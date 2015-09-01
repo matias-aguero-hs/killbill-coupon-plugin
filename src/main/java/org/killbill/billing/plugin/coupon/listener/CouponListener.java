@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.killbill.billing.plugin.coupon;
+package org.killbill.billing.plugin.coupon.listener;
 
 import java.util.UUID;
 

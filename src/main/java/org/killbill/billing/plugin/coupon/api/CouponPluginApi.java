@@ -15,22 +15,18 @@
  * under the License.
  */
 
-package org.killbill.billing.plugin.coupon;
+package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
 
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
-import org.killbill.clock.Clock;
-import org.killbill.killbill.osgi.libs.killbill.OSGIConfigPropertiesService;
-import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
-import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 
 public class CouponPluginApi {
 
     private final CouponDao dao;
 
-    protected CouponPluginApi(final OSGIKillbillAPI killbillAPI, final OSGIConfigPropertiesService configProperties, final OSGIKillbillLogService logService, final Clock clock, final CouponDao dao) {
+    public CouponPluginApi(final CouponDao dao) {
         this.dao = dao;
     }
 

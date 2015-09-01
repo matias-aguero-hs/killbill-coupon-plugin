@@ -171,7 +171,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.killbill.billing.plugin.coupon.CouponActivator</Bundle-Activator>
+                        <Bundle-Activator>org.killbill.billing.plugin.coupon.core.CouponActivator</Bundle-Activator>
                         <Export-Package />
                         <Private-Package>org.killbill.billing.plugin.coupon.*</Private-Package>
                         <!-- Optional resolution because exported by the Felix system bundle -->

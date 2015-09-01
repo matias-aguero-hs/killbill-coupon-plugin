@@ -15,7 +15,7 @@
  * under the License.
  */
 
-package org.killbill.billing.plugin.coupon;
+package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,17 +30,19 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
+import org.killbill.billing.plugin.coupon.CouponJson;
+import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.osgi.service.log.LogService;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 
-public class CreateCouponServlet extends PluginServlet {
+public class CouponServlet extends PluginServlet {
 
     private final LogService logService;
     private final CouponPluginApi couponPluginApi;
 
-    public CreateCouponServlet(final LogService logService, final CouponPluginApi couponPluginApi)
+    public CouponServlet(final LogService logService, final CouponPluginApi couponPluginApi)
     {
         this.couponPluginApi = couponPluginApi;
         this.logService = logService;
@@ -49,10 +51,9 @@ public class CreateCouponServlet extends PluginServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Find me on http://127.0.0.1:8080/plugins/killbill-helloworld
-        logService.log(LogService.LOG_INFO, "Hello Javi!");
-
         String couponCode = request.getParameter("couponCode");
+
+        logService.log(LogService.LOG_INFO, "Hello Javi!");
 
         try {
             CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);

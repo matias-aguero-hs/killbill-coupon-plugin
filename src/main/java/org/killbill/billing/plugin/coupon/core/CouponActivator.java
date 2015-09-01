@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.killbill.billing.plugin.coupon;
+package org.killbill.billing.plugin.coupon.core;
 
 import java.util.Hashtable;
 
@@ -24,10 +24,10 @@ import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
 import org.killbill.billing.osgi.api.OSGIPluginProperties;
-import org.killbill.billing.payment.plugin.api.PaymentPluginApi;
+import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
-import org.killbill.clock.Clock;
-import org.killbill.clock.DefaultClock;
+import org.killbill.billing.plugin.coupon.listener.CouponListener;
+import org.killbill.billing.plugin.coupon.servlet.CouponServlet;
 import org.killbill.killbill.osgi.libs.killbill.KillbillActivatorBase;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.osgi.framework.BundleContext;
@@ -42,7 +42,6 @@ public class CouponActivator extends KillbillActivatorBase {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
 
-        final Clock clock = new DefaultClock();
         final CouponDao dao = new CouponDao(dataSource.getDataSource());
 
         // Register an event listener (optional)
@@ -50,11 +49,11 @@ public class CouponActivator extends KillbillActivatorBase {
         dispatcher.registerEventHandler(couponListener);
 
         // Register a payment plugin api (optional)
-        final CouponPluginApi couponPluginApi = new CouponPluginApi(killbillAPI, configProperties, logService, clock, dao);
+        final CouponPluginApi couponPluginApi = new CouponPluginApi(dao);
         registerCouponPluginApi(context, couponPluginApi);
 
         // Register servlets
-        final CreateCouponServlet createCouponServlet = new CreateCouponServlet(logService, couponPluginApi);
+        final CouponServlet createCouponServlet = new CouponServlet(logService, couponPluginApi);
         registerServlet(context, createCouponServlet);
 
     }

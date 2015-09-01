@@ -22,7 +22,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.jooq.conf.RenderNameStyle;
 import org.jooq.impl.DSL;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.dao.PluginDao;
@@ -36,7 +35,6 @@ public class CouponDao extends PluginDao {
     }
 
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
-        settings.setRenderNameStyle(RenderNameStyle.LOWER);
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsRecord>() {
                            @Override
@@ -44,7 +42,7 @@ public class CouponDao extends PluginDao {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS)
                                          .where(COUPONS.COUPON_CODE.equal(couponCode))
-                                         .fetchAny();
+                                         .fetchOne();
                            }
                        });
     }
