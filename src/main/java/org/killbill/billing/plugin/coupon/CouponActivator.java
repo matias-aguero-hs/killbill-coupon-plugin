@@ -25,43 +25,54 @@ import javax.servlet.http.HttpServlet;
 
 import org.killbill.billing.osgi.api.OSGIPluginProperties;
 import org.killbill.billing.payment.plugin.api.PaymentPluginApi;
+import org.killbill.billing.plugin.coupon.dao.CouponDao;
+import org.killbill.clock.Clock;
+import org.killbill.clock.DefaultClock;
 import org.killbill.killbill.osgi.libs.killbill.KillbillActivatorBase;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.osgi.framework.BundleContext;
 
 public class CouponActivator extends KillbillActivatorBase {
 
-    public static final String PLUGIN_NAME = "killbill-coupon";
+    public static final String PLUGIN_NAME = "coupon-plugin";
 
-    private OSGIKillbillEventHandler analyticsListener;
+    private OSGIKillbillEventHandler couponListener;
 
     @Override
     public void start(final BundleContext context) throws Exception {
         super.start(context);
 
+        final Clock clock = new DefaultClock();
+        final CouponDao dao = new CouponDao(dataSource.getDataSource());
+
         // Register an event listener (optional)
-        analyticsListener = new CouponListener(logService, killbillAPI);
-        dispatcher.registerEventHandler(analyticsListener);
+        couponListener = new CouponListener(logService, killbillAPI);
+        dispatcher.registerEventHandler(couponListener);
 
         // Register a payment plugin api (optional)
-        final PaymentPluginApi paymentPluginApi = new CouponPluginApi(configProperties.getProperties(), logService);
-        registerPaymentPluginApi(context, paymentPluginApi);
+        final CouponPluginApi couponPluginApi = new CouponPluginApi(killbillAPI, configProperties, logService, clock, dao);
+        registerCouponPluginApi(context, couponPluginApi);
 
-        // Register a servlet (optional)
-        final CreateCouponServlet analyticsServlet = new CreateCouponServlet(logService);
-        registerServlet(context, analyticsServlet);
+        // Register servlets
+        final CreateCouponServlet createCouponServlet = new CreateCouponServlet(logService, couponPluginApi);
+        registerServlet(context, createCouponServlet);
 
+    }
+
+    private void registerCouponPluginApi(final BundleContext context, final CouponPluginApi couponPluginApi) {
+        final Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
+        registrar.registerService(context, CouponPluginApi.class, couponPluginApi, props);
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
         super.stop(context);
-        // Do additional work on shutdown (optional)
     }
 
     @Override
     public OSGIKillbillEventHandler getOSGIKillbillEventHandler() {
-        return analyticsListener;
+        return couponListener;
     }
 
     private void registerServlet(final BundleContext context, final HttpServlet servlet) {
@@ -69,11 +80,4 @@ public class CouponActivator extends KillbillActivatorBase {
         props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
         registrar.registerService(context, Servlet.class, servlet, props);
     }
-
-    private void registerPaymentPluginApi(final BundleContext context, final PaymentPluginApi api) {
-        final Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
-        registrar.registerService(context, PaymentPluginApi.class, api, props);
-    }
-
 }

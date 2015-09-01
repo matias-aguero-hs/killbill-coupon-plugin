@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,35 +30,41 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.osgi.service.log.LogService;
+
+import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 
 public class CreateCouponServlet extends PluginServlet {
 
     private final LogService logService;
-    JSONObject json = new JSONObject();
+    private final CouponPluginApi couponPluginApi;
 
-    public CreateCouponServlet(final LogService logService) {
+    public CreateCouponServlet(final LogService logService, final CouponPluginApi couponPluginApi)
+    {
+        this.couponPluginApi = couponPluginApi;
         this.logService = logService;
-    }
-
-    public void init() throws ServletException {
-        json.put("city", "Parana");
-        json.put("country", "Arg");
     }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         // Find me on http://127.0.0.1:8080/plugins/killbill-helloworld
         logService.log(LogService.LOG_INFO, "Hello Javi!");
 
-        response.setContentType("application/json");
-        String output = json.toString();
-        PrintWriter writer = response.getWriter();
-        writer.write(output);
-        writer.close();
+        String couponCode = request.getParameter("couponCode");
 
+        try {
+            CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("name", coupon.getValue(COUPONS.COUPON_NAME));
+            response.setContentType("application/json");
+            PrintWriter writer = response.getWriter();
+            writer.write(jsonResponse.toString());
+            writer.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
