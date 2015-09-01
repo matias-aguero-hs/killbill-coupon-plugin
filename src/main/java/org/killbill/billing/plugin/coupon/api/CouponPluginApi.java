@@ -19,6 +19,7 @@ package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
 
+import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 
@@ -34,4 +35,7 @@ public class CouponPluginApi {
         return dao.getCouponByCode(couponCode);
     }
 
+    public void createCoupon(final CouponJson couponJson) throws SQLException {
+        dao.createCoupon(couponJson);
+    }
 }

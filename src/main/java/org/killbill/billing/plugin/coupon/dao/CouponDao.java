@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.jooq.impl.DSL;
+import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.dao.PluginDao;
 
@@ -45,6 +46,25 @@ public class CouponDao extends PluginDao {
                                          .fetchOne();
                            }
                        });
+    }
+
+    public void createCoupon(final CouponJson couponJson) throws SQLException {
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .insertInto(COUPONS,
+                                       COUPONS.COUPON_CODE,
+                                       COUPONS.COUPON_NAME,
+                                       COUPONS.KB_TENANT_ID)
+                           .values(couponJson.getCouponCode(),
+                                   couponJson.getCouponName(),
+                                   couponJson.getTenantId())
+                           .execute();
+                        return null;
+                    }
+                });
     }
 
 }

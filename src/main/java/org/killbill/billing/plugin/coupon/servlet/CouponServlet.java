@@ -1,8 +1,8 @@
 /*
- * Copyright 2010-2014 Ning, Inc.
- * Copyright 2014 The Billing Project, LLC
+ * Copyright 2014-2015 Groupon, Inc
+ * Copyright 2014-2015 The Billing Project, LLC
  *
- * Ning licenses this file to you under the Apache License, version 2.0
+ * The Billing Project licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
  * License.  You may obtain a copy of the License at:
  *
@@ -27,13 +27,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.osgi.service.log.LogService;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 
@@ -48,6 +49,13 @@ public class CouponServlet extends PluginServlet {
         this.logService = logService;
     }
 
+    /**
+     * Method doGet will handle the getCoupon operations
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -68,6 +76,13 @@ public class CouponServlet extends PluginServlet {
         }
     }
 
+    /**
+     * Method doPost will handle the createCoupon operation
+     * @param request
+     * @param response
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -90,11 +105,14 @@ public class CouponServlet extends PluginServlet {
         // 3. Convert received JSON to Article
         CouponJson article = mapper.readValue(jsonString, CouponJson.class);
 
-        // 4. Set response type to JSON
-        response.setContentType("application/json");
-
-        // 5. send response
-        buildCreatedResponse("http://localhost:8080/plugins/killbill-coupon/", response);
-
+        try {
+            couponPluginApi.createCoupon(article);
+            // 4. Set response type to JSON
+            response.setContentType("application/json");
+            // 5. send response
+            buildResponse(response);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

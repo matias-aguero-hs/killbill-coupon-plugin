@@ -6,17 +6,8 @@ package org.killbill.billing.plugin.coupon;
 public class CouponJson {
 
     private String couponCode;
-
-    public String getCouponName() {
-        return couponName;
-    }
-
-    public void setCouponName(String couponName) {
-        this.couponName = couponName;
-    }
-
     private String couponName;
-
+    private String tenantId;
 
     public String getCouponCode() {
         return couponCode;
@@ -26,5 +17,19 @@ public class CouponJson {
         this.couponCode = couponCode;
     }
 
+    public String getCouponName() {
+        return couponName;
+    }
 
+    public void setCouponName(String couponName) {
+        this.couponName = couponName;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(final String tenantId) {
+        this.tenantId = tenantId;
+    }
 }

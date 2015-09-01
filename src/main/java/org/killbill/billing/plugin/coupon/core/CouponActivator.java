@@ -53,8 +53,8 @@ public class CouponActivator extends KillbillActivatorBase {
         registerCouponPluginApi(context, couponPluginApi);
 
         // Register servlets
-        final CouponServlet createCouponServlet = new CouponServlet(logService, couponPluginApi);
-        registerServlet(context, createCouponServlet);
+        final CouponServlet couponServlet = new CouponServlet(logService, couponPluginApi);
+        registerServlet(context, couponServlet);
 
     }
 
