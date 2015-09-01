@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord> {
 
-	private static final long serialVersionUID = -239098521;
+	private static final long serialVersionUID = 238849525;
 
 	/**
 	 * The reference instance of <code>killbill.coupons</code>
@@ -34,12 +34,7 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	/**
 	 * The column <code>killbill.coupons.record_id</code>.
 	 */
-	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, org.jooq.types.ULong> RECORD_ID = createField("record_id", org.jooq.impl.SQLDataType.BIGINTUNSIGNED.nullable(false), this, "");
-
-	/**
-	 * The column <code>killbill.coupons.id</code>.
-	 */
-	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> ID = createField("id", org.jooq.impl.SQLDataType.VARCHAR.length(36).nullable(false), this, "");
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, org.jooq.types.UInteger> RECORD_ID = createField("record_id", org.jooq.impl.SQLDataType.INTEGERUNSIGNED.nullable(false), this, "");
 
 	/**
 	 * The column <code>killbill.coupons.coupon_code</code>.
@@ -49,12 +44,22 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	/**
 	 * The column <code>killbill.coupons.coupon_name</code>.
 	 */
-	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> COUPON_NAME = createField("coupon_name", org.jooq.impl.SQLDataType.VARCHAR.length(100), this, "");
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> COUPON_NAME = createField("coupon_name", org.jooq.impl.SQLDataType.VARCHAR.length(100).nullable(false), this, "");
 
 	/**
-	 * The column <code>killbill.coupons.tenant_record_id</code>.
+	 * The column <code>killbill.coupons.discount_type</code>.
 	 */
-	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, org.jooq.types.ULong> TENANT_RECORD_ID = createField("tenant_record_id", org.jooq.impl.SQLDataType.BIGINTUNSIGNED.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> DISCOUNT_TYPE = createField("discount_type", org.jooq.impl.SQLDataType.VARCHAR.length(15).nullable(false), this, "");
+
+	/**
+	 * The column <code>killbill.coupons.percentage_discount</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Double> PERCENTAGE_DISCOUNT = createField("percentage_discount", org.jooq.impl.SQLDataType.FLOAT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>killbill.coupons.kb_tenant_id</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> KB_TENANT_ID = createField("kb_tenant_id", org.jooq.impl.SQLDataType.CHAR.length(36).nullable(false), this, "");
 
 	/**
 	 * Create a <code>killbill.coupons</code> table reference
@@ -82,7 +87,7 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	 * {@inheritDoc}
 	 */
 	@Override
-	public org.jooq.Identity<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, org.jooq.types.ULong> getIdentity() {
+	public org.jooq.Identity<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, org.jooq.types.UInteger> getIdentity() {
 		return org.killbill.billing.plugin.coupon.dao.gen.Keys.IDENTITY_COUPONS;
 	}
 
@@ -99,7 +104,7 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord>>asList(org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_RECORD_ID, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_PRIMARY, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_COUPONS_ID, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_COUPONS_CODE);
+		return java.util.Arrays.<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord>>asList(org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_PRIMARY, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_COUPONS_CODE);
 	}
 
 	/**
