@@ -44,7 +44,7 @@ public class CouponDao extends PluginDao {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS)
                                          .where(COUPONS.COUPON_CODE.equal(couponCode))
-                                         .fetchOne();
+                                         .fetchAny();
                            }
                        });
     }

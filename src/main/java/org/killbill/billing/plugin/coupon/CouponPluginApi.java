@@ -19,7 +19,6 @@ package org.killbill.billing.plugin.coupon;
 
 import java.sql.SQLException;
 
-import org.killbill.billing.plugin.api.PluginApi;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.clock.Clock;
@@ -32,7 +31,6 @@ public class CouponPluginApi {
     private final CouponDao dao;
 
     protected CouponPluginApi(final OSGIKillbillAPI killbillAPI, final OSGIConfigPropertiesService configProperties, final OSGIKillbillLogService logService, final Clock clock, final CouponDao dao) {
-//        super(killbillAPI, configProperties, logService, clock);
         this.dao = dao;
     }
 
