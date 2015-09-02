@@ -27,14 +27,16 @@ import org.killbill.billing.osgi.api.OSGIPluginProperties;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.listener.CouponListener;
-import org.killbill.billing.plugin.coupon.servlet.CouponServlet;
+import org.killbill.billing.plugin.coupon.servlet.ApplyCouponServlet;
+import org.killbill.billing.plugin.coupon.servlet.CreateCouponServlet;
+import org.killbill.billing.plugin.coupon.servlet.GetCouponServlet;
 import org.killbill.killbill.osgi.libs.killbill.KillbillActivatorBase;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.osgi.framework.BundleContext;
 
 public class CouponActivator extends KillbillActivatorBase {
 
-    public static final String PLUGIN_NAME = "coupon-plugin";
+    public static final String PLUGIN_NAME = "hootsuite";
 
     private OSGIKillbillEventHandler couponListener;
 
@@ -48,16 +50,21 @@ public class CouponActivator extends KillbillActivatorBase {
         couponListener = new CouponListener(logService, killbillAPI);
         dispatcher.registerEventHandler(couponListener);
 
-        // Register a payment plugin api (optional)
+        // Register Plugin API
         final CouponPluginApi couponPluginApi = new CouponPluginApi(dao, killbillAPI);
         registerCouponPluginApi(context, couponPluginApi);
 
-        // Register servlets
-        final CouponServlet couponServlet = new CouponServlet(logService, couponPluginApi);
-        registerServlet(context, couponServlet);
+        // Register Get Coupon Servlet
+        final GetCouponServlet getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
+        registerServlet(context, getCouponServlet, "-getcoupon");
 
+        // Register Create Coupon Servlet
+        final CreateCouponServlet createCouponServlet = new CreateCouponServlet(logService, couponPluginApi);
+        registerServlet(context, createCouponServlet, "-createcoupon");
 
-
+        // Register Apply Coupon Servlet
+        final ApplyCouponServlet applyCouponServlet = new ApplyCouponServlet(logService, couponPluginApi);
+        registerServlet(context, applyCouponServlet, "-applycoupon");
     }
 
     private void registerCouponPluginApi(final BundleContext context, final CouponPluginApi couponPluginApi) {
@@ -76,9 +83,9 @@ public class CouponActivator extends KillbillActivatorBase {
         return couponListener;
     }
 
-    private void registerServlet(final BundleContext context, final HttpServlet servlet) {
+    private void registerServlet(final BundleContext context, final HttpServlet servlet, String subPath) {
         final Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
+        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME + subPath);
         registrar.registerService(context, Servlet.class, servlet, props);
     }
 }

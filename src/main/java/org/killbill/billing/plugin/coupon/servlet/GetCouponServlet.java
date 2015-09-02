@@ -17,9 +17,7 @@
 
 package org.killbill.billing.plugin.coupon.servlet;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 
@@ -29,21 +27,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
-import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.osgi.service.log.LogService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 
-public class CouponServlet extends PluginServlet {
+public class GetCouponServlet extends PluginServlet {
 
+    public static final String COUPON_CODE = "couponCode";
     private final LogService logService;
     private final CouponPluginApi couponPluginApi;
 
-    public CouponServlet(final LogService logService, final CouponPluginApi couponPluginApi)
+    public GetCouponServlet(final LogService logService, final CouponPluginApi couponPluginApi)
     {
         this.couponPluginApi = couponPluginApi;
         this.logService = logService;
@@ -59,58 +55,16 @@ public class CouponServlet extends PluginServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String couponCode = request.getParameter("couponCode");
-
-        logService.log(LogService.LOG_INFO, "Hello Javi!");
+        String couponCode = request.getParameter(COUPON_CODE);
 
         try {
             CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("name", coupon.getValue(COUPONS.COUPON_NAME));
-            response.setContentType("application/json");
+            jsonResponse.put("getCouponServlet-name", coupon.getValue(COUPONS.COUPON_NAME));
+            response.setContentType(APPLICATION_JSON);
             PrintWriter writer = response.getWriter();
             writer.write(jsonResponse.toString());
             writer.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Method doPost will handle the createCoupon operation
-     * @param request
-     * @param response
-     * @throws ServletException
-     * @throws IOException
-     */
-    @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        // 1. get received JSON data from request
-        BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
-        String jsonString = "";
-        String line = null;
-        if(br != null){
-            while ((line = br.readLine()) != null) {
-                jsonString += line;
-            }
-        }
-
-        logService.log(LogService.LOG_INFO, jsonString);
-
-        // 2. initiate jackson mapper
-        ObjectMapper mapper = new ObjectMapper();
-
-        // 3. Convert received JSON to Article
-        CouponJson article = mapper.readValue(jsonString, CouponJson.class);
-
-        try {
-            couponPluginApi.createCoupon(article);
-            // 4. Set response type to JSON
-            response.setContentType("application/json");
-            // 5. send response
-            buildResponse(response);
         } catch (SQLException e) {
             e.printStackTrace();
         }

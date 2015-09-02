@@ -20,12 +20,14 @@ package org.killbill.billing.plugin.coupon.api;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
+import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
+import org.killbill.billing.tenant.api.TenantUserApi;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 
@@ -43,13 +45,19 @@ public class CouponPluginApi {
         return dao.getCouponByCode(couponCode);
     }
 
-    public void createCoupon(final CouponJson couponJson) throws SQLException {
-        dao.createCoupon(couponJson);
+    public void createCoupon(final CouponJson couponJson, TenantContext context) throws SQLException {
+        dao.createCoupon(couponJson, context);
     }
 
     public UUID getTenantId(String apiKey) throws TenantApiException {
-        // TODO refactor
-        return osgiKillbillAPI.getTenantUserApi().getTenantByApiKey(apiKey).getId();
+        TenantUserApi tenantUserApi = osgiKillbillAPI.getTenantUserApi();
+        if (null != tenantUserApi && !apiKey.isEmpty()) {
+            Tenant tenant = tenantUserApi.getTenantByApiKey(apiKey);
+            if (null != tenant) {
+                return tenant.getId();
+            }
+        }
+        return null;
     }
 
     /**

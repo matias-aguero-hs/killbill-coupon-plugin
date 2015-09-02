@@ -26,6 +26,7 @@ import javax.sql.DataSource;
 import org.jooq.impl.DSL;
 import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.dao.PluginDao;
 import org.killbill.billing.util.callcontext.TenantContext;
 
@@ -51,7 +52,7 @@ public class CouponDao extends PluginDao {
                        });
     }
 
-    public void createCoupon(final CouponJson couponJson) throws SQLException {
+    public void createCoupon(final CouponJson couponJson, TenantContext context) throws SQLException {
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
                     @Override
@@ -60,10 +61,14 @@ public class CouponDao extends PluginDao {
                            .insertInto(COUPONS,
                                        COUPONS.COUPON_CODE,
                                        COUPONS.COUPON_NAME,
+                                       COUPONS.DISCOUNT_TYPE,
+                                       COUPONS.PERCENTAGE_DISCOUNT,
                                        COUPONS.KB_TENANT_ID)
                            .values(couponJson.getCouponCode(),
                                    couponJson.getCouponName(),
-                                   couponJson.getTenantId())
+                                   couponJson.getDiscountType().toString(),
+                                   couponJson.getPercentageDiscount(),
+                                   context.getTenantId().toString())
                            .execute();
                         return null;
                     }
@@ -83,9 +88,9 @@ public class CouponDao extends PluginDao {
                     public Void withConnection(final Connection conn) throws SQLException {
                         DSL.using(conn, dialect, settings)
                                 .insertInto(COUPONS_APPLIED,
-                                        COUPONS_APPLIED.COUPON_CODE,
-                                        COUPONS_APPLIED.KB_ACCOUNT_ID,
-                                        COUPONS_APPLIED.KB_TENANT_ID)
+                                            COUPONS_APPLIED.COUPON_CODE,
+                                            COUPONS_APPLIED.KB_ACCOUNT_ID,
+                                            COUPONS_APPLIED.KB_TENANT_ID)
                                 .values(couponCode,
                                         accountId.toString(),
                                         context.getTenantId().toString())
