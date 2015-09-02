@@ -18,12 +18,16 @@
 package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
@@ -85,6 +89,26 @@ public class CouponPluginApi {
 
         // save applied coupon
         dao.applyCoupon(couponCode, accountId, context);
+
+    }
+
+    /**
+     * Get coupons applied to customer
+     * @param accountId
+     * @return
+     */
+    public List<CouponsAppliedRecord> getCouponsApplied(UUID accountId) {
+
+        // TODO add logs
+
+        try {
+            return dao.getCouponsApplied(accountId);
+        } catch (SQLException e) {
+            // TODO log error
+            e.printStackTrace();
+        }
+
+        return new ArrayList<CouponsAppliedRecord>();
 
     }
 

@@ -23,10 +23,11 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.killbill.billing.plugin.coupon.CouponJson;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
-import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.dao.PluginDao;
 import org.killbill.billing.util.callcontext.TenantContext;
 
@@ -104,6 +105,19 @@ public class CouponDao extends PluginDao {
                         return null;
                     }
                 });
+    }
+
+    public Result<CouponsAppliedRecord> getCouponsApplied(UUID accountId) throws SQLException {
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
+                           @Override
+                           public Result<CouponsAppliedRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_APPLIED)
+                                         .where(COUPONS_APPLIED.KB_ACCOUNT_ID.equal(accountId.toString()))
+                                         .fetch();
+                           }
+                       });
     }
 
 }

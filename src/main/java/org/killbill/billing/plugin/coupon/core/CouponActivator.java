@@ -46,13 +46,13 @@ public class CouponActivator extends KillbillActivatorBase {
 
         final CouponDao dao = new CouponDao(dataSource.getDataSource());
 
-        // Register an event listener (optional)
-        couponListener = new CouponListener(logService, killbillAPI);
-        dispatcher.registerEventHandler(couponListener);
-
         // Register Plugin API
         final CouponPluginApi couponPluginApi = new CouponPluginApi(dao, killbillAPI);
         registerCouponPluginApi(context, couponPluginApi);
+
+        // Register an event listener
+        couponListener = new CouponListener(logService, killbillAPI, couponPluginApi);
+        dispatcher.registerEventHandler(couponListener);
 
         // Register Get Coupon Servlet
         final GetCouponServlet getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
@@ -88,4 +88,5 @@ public class CouponActivator extends KillbillActivatorBase {
         props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME + subPath);
         registrar.registerService(context, Servlet.class, servlet, props);
     }
+
 }
