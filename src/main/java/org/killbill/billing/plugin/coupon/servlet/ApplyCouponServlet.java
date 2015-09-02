@@ -1,31 +1,23 @@
 package org.killbill.billing.plugin.coupon.servlet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONObject;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.plugin.core.PluginServlet;
-import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
-import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.model.ApplyCouponRequest;
 import org.killbill.billing.plugin.coupon.util.CouponContext;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.tenant.api.TenantApiException;
-import org.killbill.billing.util.callcontext.TenantContext;
-import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.osgi.service.log.LogService;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.sql.SQLException;
-
-import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 
 /**
  * Created by maguero on 01/09/15.
@@ -46,24 +38,32 @@ public class ApplyCouponServlet extends PluginServlet {
             throws ServletException, IOException {
 
         // TODO refactor
-
-        String apikey = request.getHeader("X-Killbill-ApiKey");
+        String apiKey = request.getHeader("X-Killbill-ApiKey");
 
         CouponContext context = null;
         try {
-            context = new CouponContext(couponPluginApi.getTenantId(apikey));
+            if (!apiKey.isEmpty()) {
+                context = new CouponContext(couponPluginApi.getTenantId(apiKey));
+            }
         } catch (TenantApiException e) {
             e.printStackTrace();
         }
 
-        ApplyCouponRequest req = (ApplyCouponRequest) JsonHelper.getObjectFromRequest(request, ApplyCouponRequest.class);
+        ApplyCouponRequest applyCouponRequest = (ApplyCouponRequest) JsonHelper.getObjectFromRequest(request, ApplyCouponRequest.class);
 
         try {
-            couponPluginApi.applyCoupon(req.getCouponCode(), req.getAccountId(), context);
+            if (null != applyCouponRequest) {
+                couponPluginApi.applyCoupon(applyCouponRequest.getCouponCode(), applyCouponRequest.getAccountId(), context);
 
-            response.setContentType(APPLICATION_JSON);
-            buildCreatedResponse("http://localhost:8080/plugins/coupon-plugin/applied", response);
+                CouponsAppliedRecord couponApplied = couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getAccountId());
+                JSONObject jsonResponse = JsonHelper.buildCouponAppliedJsonResponse(couponApplied);
 
+                PrintWriter writer = response.getWriter();
+                writer.write(jsonResponse.toString());
+                writer.close();
+                response.setContentType(APPLICATION_JSON);
+                buildResponse(response);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             buildErrorResponse(e, response);
@@ -71,7 +71,5 @@ public class ApplyCouponServlet extends PluginServlet {
             e.printStackTrace();
             buildErrorResponse(e, response);
         }
-
-
     }
 }

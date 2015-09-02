@@ -22,9 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
+import org.killbill.billing.account.api.AccountUserApi;
 import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
@@ -64,6 +64,10 @@ public class CouponPluginApi {
         return null;
     }
 
+    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId) throws SQLException {
+        return dao.getCouponApplied(couponCode, accountId);
+    }
+
     /**
      *
      * @param couponCode
@@ -72,24 +76,28 @@ public class CouponPluginApi {
      */
     public void applyCoupon(String couponCode, UUID accountId, TenantContext context) throws SQLException, AccountApiException {
 
-        // TODO tenat context
-        Account account = osgiKillbillAPI.getAccountUserApi().getAccountById(accountId, context);
-
-        if (account == null) {
-            // TODO inform error
+        Account account = null;
+        AccountUserApi accountUserApi = osgiKillbillAPI.getAccountUserApi();
+        if (null != accountUserApi && null != accountId) {
+            account = accountUserApi.getAccountById(accountId, context);
         }
 
-        CouponsRecord coupon = getCouponByCode(couponCode);
+        if (null != account) {
+            // Get Coupon by Code from DB
+            CouponsRecord coupon = getCouponByCode(couponCode);
+            if (null != coupon) {
+                // TODO validate if coupon can be applied
 
-        if (coupon == null) {
+                // save applied coupon
+                dao.applyCoupon(couponCode, accountId, context);
+            }
+            else {
+                // TODO inform error
+            }
+        }
+        else {
             // TODO inform error
         }
-
-        // TODO validate if coupon can be applied
-
-        // save applied coupon
-        dao.applyCoupon(couponCode, accountId, context);
-
     }
 
     /**
@@ -111,5 +119,4 @@ public class CouponPluginApi {
         return new ArrayList<CouponsAppliedRecord>();
 
     }
-
 }

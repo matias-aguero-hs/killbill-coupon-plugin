@@ -65,6 +65,7 @@ public class GetCouponServlet extends PluginServlet {
             PrintWriter writer = response.getWriter();
             writer.write(jsonResponse.toString());
             writer.close();
+            buildResponse(response);
         } catch (SQLException e) {
             e.printStackTrace();
         }

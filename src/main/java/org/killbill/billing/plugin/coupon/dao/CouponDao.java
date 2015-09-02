@@ -94,14 +94,14 @@ public class CouponDao extends PluginDao {
                     @Override
                     public Void withConnection(final Connection conn) throws SQLException {
                         DSL.using(conn, dialect, settings)
-                                .insertInto(COUPONS_APPLIED,
-                                            COUPONS_APPLIED.COUPON_CODE,
-                                            COUPONS_APPLIED.KB_ACCOUNT_ID,
-                                            COUPONS_APPLIED.KB_TENANT_ID)
-                                .values(couponCode,
-                                        accountId.toString(),
-                                        context.getTenantId().toString())
-                                .execute();
+                           .insertInto(COUPONS_APPLIED,
+                                       COUPONS_APPLIED.COUPON_CODE,
+                                       COUPONS_APPLIED.KB_ACCOUNT_ID,
+                                       COUPONS_APPLIED.KB_TENANT_ID)
+                           .values(couponCode,
+                                   accountId.toString(),
+                                   context.getTenantId().toString())
+                           .execute();
                         return null;
                     }
                 });
@@ -120,4 +120,24 @@ public class CouponDao extends PluginDao {
                        });
     }
 
+    /**
+     * Method to get a Coupon Applied object by couponCode and accountId
+     * @param couponCode
+     * @param accountId
+     * @return
+     * @throws SQLException
+     */
+    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId) throws SQLException {
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<CouponsAppliedRecord>() {
+                           @Override
+                           public CouponsAppliedRecord withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_APPLIED)
+                                         .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
+                                          .and(COUPONS_APPLIED.KB_ACCOUNT_ID.equal(accountId.toString()))
+                                         .fetchOne();
+                           }
+                       });
+    }
 }
