@@ -29,9 +29,8 @@ import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.osgi.service.log.LogService;
-
-import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 
 public class GetCouponServlet extends PluginServlet {
 
@@ -59,8 +58,9 @@ public class GetCouponServlet extends PluginServlet {
 
         try {
             CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
-            JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("getCouponServlet-name", coupon.getValue(COUPONS.COUPON_NAME));
+
+            JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(coupon);
+
             response.setContentType(APPLICATION_JSON);
             PrintWriter writer = response.getWriter();
             writer.write(jsonResponse.toString());

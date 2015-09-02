@@ -39,6 +39,12 @@ public class CouponDao extends PluginDao {
         super(dataSource);
     }
 
+    /**
+     * Method to get a Coupon object by couponCode
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsRecord>() {

@@ -18,15 +18,18 @@
 package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.util.CouponContext;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
@@ -75,9 +78,13 @@ public class CreateCouponServlet extends PluginServlet {
                     // TODO: Error! percentage must be between 0 and 100
                 }
                 couponPluginApi.createCoupon(coupon, context);
-                // 4. Set response type to JSON
+
+                CouponsRecord couponCreated = couponPluginApi.getCouponByCode(coupon.getCouponCode());
+                JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(couponCreated);
                 response.setContentType(APPLICATION_JSON);
-                // 5. send response
+                PrintWriter writer = response.getWriter();
+                writer.write(jsonResponse.toString());
+                writer.close();
                 buildResponse(response);
             }
         } catch (SQLException e) {

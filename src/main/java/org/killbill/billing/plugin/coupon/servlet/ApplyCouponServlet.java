@@ -61,7 +61,7 @@ public class ApplyCouponServlet extends PluginServlet {
         try {
             couponPluginApi.applyCoupon(req.getCouponCode(), req.getAccountId(), context);
 
-            response.setContentType("application/json");
+            response.setContentType(APPLICATION_JSON);
             buildCreatedResponse("http://localhost:8080/plugins/coupon-plugin/applied", response);
 
         } catch (SQLException e) {
