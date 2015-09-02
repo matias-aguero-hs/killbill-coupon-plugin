@@ -59,7 +59,7 @@ public class CouponDao extends PluginDao {
                        });
     }
 
-    public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
+    public void createCoupon(final Coupon coupon, final TenantContext context) throws SQLException {
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
                     @Override
@@ -107,7 +107,7 @@ public class CouponDao extends PluginDao {
                 });
     }
 
-    public Result<CouponsAppliedRecord> getCouponsApplied(UUID accountId) throws SQLException {
+    public Result<CouponsAppliedRecord> getCouponsApplied(final UUID accountId) throws SQLException {
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
                            @Override

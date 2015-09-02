@@ -20,12 +20,11 @@ package org.killbill.billing.plugin.coupon.listener;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.killbill.billing.account.api.Account;
-import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.catalog.api.Currency;
 import org.killbill.billing.invoice.api.Invoice;
 import org.killbill.billing.invoice.api.InvoiceApiException;
@@ -39,7 +38,6 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.CouponContext;
-import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
@@ -63,9 +61,8 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
         // catch only invoice creations events
         if (ExtBusEventType.INVOICE_CREATION.equals(killbillEvent.getEventType())) {
-            logEvent(killbillEvent);
 
-            logService.log(LogService.LOG_INFO, "Event catched");
+            logEvent(killbillEvent);
 
             // TODO add logs
             try {
@@ -84,14 +81,8 @@ public class CouponListener implements OSGIKillbillEventHandler {
         logService.log(LogService.LOG_INFO, "Received event " + killbillEvent.getEventType() +
                                             " for object id " + killbillEvent.getObjectId() +
                                             " of type " + killbillEvent.getObjectType());
+        logService.log(LogService.LOG_INFO, "-------------------------------------------------");
 
-        logService.log(LogService.LOG_INFO, "-------------------------------------------------");
-        logService.log(LogService.LOG_INFO, "" + killbillEvent.getEventType());
-        logService.log(LogService.LOG_INFO, "" + killbillEvent.getObjectId());
-        logService.log(LogService.LOG_INFO, "" + killbillEvent.getObjectType());
-        logService.log(LogService.LOG_INFO, "" + killbillEvent.getMetaData());
-        logService.log(LogService.LOG_INFO, "" + killbillEvent.getTenantId());
-        logService.log(LogService.LOG_INFO, "-------------------------------------------------");
     }
 
     private void applyDiscounts(ExtBusEvent killbillEvent) throws InvoiceApiException, SQLException {
@@ -100,28 +91,36 @@ public class CouponListener implements OSGIKillbillEventHandler {
         UUID invoiceId = killbillEvent.getObjectId();
         UUID tenantId = killbillEvent.getTenantId();
 
+        // login TODO figure out where credential are get from...
+        osgiKillbillAPI.getSecurityApi().login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+
+        // get invoice
+        Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponContext(tenantId));
+
         logService.log(LogService.LOG_INFO, "getting coupons applied for account " + accountId);
-        //for (CouponsAppliedRecord cApplied : couponPluginApi.getCouponsApplied(accountId)) {
-            //CouponsRecord coupon = couponPluginApi.getCouponByCode(cApplied.getCouponCode());
-            //if (coupon != null) {
+        List<CouponsAppliedRecord> coupons = couponPluginApi.getCouponsApplied(accountId);
 
-                // apply discount
-                Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponContext(tenantId));
+        for (CouponsAppliedRecord cApplied : coupons) {
+            CouponsRecord coupon = couponPluginApi.getCouponByCode(cApplied.getCouponCode());
+            if (coupon != null) {
 
-                // TODO validate if the coupon should be applied to this invoice
+                // TODO ??? validate if the coupon should be applied to this invoice
 
-                osgiKillbillAPI.getSecurityApi().login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+                // TODO calculate discount amount based on coupon
+                final BigDecimal discount = BigDecimal.TEN;
+
+
                 PluginCallContext context = new PluginCallContext(Constants.PLUGIN_NAME, DateTime.now(), tenantId);
-                InvoiceItem item = osgiKillbillAPI.getInvoiceUserApi().insertCreditForInvoice(accountId, invoiceId, BigDecimal.TEN, LocalDate.now(), Currency.USD, context);
+                InvoiceItem item = osgiKillbillAPI.getInvoiceUserApi().insertCreditForInvoice(accountId, invoiceId, discount, LocalDate.now(), Currency.USD, context);
 
                 logService.log(LogService.LOG_INFO, "new invoice item added. ID: " + item.getId());
 
-            //}
-        //}
-
-
-
+            } else {
+                // TODO inform error
+            }
+        }
 
     }
 
 }
+

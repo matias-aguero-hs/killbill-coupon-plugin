@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class CouponsApplied extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord> {
 
-	private static final long serialVersionUID = -1312973173;
+	private static final long serialVersionUID = -1301383047;
 
 	/**
 	 * The reference instance of <code>killbill.coupons_applied</code>
@@ -40,6 +40,11 @@ public class CouponsApplied extends org.jooq.impl.TableImpl<org.killbill.billing
 	 * The column <code>killbill.coupons_applied.coupon_code</code>.
 	 */
 	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.lang.String> COUPON_CODE = createField("coupon_code", org.jooq.impl.SQLDataType.VARCHAR.length(36).nullable(false), this, "");
+
+	/**
+	 * The column <code>killbill.coupons_applied.kb_subscription_id</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.lang.String> KB_SUBSCRIPTION_ID = createField("kb_subscription_id", org.jooq.impl.SQLDataType.CHAR.length(36).nullable(false), this, "");
 
 	/**
 	 * The column <code>killbill.coupons_applied.kb_account_id</code>.
@@ -94,7 +99,7 @@ public class CouponsApplied extends org.jooq.impl.TableImpl<org.killbill.billing
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord>>asList(org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_APPLIED_PRIMARY, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_APPLIED_COUPONS_APPLIED_CODE, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_APPLIED_COUPONS_APPLIED_ACCOUNT);
+		return java.util.Arrays.<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord>>asList(org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_APPLIED_PRIMARY, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_APPLIED_COUPONS_APPLIED_UNIQUE);
 	}
 
 	/**
