@@ -17,10 +17,12 @@ DROP TABLE IF EXISTS coupons_applied;
 CREATE TABLE coupons_applied (
   record_id int(11) unsigned not null auto_increment,
   coupon_code varchar(36) NOT NULL,
+  kb_subscription_id char(36) not null,
   kb_account_id char(36) not null,
   kb_tenant_id char(36) not null,
   PRIMARY KEY(record_id)
 ) /*! CHARACTER SET utf8 COLLATE utf8_bin */;
-CREATE UNIQUE INDEX coupons_applied_code ON coupons_applied(coupon_code);
-CREATE UNIQUE INDEX coupons_applied_account ON coupons_applied(kb_account_id);
+CREATE INDEX coupons_applied_code ON coupons_applied(coupon_code);
+CREATE INDEX coupons_applied_account ON coupons_applied(kb_account_id);
 CREATE INDEX coupons_tenant_record_id ON coupons_applied(kb_tenant_id);
+CREATE UNIQUE INDEX coupons_applied_unique ON coupons_applied(coupon_code, kb_subscription_id);
