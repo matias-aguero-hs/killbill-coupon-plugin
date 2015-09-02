@@ -37,6 +37,7 @@ import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.core.CouponActivator;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.CouponContext;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
@@ -45,6 +46,7 @@ import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 import org.osgi.service.log.LogService;
 
 public class CouponListener implements OSGIKillbillEventHandler {
+
 
     private final LogService logService;
     private final OSGIKillbillAPI osgiKillbillAPI;
@@ -108,8 +110,8 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
                 // TODO validate if the coupon should be applied to this invoice
 
-                osgiKillbillAPI.getSecurityApi().login("admin", "password");
-                PluginCallContext context = new PluginCallContext(CouponActivator.PLUGIN_NAME, DateTime.now(), tenantId);
+                osgiKillbillAPI.getSecurityApi().login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+                PluginCallContext context = new PluginCallContext(Constants.PLUGIN_NAME, DateTime.now(), tenantId);
                 InvoiceItem item = osgiKillbillAPI.getInvoiceUserApi().insertCreditForInvoice(accountId, invoiceId, BigDecimal.TEN, LocalDate.now(), Currency.USD, context);
 
                 logService.log(LogService.LOG_INFO, "new invoice item added. ID: " + item.getId());

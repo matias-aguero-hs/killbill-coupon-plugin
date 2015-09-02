@@ -1,16 +1,15 @@
-package org.killbill.billing.plugin.coupon;
+package org.killbill.billing.plugin.coupon.model;
 
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 
 /**
  * Created by maguero on 31/08/15.
  */
-public class CouponJson {
+public class Coupon {
 
     private String couponCode;
     private String couponName;
@@ -69,7 +68,7 @@ public class CouponJson {
         if (obj.getClass() != getClass()) {
             return false;
         }
-        CouponJson rhs = (CouponJson) obj;
+        Coupon rhs = (Coupon) obj;
         return new EqualsBuilder()
                 .append(this.couponCode, rhs.couponCode)
                 .append(this.couponName, rhs.couponName)
@@ -93,11 +92,11 @@ public class CouponJson {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("couponCode", couponCode)
-                .append("couponName", couponName)
-                .append("discountType", discountType)
-                .append("percentageDiscount", percentageDiscount)
-                .append("tenantId", tenantId)
+                .append(Constants.COUPON_CODE, couponCode)
+                .append(Constants.COUPON_NAME, couponName)
+                .append(Constants.DISCOUNT_TYPE, discountType)
+                .append(Constants.PERCENTAGE_DISCOUNT, percentageDiscount)
+                .append(Constants.TENANT_ID, tenantId)
                 .toString();
     }
 }

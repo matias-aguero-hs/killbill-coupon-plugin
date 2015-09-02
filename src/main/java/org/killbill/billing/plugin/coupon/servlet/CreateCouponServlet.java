@@ -27,7 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
-import org.killbill.billing.plugin.coupon.CouponJson;
+import org.killbill.billing.plugin.coupon.model.Constants;
+import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
@@ -58,7 +59,7 @@ public class CreateCouponServlet extends PluginServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String apiKey = request.getHeader("X-Killbill-ApiKey");
+        String apiKey = request.getHeader(Constants.X_KILLBILL_API_KEY);
 
         CouponContext context = null;
         try {
@@ -69,7 +70,7 @@ public class CreateCouponServlet extends PluginServlet {
             e.printStackTrace();
         }
 
-        CouponJson coupon = (CouponJson) JsonHelper.getObjectFromRequest(request, CouponJson.class);
+        Coupon coupon = (Coupon) JsonHelper.getObjectFromRequest(request, Coupon.class);
 
         try {
             if (null != coupon) {

@@ -25,7 +25,7 @@ import javax.sql.DataSource;
 
 import org.jooq.Result;
 import org.jooq.impl.DSL;
-import org.killbill.billing.plugin.coupon.CouponJson;
+import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.dao.PluginDao;
@@ -59,7 +59,7 @@ public class CouponDao extends PluginDao {
                        });
     }
 
-    public void createCoupon(final CouponJson couponJson, TenantContext context) throws SQLException {
+    public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
                     @Override
@@ -71,10 +71,10 @@ public class CouponDao extends PluginDao {
                                        COUPONS.DISCOUNT_TYPE,
                                        COUPONS.PERCENTAGE_DISCOUNT,
                                        COUPONS.KB_TENANT_ID)
-                           .values(couponJson.getCouponCode(),
-                                   couponJson.getCouponName(),
-                                   couponJson.getDiscountType().toString(),
-                                   couponJson.getPercentageDiscount(),
+                           .values(coupon.getCouponCode(),
+                                   coupon.getCouponName(),
+                                   coupon.getDiscountType().toString(),
+                                   coupon.getPercentageDiscount(),
                                    context.getTenantId().toString())
                            .execute();
                         return null;
