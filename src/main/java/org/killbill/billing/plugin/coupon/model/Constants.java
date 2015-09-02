@@ -35,5 +35,6 @@ public class Constants {
     public static final String APPLY_COUPON_PATH = "-applycoupon";
     public static final String ADMIN_USER = "admin";
     public static final String ADMIN_PASSWORD = "password";
+    public static final String PRODUCTS = "products";
 
 }

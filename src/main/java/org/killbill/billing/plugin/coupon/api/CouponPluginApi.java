@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
@@ -118,5 +119,19 @@ public class CouponPluginApi {
 
         return new ArrayList<CouponsAppliedRecord>();
 
+    }
+
+    /**
+     * Get products associated to a Coupon
+     * @param couponCode
+     * @return
+     */
+    public List<CouponsProductsRecord> getProductsOfCoupon(String couponCode) {
+        try {
+            return dao.getProductsOfCoupon(couponCode);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<CouponsProductsRecord>();
     }
 }

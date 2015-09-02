@@ -19,12 +19,14 @@ package org.killbill.billing.plugin.coupon.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
 
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
@@ -33,6 +35,7 @@ import org.killbill.billing.util.callcontext.TenantContext;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
+import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS;
 
 public class CouponDao extends PluginDao {
 
@@ -60,6 +63,7 @@ public class CouponDao extends PluginDao {
     }
 
     public void createCoupon(final Coupon coupon, final TenantContext context) throws SQLException {
+        // Add Coupon to Coupons table
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
                     @Override
@@ -80,6 +84,27 @@ public class CouponDao extends PluginDao {
                         return null;
                     }
                 });
+
+        List<String> products = coupon.getProducts();
+        // Add List of Products and Coupon associated to the table
+        for (final String product : products) {
+            execute(dataSource.getConnection(),
+                    new WithConnectionCallback<Void>() {
+                        @Override
+                        public Void withConnection(final Connection conn) throws SQLException {
+                            DSL.using(conn, dialect, settings)
+                               .insertInto(COUPONS_PRODUCTS,
+                                           COUPONS_PRODUCTS.COUPON_CODE,
+                                           COUPONS_PRODUCTS.PRODUCT_NAME,
+                                           COUPONS.KB_TENANT_ID)
+                               .values(coupon.getCouponCode(),
+                                       product,
+                                       context.getTenantId().toString())
+                               .execute();
+                            return null;
+                        }
+                    });
+        }
     }
 
     /**
@@ -115,6 +140,19 @@ public class CouponDao extends PluginDao {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS_APPLIED)
                                          .where(COUPONS_APPLIED.KB_ACCOUNT_ID.equal(accountId.toString()))
+                                         .fetch();
+                           }
+                       });
+    }
+
+    public Result<CouponsProductsRecord> getProductsOfCoupon(final String couponCode) throws SQLException {
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsProductsRecord>>() {
+                           @Override
+                           public Result<CouponsProductsRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_PRODUCTS)
+                                         .where(COUPONS_PRODUCTS.COUPON_CODE.equal(couponCode))
                                          .fetch();
                            }
                        });

@@ -37,7 +37,6 @@ public class Keys {
 	public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsHistoryRecord> KEY_COUPONS_HISTORY_PRIMARY = UniqueKeys0.KEY_COUPONS_HISTORY_PRIMARY;
 	public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsHistoryRecord> KEY_COUPONS_HISTORY_RECORD_ID = UniqueKeys0.KEY_COUPONS_HISTORY_RECORD_ID;
 	public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord> KEY_COUPONS_PRODUCTS_PRIMARY = UniqueKeys0.KEY_COUPONS_PRODUCTS_PRIMARY;
-	public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord> KEY_COUPONS_PRODUCTS_COUPONS_PRODUCTS_UNIQUE = UniqueKeys0.KEY_COUPONS_PRODUCTS_COUPONS_PRODUCTS_UNIQUE;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
@@ -63,6 +62,5 @@ public class Keys {
 		public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsHistoryRecord> KEY_COUPONS_HISTORY_PRIMARY = createUniqueKey(org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsHistory.COUPONS_HISTORY, org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsHistory.COUPONS_HISTORY.RECORD_ID);
 		public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsHistoryRecord> KEY_COUPONS_HISTORY_RECORD_ID = createUniqueKey(org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsHistory.COUPONS_HISTORY, org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsHistory.COUPONS_HISTORY.RECORD_ID);
 		public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord> KEY_COUPONS_PRODUCTS_PRIMARY = createUniqueKey(org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS, org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS.RECORD_ID);
-		public static final org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord> KEY_COUPONS_PRODUCTS_COUPONS_PRODUCTS_UNIQUE = createUniqueKey(org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS, org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS.COUPON_CODE);
 	}
 }

@@ -20,6 +20,7 @@ package org.killbill.billing.plugin.coupon.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
@@ -81,7 +83,13 @@ public class CreateCouponServlet extends PluginServlet {
                 couponPluginApi.createCoupon(coupon, context);
 
                 CouponsRecord couponCreated = couponPluginApi.getCouponByCode(coupon.getCouponCode());
+                // add Coupon to JSON response
                 JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(couponCreated);
+
+                List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
+                // add Products to JSON response
+                jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
+
                 response.setContentType(APPLICATION_JSON);
                 PrintWriter writer = response.getWriter();
                 writer.write(jsonResponse.toString());

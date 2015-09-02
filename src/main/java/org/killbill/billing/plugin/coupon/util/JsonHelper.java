@@ -2,11 +2,15 @@ package org.killbill.billing.plugin.coupon.util;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONObject;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 
@@ -14,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
+import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS;
 
 /**
  * Created by maguero on 01/09/15.
@@ -73,5 +78,20 @@ public class JsonHelper {
         jsonResponse.put(Constants.ACCOUNT_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_ACCOUNT_ID));
         jsonResponse.put(Constants.TENANT_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_TENANT_ID));
         return jsonResponse;
+    }
+
+    public static JSONObject buildProductsAssociatedToCoupon(JSONObject json, List<CouponsProductsRecord> products) {
+        List<String> productsAsString = buildProductList(products);
+        json.put(Constants.PRODUCTS, productsAsString);
+        return json;
+    }
+
+    private static List<String> buildProductList(final List<CouponsProductsRecord> products) {
+        List<String> productsAsString = new ArrayList<>();
+        for (CouponsProductsRecord product : products) {
+            String productAsString = product.getProductName();
+            productsAsString.add(productAsString);
+        }
+        return productsAsString;
     }
 }

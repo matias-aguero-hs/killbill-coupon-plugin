@@ -1,5 +1,6 @@
 package org.killbill.billing.plugin.coupon.model;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -16,6 +17,7 @@ public class Coupon {
     private DiscountTypeEnum discountType;
     private Double percentageDiscount;
     private UUID tenantId;
+    private List<String> products;
 
     public String getCouponCode() {
         return couponCode;
@@ -57,6 +59,14 @@ public class Coupon {
         this.tenantId = tenantId;
     }
 
+    public List<String> getProducts() {
+        return products;
+    }
+
+    public void setProducts(final List<String> products) {
+        this.products = products;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -75,6 +85,7 @@ public class Coupon {
                 .append(this.discountType, rhs.discountType)
                 .append(this.percentageDiscount, rhs.percentageDiscount)
                 .append(this.tenantId, rhs.tenantId)
+                .append(this.products, rhs.products)
                 .isEquals();
     }
 
@@ -86,17 +97,19 @@ public class Coupon {
                 .append(discountType)
                 .append(percentageDiscount)
                 .append(tenantId)
+                .append(products)
                 .toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append(Constants.COUPON_CODE, couponCode)
-                .append(Constants.COUPON_NAME, couponName)
-                .append(Constants.DISCOUNT_TYPE, discountType)
-                .append(Constants.PERCENTAGE_DISCOUNT, percentageDiscount)
-                .append(Constants.TENANT_ID, tenantId)
+                .append("couponCode", couponCode)
+                .append("couponName", couponName)
+                .append("discountType", discountType)
+                .append("percentageDiscount", percentageDiscount)
+                .append("tenantId", tenantId)
+                .append("products", products)
                 .toString();
     }
 }
