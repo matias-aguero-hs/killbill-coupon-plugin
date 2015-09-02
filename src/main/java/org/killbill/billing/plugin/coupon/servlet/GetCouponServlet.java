@@ -29,12 +29,12 @@ import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.osgi.service.log.LogService;
 
 public class GetCouponServlet extends PluginServlet {
 
-    public static final String COUPON_CODE = "couponCode";
     private final LogService logService;
     private final CouponPluginApi couponPluginApi;
 
@@ -54,7 +54,7 @@ public class GetCouponServlet extends PluginServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String couponCode = request.getParameter(COUPON_CODE);
+        String couponCode = request.getParameter(Constants.COUPON_CODE);
 
         try {
             CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);

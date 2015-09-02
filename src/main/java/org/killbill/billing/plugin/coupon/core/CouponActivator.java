@@ -27,6 +27,7 @@ import org.killbill.billing.osgi.api.OSGIPluginProperties;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.listener.CouponListener;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.servlet.ApplyCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.CreateCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.GetCouponServlet;
@@ -36,7 +37,6 @@ import org.osgi.framework.BundleContext;
 
 public class CouponActivator extends KillbillActivatorBase {
 
-    public static final String PLUGIN_NAME = "hootsuite";
 
     private OSGIKillbillEventHandler couponListener;
 
@@ -56,20 +56,20 @@ public class CouponActivator extends KillbillActivatorBase {
 
         // Register Get Coupon Servlet
         final GetCouponServlet getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
-        registerServlet(context, getCouponServlet, "-getcoupon");
+        registerServlet(context, getCouponServlet, Constants.GET_COUPON_PATH);
 
         // Register Create Coupon Servlet
         final CreateCouponServlet createCouponServlet = new CreateCouponServlet(logService, couponPluginApi);
-        registerServlet(context, createCouponServlet, "-createcoupon");
+        registerServlet(context, createCouponServlet, Constants.CREATE_COUPON_PATH);
 
         // Register Apply Coupon Servlet
         final ApplyCouponServlet applyCouponServlet = new ApplyCouponServlet(logService, couponPluginApi);
-        registerServlet(context, applyCouponServlet, "-applycoupon");
+        registerServlet(context, applyCouponServlet, Constants.APPLY_COUPON_PATH);
     }
 
     private void registerCouponPluginApi(final BundleContext context, final CouponPluginApi couponPluginApi) {
         final Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
+        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, Constants.PLUGIN_NAME);
         registrar.registerService(context, CouponPluginApi.class, couponPluginApi, props);
     }
 
@@ -85,7 +85,7 @@ public class CouponActivator extends KillbillActivatorBase {
 
     private void registerServlet(final BundleContext context, final HttpServlet servlet, String subPath) {
         final Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME + subPath);
+        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, Constants.PLUGIN_NAME + subPath);
         registrar.registerService(context, Servlet.class, servlet, props);
     }
 

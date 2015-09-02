@@ -25,7 +25,7 @@ import java.util.UUID;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
-import org.killbill.billing.plugin.coupon.CouponJson;
+import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
@@ -49,8 +49,8 @@ public class CouponPluginApi {
         return dao.getCouponByCode(couponCode);
     }
 
-    public void createCoupon(final CouponJson couponJson, TenantContext context) throws SQLException {
-        dao.createCoupon(couponJson, context);
+    public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
+        dao.createCoupon(coupon, context);
     }
 
     public UUID getTenantId(String apiKey) throws TenantApiException {

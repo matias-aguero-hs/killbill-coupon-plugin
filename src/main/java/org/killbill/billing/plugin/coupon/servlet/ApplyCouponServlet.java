@@ -14,6 +14,7 @@ import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.model.ApplyCouponRequest;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.CouponContext;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.tenant.api.TenantApiException;
@@ -23,6 +24,7 @@ import org.osgi.service.log.LogService;
  * Created by maguero on 01/09/15.
  */
 public class ApplyCouponServlet extends PluginServlet {
+
 
     private final LogService logService;
     private final CouponPluginApi couponPluginApi;
@@ -38,7 +40,7 @@ public class ApplyCouponServlet extends PluginServlet {
             throws ServletException, IOException {
 
         // TODO refactor
-        String apiKey = request.getHeader("X-Killbill-ApiKey");
+        String apiKey = request.getHeader(Constants.X_KILLBILL_API_KEY);
 
         CouponContext context = null;
         try {
