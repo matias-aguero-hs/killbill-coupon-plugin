@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.notification.plugin.api.ExtBusEvent;
+import org.killbill.billing.plugin.coupon.util.CouponContext;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
@@ -45,24 +46,11 @@ public class CouponListener implements OSGIKillbillEventHandler {
                                             " for object id " + killbillEvent.getObjectId() +
                                             " of type " + killbillEvent.getObjectType());
         try {
-            final Account account = osgiKillbillAPI.getAccountUserApi().getAccountById(killbillEvent.getAccountId(), new HelloWorldContext(killbillEvent.getTenantId()));
+            final Account account = osgiKillbillAPI.getAccountUserApi().getAccountById(killbillEvent.getAccountId(), new CouponContext(killbillEvent.getTenantId()));
             logService.log(LogService.LOG_INFO, "Account information: " + account);
         } catch (final AccountApiException e) {
             logService.log(LogService.LOG_WARNING, "Unable to find account", e);
         }
     }
 
-    private static final class HelloWorldContext implements TenantContext {
-
-        private final UUID tenantId;
-
-        private HelloWorldContext(final UUID tenantId) {
-            this.tenantId = tenantId;
-        }
-
-        @Override
-        public UUID getTenantId() {
-            return tenantId;
-        }
-    }
 }

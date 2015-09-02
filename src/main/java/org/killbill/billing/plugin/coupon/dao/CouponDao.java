@@ -19,6 +19,7 @@ package org.killbill.billing.plugin.coupon.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import javax.sql.DataSource;
 
@@ -26,8 +27,10 @@ import org.jooq.impl.DSL;
 import org.killbill.billing.plugin.coupon.CouponJson;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.dao.PluginDao;
+import org.killbill.billing.util.callcontext.TenantContext;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
+import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
 
 public class CouponDao extends PluginDao {
 
@@ -62,6 +65,31 @@ public class CouponDao extends PluginDao {
                                    couponJson.getCouponName(),
                                    couponJson.getTenantId())
                            .execute();
+                        return null;
+                    }
+                });
+    }
+
+    /**
+     * TODO document me
+     * @param couponCode
+     * @param accountId
+     * @throws SQLException
+     */
+    public void applyCoupon(final String couponCode, final UUID accountId, final TenantContext context) throws SQLException {
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                                .insertInto(COUPONS_APPLIED,
+                                        COUPONS_APPLIED.COUPON_CODE,
+                                        COUPONS_APPLIED.KB_ACCOUNT_ID,
+                                        COUPONS_APPLIED.KB_TENANT_ID)
+                                .values(couponCode,
+                                        accountId.toString(),
+                                        context.getTenantId().toString())
+                                .execute();
                         return null;
                     }
                 });

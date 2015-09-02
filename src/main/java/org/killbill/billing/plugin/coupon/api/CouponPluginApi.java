@@ -18,17 +18,25 @@
 package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
+import java.util.UUID;
 
 import org.killbill.billing.plugin.coupon.CouponJson;
+import org.killbill.billing.account.api.Account;
+import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.tenant.api.TenantApiException;
+import org.killbill.billing.util.callcontext.TenantContext;
+import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 
 public class CouponPluginApi {
 
+    private final OSGIKillbillAPI osgiKillbillAPI;
     private final CouponDao dao;
 
-    public CouponPluginApi(final CouponDao dao) {
+    public CouponPluginApi(final CouponDao dao, final OSGIKillbillAPI osgiKillbillAPI) {
         this.dao = dao;
+        this.osgiKillbillAPI = osgiKillbillAPI;
     }
 
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
@@ -38,4 +46,38 @@ public class CouponPluginApi {
     public void createCoupon(final CouponJson couponJson) throws SQLException {
         dao.createCoupon(couponJson);
     }
+
+    public UUID getTenantId(String apiKey) throws TenantApiException {
+        // TODO refactor
+        return osgiKillbillAPI.getTenantUserApi().getTenantByApiKey(apiKey).getId();
+    }
+
+    /**
+     *
+     * @param couponCode
+     * @param accountId
+     * @throws SQLException
+     */
+    public void applyCoupon(String couponCode, UUID accountId, TenantContext context) throws SQLException, AccountApiException {
+
+        // TODO tenat context
+        Account account = osgiKillbillAPI.getAccountUserApi().getAccountById(accountId, context);
+
+        if (account == null) {
+            // TODO inform error
+        }
+
+        CouponsRecord coupon = getCouponByCode(couponCode);
+
+        if (coupon == null) {
+            // TODO inform error
+        }
+
+        // TODO validate if coupon can be applied
+
+        // save applied coupon
+        dao.applyCoupon(couponCode, accountId, context);
+
+    }
+
 }

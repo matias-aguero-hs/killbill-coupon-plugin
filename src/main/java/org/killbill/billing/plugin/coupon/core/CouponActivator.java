@@ -49,12 +49,14 @@ public class CouponActivator extends KillbillActivatorBase {
         dispatcher.registerEventHandler(couponListener);
 
         // Register a payment plugin api (optional)
-        final CouponPluginApi couponPluginApi = new CouponPluginApi(dao);
+        final CouponPluginApi couponPluginApi = new CouponPluginApi(dao, killbillAPI);
         registerCouponPluginApi(context, couponPluginApi);
 
         // Register servlets
         final CouponServlet couponServlet = new CouponServlet(logService, couponPluginApi);
         registerServlet(context, couponServlet);
+
+
 
     }
 
