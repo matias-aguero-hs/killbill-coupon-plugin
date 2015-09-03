@@ -87,7 +87,7 @@ public class JsonHelper {
     }
 
     private static List<String> buildProductList(final List<CouponsProductsRecord> products) {
-        List<String> productsAsString = new ArrayList<>();
+        List<String> productsAsString = new ArrayList<String>();
         for (CouponsProductsRecord product : products) {
             String productAsString = product.getProductName();
             productsAsString.add(productAsString);

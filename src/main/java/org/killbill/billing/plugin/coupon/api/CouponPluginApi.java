@@ -25,11 +25,11 @@ import java.util.UUID;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
-import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
-import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
 import org.killbill.billing.tenant.api.TenantUserApi;
@@ -67,6 +67,17 @@ public class CouponPluginApi {
 
     public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId) throws SQLException {
         return dao.getCouponApplied(couponCode, accountId);
+    }
+
+    /**
+     * Get a coupon applied to a specific subscription
+     *
+     * @param subscriptionId
+     * @return
+     * @throws SQLException
+     */
+    public CouponsAppliedRecord getCouponAppliedBySubscription(final UUID subscriptionId) throws SQLException {
+        return dao.getCouponAppliedBySubscription(subscriptionId);
     }
 
     /**

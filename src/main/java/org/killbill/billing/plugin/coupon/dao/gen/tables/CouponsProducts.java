@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class CouponsProducts extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord> {
 
-	private static final long serialVersionUID = 494078389;
+	private static final long serialVersionUID = -407933298;
 
 	/**
 	 * The reference instance of <code>killbill.coupons_products</code>
@@ -45,6 +45,11 @@ public class CouponsProducts extends org.jooq.impl.TableImpl<org.killbill.billin
 	 * The column <code>killbill.coupons_products.product_name</code>.
 	 */
 	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord, java.lang.String> PRODUCT_NAME = createField("product_name", org.jooq.impl.SQLDataType.VARCHAR.length(50).nullable(false), this, "");
+
+	/**
+	 * The column <code>killbill.coupons_products.kb_tenant_id</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord, java.lang.String> KB_TENANT_ID = createField("kb_tenant_id", org.jooq.impl.SQLDataType.CHAR.length(36).nullable(false), this, "");
 
 	/**
 	 * Create a <code>killbill.coupons_products</code> table reference
@@ -89,7 +94,7 @@ public class CouponsProducts extends org.jooq.impl.TableImpl<org.killbill.billin
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord>>asList(org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_PRODUCTS_PRIMARY, org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_PRODUCTS_COUPONS_PRODUCTS_UNIQUE);
+		return java.util.Arrays.<org.jooq.UniqueKey<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord>>asList(org.killbill.billing.plugin.coupon.dao.gen.Keys.KEY_COUPONS_PRODUCTS_PRIMARY);
 	}
 
 	/**

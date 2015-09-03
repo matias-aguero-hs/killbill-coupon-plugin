@@ -178,4 +178,23 @@ public class CouponDao extends PluginDao {
                            }
                        });
     }
+
+    /**
+     * Method to get a Coupon Applied object by subscriptionId
+     * @param subscriptiontId
+     * @return
+     * @throws SQLException
+     */
+    public CouponsAppliedRecord getCouponAppliedBySubscription(final UUID subscriptiontId) throws SQLException {
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<CouponsAppliedRecord>() {
+                           @Override
+                           public CouponsAppliedRecord withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_APPLIED)
+                                         .where(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptiontId.toString()))
+                                         .fetchOne();
+                           }
+                       });
+    }
 }
