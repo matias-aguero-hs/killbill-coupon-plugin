@@ -65,13 +65,11 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
             logEvent(killbillEvent);
 
-            // TODO add logs
             try {
                 applyDiscounts(killbillEvent);
-            } catch (InvoiceApiException e) {
-                e.printStackTrace();
-            } catch (SQLException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                logService.log(LogService.LOG_ERROR,
+                               "There is an error trying to validate and apply a coupon discount", e);
             }
 
         }
@@ -88,6 +86,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
     /**
      * Validate and apply discounts to the invoice
+     *
      * @param killbillEvent
      * @throws InvoiceApiException
      * @throws SQLException
@@ -110,16 +109,17 @@ public class CouponListener implements OSGIKillbillEventHandler {
         CouponsAppliedRecord cApplied = couponPluginApi.getCouponAppliedBySubscription(subscriptionId);
 
         if (cApplied == null) {
-            logService.log(LogService.LOG_INFO, "Subscription " + subscriptionId + " does not have active coupon.");
+            logService.log(LogService.LOG_INFO, "Subscription " + subscriptionId + " does not have active coupon applied.");
             return;
         }
 
         for (InvoiceItem item : invoice.getInvoiceItems()) {
             if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())) {
+
                 logService.log(LogService.LOG_INFO, "RECURRING item " + item.getId() + " found for invoice " + invoice.getId());
 
                 // TODO refactor when implement coupon duration
-                // TODO validate phase plan
+                // TODO validate phase plan (EVERGREEN) ?
 
                 BigDecimal discountAmount = calculateDiscountAmount(item, cApplied);
 
@@ -127,16 +127,13 @@ public class CouponListener implements OSGIKillbillEventHandler {
                 InvoiceItem invoiceItemAdjustment = osgiKillbillAPI.getInvoiceUserApi().insertInvoiceItemAdjustment(accountId, invoiceId, item.getId(),
                                                                                 item.getStartDate(), discountAmount,
                                                                                 item.getCurrency(), context);
-                // osgiKillbillAPI.getInvoiceUserApi().insertCreditForInvoice(accountId, invoiceId, discount, LocalDate.now(), Currency.USD, context);
 
                 logService.log(LogService.LOG_INFO, "Invoice Item Adjustment added. ID: " + invoiceItemAdjustment.getId());
 
             } else {
-                logService.log(LogService.LOG_INFO, "Skipping invoice item" + item.getId() + "/" + item.getInvoiceItemType());
+                logService.log(LogService.LOG_INFO, "Skipping invoice item " + item.getId() + "/" + item.getInvoiceItemType());
             }
         }
-
-
 
     }
 
@@ -152,6 +149,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
     }
 
     /**
+     * Calculate the discount amount based on the DiscountType
      *
      * @param item
      * @param cApplied
@@ -159,7 +157,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
      */
     private BigDecimal calculateDiscountAmount(final InvoiceItem item, final CouponsAppliedRecord cApplied)
             throws SQLException {
-        // TODO complete
+
         CouponsRecord coupon = couponPluginApi.getCouponByCode(cApplied.getCouponCode());
 
         if ((coupon != null) && (coupon.getDiscountType() != null)
@@ -169,30 +167,10 @@ public class CouponListener implements OSGIKillbillEventHandler {
                                    .divide(BigDecimal.valueOf(100)));
             logService.log(LogService.LOG_INFO, "Discount calculated: " + discountAmount);
             return discountAmount;
-        }
+        } // TODO complete when implement DiscountTypeEnum.amount
 
         logService.log(LogService.LOG_WARNING, "No discount type was found for coupon " + cApplied.getCouponCode());
         return BigDecimal.ZERO;
-    }
-
-    /**
-     * Get the invoice item that is marked as RECURRING
-     * @param invoice
-     * @return
-     */
-    private InvoiceItem getRecurringInvoiceItem(final Invoice invoice) {
-
-        for (InvoiceItem item : invoice.getInvoiceItems()) {
-            if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())) {
-                logService.log(LogService.LOG_INFO, "RECURRING item " + item.getId() + " found for invoice "
-                                                    + invoice.getId());
-                return item;
-            }
-        }
-
-        logService.log(LogService.LOG_WARNING, "No RECURRING item was found for invoice " + invoice.getId());
-
-        return null;
     }
 
 }
