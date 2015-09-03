@@ -76,12 +76,14 @@ public class ApplyCouponServlet extends PluginServlet {
         try {
             if (null != applyCouponRequest) {
                 logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to Apply a Coupon");
-                couponPluginApi.applyCoupon(applyCouponRequest.getCouponCode(), applyCouponRequest.getAccountId(), context);
+                couponPluginApi.applyCoupon(applyCouponRequest.getCouponCode(), applyCouponRequest.getSubscriptionId(), applyCouponRequest.getAccountId(), context);
 
                 logService.log(LogService.LOG_INFO, "Getting recently created Coupon Applied using couponCode: "
                                                     + applyCouponRequest.getCouponCode()
                                                     + " and accountId: " + applyCouponRequest.getAccountId());
-                CouponsAppliedRecord couponApplied = couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getAccountId());
+                CouponsAppliedRecord couponApplied =
+                        couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getSubscriptionId(),
+                                                         applyCouponRequest.getAccountId());
 
                 if (null != couponApplied) {
                     // add Coupon to JSON response

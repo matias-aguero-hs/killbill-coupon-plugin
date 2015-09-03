@@ -43,34 +43,27 @@ public class CouponActivator extends KillbillActivatorBase {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        logService.log(LogService.LOG_INFO, "Starting Coupon Plugin");
         super.start(context);
 
-        logService.log(LogService.LOG_INFO, "Creating new Coupon DAO");
         final CouponDao dao = new CouponDao(logService, dataSource.getDataSource());
 
         // Register Plugin API
-        logService.log(LogService.LOG_INFO, "Registering Coupon Plugin API");
         final CouponPluginApi couponPluginApi = new CouponPluginApi(logService, dao, killbillAPI);
         registerCouponPluginApi(context, couponPluginApi);
 
         // Register an event listener
-        logService.log(LogService.LOG_INFO, "Registering Coupon Event Listener");
         couponListener = new CouponListener(logService, killbillAPI, couponPluginApi);
         dispatcher.registerEventHandler(couponListener);
 
         // Register Get Coupon Servlet
-        logService.log(LogService.LOG_INFO, "Registering Get Coupon Servlet");
         final GetCouponServlet getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
         registerServlet(context, getCouponServlet, Constants.GET_COUPON_PATH);
 
         // Register Create Coupon Servlet
-        logService.log(LogService.LOG_INFO, "Registering Create Coupon Servlet");
         final CreateCouponServlet createCouponServlet = new CreateCouponServlet(logService, couponPluginApi);
         registerServlet(context, createCouponServlet, Constants.CREATE_COUPON_PATH);
 
         // Register Apply Coupon Servlet
-        logService.log(LogService.LOG_INFO, "Registering Apply Coupon Servlet");
         final ApplyCouponServlet applyCouponServlet = new ApplyCouponServlet(logService, couponPluginApi);
         registerServlet(context, applyCouponServlet, Constants.APPLY_COUPON_PATH);
     }
@@ -83,7 +76,6 @@ public class CouponActivator extends KillbillActivatorBase {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        logService.log(LogService.LOG_INFO, "Stopping Coupon Plugin");
         super.stop(context);
     }
 

@@ -97,37 +97,39 @@ public class CouponDao extends PluginDao {
                     }
                 });
 
-        List<String> products = coupon.getProducts();
         // Add List of Products and Coupon associated to the table
-        logService.log(LogService.LOG_INFO, "Executing query to Add associated Products of a Coupon in the DB");
-        for (final String product : products) {
-            execute(dataSource.getConnection(),
-                    new WithConnectionCallback<Void>() {
-                        @Override
-                        public Void withConnection(final Connection conn) throws SQLException {
-                            DSL.using(conn, dialect, settings)
-                               .insertInto(COUPONS_PRODUCTS,
-                                           COUPONS_PRODUCTS.COUPON_CODE,
-                                           COUPONS_PRODUCTS.PRODUCT_NAME,
-                                           COUPONS.KB_TENANT_ID)
-                               .values(coupon.getCouponCode(),
-                                       product,
-                                       context.getTenantId().toString())
-                               .execute();
-                            return null;
-                        }
-                    });
+        List<String> products = coupon.getProducts();
+        if (null != products) {
+            logService.log(LogService.LOG_INFO, "Executing query to Add associated Products of a Coupon in the DB");
+            for (final String product : products) {
+                execute(dataSource.getConnection(),
+                        new WithConnectionCallback<Void>() {
+                            @Override
+                            public Void withConnection(final Connection conn) throws SQLException {
+                                DSL.using(conn, dialect, settings)
+                                   .insertInto(COUPONS_PRODUCTS,
+                                               COUPONS_PRODUCTS.COUPON_CODE,
+                                               COUPONS_PRODUCTS.PRODUCT_NAME,
+                                               COUPONS.KB_TENANT_ID)
+                                   .values(coupon.getCouponCode(),
+                                           product,
+                                           context.getTenantId().toString())
+                                   .execute();
+                                return null;
+                            }
+                        });
+            }
         }
     }
 
     /**
-     * Method to store an applied Coupon with its respective accountId in the DB
+     * Method to store an applied Coupon with its respective subscriptionId and accountId in the DB
      * @param couponCode
      * @param accountId
      * @throws SQLException
      */
-    public void applyCoupon(final String couponCode, final UUID accountId, final TenantContext context) throws SQLException {
-        logService.log(LogService.LOG_INFO, "Executing query to store an applied Coupon with its accountId in the DB");
+    public void applyCoupon(final String couponCode, final UUID subscriptionId, final UUID accountId, final TenantContext context) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to store an applied Coupon with its subscriptionId and accountId in the DB");
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
                     @Override
@@ -135,9 +137,11 @@ public class CouponDao extends PluginDao {
                         DSL.using(conn, dialect, settings)
                            .insertInto(COUPONS_APPLIED,
                                        COUPONS_APPLIED.COUPON_CODE,
+                                       COUPONS_APPLIED.KB_SUBSCRIPTION_ID,
                                        COUPONS_APPLIED.KB_ACCOUNT_ID,
                                        COUPONS_APPLIED.KB_TENANT_ID)
                            .values(couponCode,
+                                   subscriptionId.toString(),
                                    accountId.toString(),
                                    context.getTenantId().toString())
                            .execute();
@@ -147,12 +151,12 @@ public class CouponDao extends PluginDao {
     }
 
     /**
-     * Method to get a list of Coupons Applied from the DB
+     * Method to get a list of Coupons Applied from the DB using its accountId
      * @param accountId
      * @return
      * @throws SQLException
      */
-    public Result<CouponsAppliedRecord> getCouponsApplied(final UUID accountId) throws SQLException {
+    public Result<CouponsAppliedRecord> getCouponsAppliedByAccountId(final UUID accountId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
@@ -190,10 +194,11 @@ public class CouponDao extends PluginDao {
      * Method to get a Coupon Applied object by couponCode and accountId
      * @param couponCode
      * @param accountId
+     * @param subscriptionId
      * @return
      * @throws SQLException
      */
-    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId) throws SQLException {
+    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId, final UUID subscriptionId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to get a Coupon Applied object by couponCode and accountId from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsAppliedRecord>() {
@@ -202,7 +207,8 @@ public class CouponDao extends PluginDao {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS_APPLIED)
                                          .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
-                                          .and(COUPONS_APPLIED.KB_ACCOUNT_ID.equal(accountId.toString()))
+                                         .and(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
+                                         .and(COUPONS_APPLIED.KB_ACCOUNT_ID.equal(accountId.toString()))
                                          .fetchOne();
                            }
                        });
@@ -210,18 +216,19 @@ public class CouponDao extends PluginDao {
 
     /**
      * Method to get a Coupon Applied object by subscriptionId
-     * @param subscriptiontId
+     * @param subscriptionId
      * @return
      * @throws SQLException
      */
-    public CouponsAppliedRecord getCouponAppliedBySubscription(final UUID subscriptiontId) throws SQLException {
+    public CouponsAppliedRecord getCouponAppliedBySubscription(final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB using subscriptionId");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsAppliedRecord>() {
                            @Override
                            public CouponsAppliedRecord withConnection(final Connection conn) throws SQLException {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS_APPLIED)
-                                         .where(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptiontId.toString()))
+                                         .where(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
                                          .fetchOne();
                            }
                        });

@@ -83,9 +83,9 @@ public class CouponPluginApi {
         throw new CouponApiException(new Throwable("Either TenantUserApi is null or apiKey is Empty"), 0, "Either TenantUserApi is null or apiKey is Empty");
     }
 
-    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId) throws SQLException {
+    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID subscriptionId, final UUID accountId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to get an Applied Coupon");
-        return dao.getCouponApplied(couponCode, accountId);
+        return dao.getCouponApplied(couponCode, subscriptionId, accountId);
     }
 
     /**
@@ -105,7 +105,7 @@ public class CouponPluginApi {
      * @param accountId
      * @throws SQLException
      */
-    public void applyCoupon(String couponCode, UUID accountId, TenantContext context) throws SQLException, AccountApiException {
+    public void applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context) throws SQLException, AccountApiException {
 
         Account account = null;
         logService.log(LogService.LOG_INFO, "Getting the Account User API from the OSGi Killbill API");
@@ -127,7 +127,7 @@ public class CouponPluginApi {
 
                 // save applied coupon
                 logService.log(LogService.LOG_INFO, "Accessing the DAO to apply a Coupon");
-                dao.applyCoupon(couponCode, accountId, context);
+                dao.applyCoupon(couponCode, subscriptionId, accountId, context);
             }
             else {
                 logService.log(LogService.LOG_ERROR, "Error getting Coupon from the DB for couponCode: " + couponCode);
@@ -139,14 +139,14 @@ public class CouponPluginApi {
     }
 
     /**
-     * Get coupons applied to customer
+     * Get coupons applied to customer using the accountId
      * @param accountId
      * @return
      */
-    public List<CouponsAppliedRecord> getCouponsApplied(UUID accountId) {
-        logService.log(LogService.LOG_INFO, "Accessing the DAO to get a list of Applied Coupons from the DB");
+    public List<CouponsAppliedRecord> getCouponsAppliedByAccountId(UUID accountId) {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get a list of Applied Coupons from the DB using the accountId");
         try {
-            return dao.getCouponsApplied(accountId);
+            return dao.getCouponsAppliedByAccountId(accountId);
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "Error getting list of Applied Coupons for accountId: " + accountId + ". Cause: " + e.getMessage());
             e.printStackTrace();

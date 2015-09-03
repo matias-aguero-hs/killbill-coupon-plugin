@@ -14,7 +14,16 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class ApplyCouponRequest {
 
     private UUID accountId;
+    private UUID subscriptionId;
     private String couponCode;
+
+    public String getCouponCode() {
+        return couponCode;
+    }
+
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
+    }
 
     public UUID getAccountId() {
         return accountId;
@@ -24,12 +33,12 @@ public class ApplyCouponRequest {
         this.accountId = accountId;
     }
 
-    public String getCouponCode() {
-        return couponCode;
+    public UUID getSubscriptionId() {
+        return subscriptionId;
     }
 
-    public void setCouponCode(String couponCode) {
-        this.couponCode = couponCode;
+    public void setSubscriptionId(final UUID subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 
     @Override
@@ -46,6 +55,7 @@ public class ApplyCouponRequest {
         ApplyCouponRequest rhs = (ApplyCouponRequest) obj;
         return new EqualsBuilder()
                 .append(this.accountId, rhs.accountId)
+                .append(this.subscriptionId, rhs.subscriptionId)
                 .append(this.couponCode, rhs.couponCode)
                 .isEquals();
     }
@@ -54,6 +64,7 @@ public class ApplyCouponRequest {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(accountId)
+                .append(subscriptionId)
                 .append(couponCode)
                 .toHashCode();
     }
@@ -62,6 +73,7 @@ public class ApplyCouponRequest {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("accountId", accountId)
+                .append("subscriptionId", subscriptionId)
                 .append("couponCode", couponCode)
                 .toString();
     }

@@ -92,7 +92,7 @@ public class CreateCouponServlet extends PluginServlet {
         try {
             if (null != coupon) {
                 if (coupon.getDiscountType().equals(DiscountTypeEnum.percentage)
-                    && (coupon.getPercentageDiscount() <= 0 || coupon.getPercentageDiscount() <= 100)) {
+                    && (coupon.getPercentageDiscount().doubleValue() <= 0 || coupon.getPercentageDiscount().doubleValue() > 100)) {
                     logService.log(LogService.LOG_ERROR, "Error. Percentage must be between 0 and 100");
                     buildErrorResponse(new Throwable("Error. Percentage must be between 0 and 100"), response);
                 }

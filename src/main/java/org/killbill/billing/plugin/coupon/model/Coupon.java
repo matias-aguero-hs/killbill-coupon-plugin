@@ -7,6 +7,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Created by maguero on 31/08/15.
  */
@@ -17,6 +19,7 @@ public class Coupon {
     private DiscountTypeEnum discountType;
     private Double percentageDiscount;
     private UUID tenantId;
+    @JsonIgnore
     private List<String> products;
 
     public String getCouponCode() {
