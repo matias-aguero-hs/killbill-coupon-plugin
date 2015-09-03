@@ -32,6 +32,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.dao.PluginDao;
 import org.killbill.billing.util.callcontext.TenantContext;
+import org.osgi.service.log.LogService;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
@@ -39,17 +40,21 @@ import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.
 
 public class CouponDao extends PluginDao {
 
-    public CouponDao(final DataSource dataSource) throws SQLException {
+    private final LogService logService;
+
+    public CouponDao(final LogService logService, final DataSource dataSource) throws SQLException {
         super(dataSource);
+        this.logService = logService;
     }
 
     /**
-     * Method to get a Coupon object by couponCode
+     * Method to get a Coupon object by couponCode from the DB
      * @param couponCode
      * @return
      * @throws SQLException
      */
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Get a Coupon by couponCode in the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsRecord>() {
                            @Override
@@ -62,7 +67,14 @@ public class CouponDao extends PluginDao {
                        });
     }
 
+    /**
+     * Method to create a Coupon in the DB
+     * @param coupon
+     * @param context
+     * @throws SQLException
+     */
     public void createCoupon(final Coupon coupon, final TenantContext context) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Create a Coupon in the DB");
         // Add Coupon to Coupons table
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
@@ -87,6 +99,7 @@ public class CouponDao extends PluginDao {
 
         List<String> products = coupon.getProducts();
         // Add List of Products and Coupon associated to the table
+        logService.log(LogService.LOG_INFO, "Executing query to Add associated Products of a Coupon in the DB");
         for (final String product : products) {
             execute(dataSource.getConnection(),
                     new WithConnectionCallback<Void>() {
@@ -108,12 +121,13 @@ public class CouponDao extends PluginDao {
     }
 
     /**
-     * TODO document me
+     * Method to store an applied Coupon with its respective accountId in the DB
      * @param couponCode
      * @param accountId
      * @throws SQLException
      */
     public void applyCoupon(final String couponCode, final UUID accountId, final TenantContext context) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to store an applied Coupon with its accountId in the DB");
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
                     @Override
@@ -132,7 +146,14 @@ public class CouponDao extends PluginDao {
                 });
     }
 
+    /**
+     * Method to get a list of Coupons Applied from the DB
+     * @param accountId
+     * @return
+     * @throws SQLException
+     */
     public Result<CouponsAppliedRecord> getCouponsApplied(final UUID accountId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
                            @Override
@@ -145,7 +166,14 @@ public class CouponDao extends PluginDao {
                        });
     }
 
+    /**
+     * Method to get a list of Products associated with a Coupon from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
     public Result<CouponsProductsRecord> getProductsOfCoupon(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Products associated with a Coupon from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<Result<CouponsProductsRecord>>() {
                            @Override
@@ -166,6 +194,7 @@ public class CouponDao extends PluginDao {
      * @throws SQLException
      */
     public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a Coupon Applied object by couponCode and accountId from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsAppliedRecord>() {
                            @Override

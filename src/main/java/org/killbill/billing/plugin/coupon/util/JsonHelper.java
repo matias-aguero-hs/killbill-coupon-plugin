@@ -12,7 +12,9 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
+import org.osgi.service.log.LogService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,11 +34,10 @@ public class JsonHelper {
      * @param clazz
      * @return
      */
-    public static Object getObjectFromRequest(HttpServletRequest request, Class clazz) {
-
+    public static Object getObjectFromRequest(HttpServletRequest request, Class clazz, LogService logService) throws CouponApiException {
         try {
-
             // 1. get json from request
+            logService.log(LogService.LOG_INFO, "Getting JSON from Request");
             BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
 
             String jsonString = "";
@@ -50,16 +51,18 @@ public class JsonHelper {
             // 2. initiate jackson mapper
             ObjectMapper mapper = new ObjectMapper();
 
-            // 3. Convert received JSON to Article
+            // 3. Convert received JSON to Object
+            logService.log(LogService.LOG_INFO, "Converting JSON to Object: " + clazz.toString());
             Object jsonObject = mapper.readValue(jsonString, clazz);
 
+            logService.log(LogService.LOG_INFO, "Returning generated Java Object from JSON");
             return jsonObject;
 
         } catch (Exception e) {
-            // TODO use logger info
+            logService.log(LogService.LOG_INFO, "Exception during generation of the Object from JSON. Cause: " + e.getMessage());
             e.printStackTrace();
+            throw new CouponApiException(new Throwable(e.getMessage()), 0, "Exception during generation of the Object from JSON");
         }
-        return null;
     }
 
     public static JSONObject buildCouponJsonResponse(CouponsRecord coupon) {

@@ -56,24 +56,42 @@ public class GetCouponServlet extends PluginServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        logService.log(LogService.LOG_INFO, "Getting couponCode from the Parameters of the Request");
         String couponCode = request.getParameter(Constants.COUPON_CODE);
 
-        try {
-            CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
+        if (!couponCode.isEmpty()) {
+            try {
+                logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to get a Coupon with couponCode: " + couponCode);
+                CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
 
-            JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(coupon);
-
-            List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
-            // add Products to JSON response
-            jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
-
-            response.setContentType(APPLICATION_JSON);
-            PrintWriter writer = response.getWriter();
-            writer.write(jsonResponse.toString());
-            writer.close();
-            buildResponse(response);
-        } catch (SQLException e) {
-            e.printStackTrace();
+                if (null != coupon) {
+                    logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon obtained");
+                    JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(coupon);
+                    logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
+                    List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
+                    logService.log(LogService.LOG_INFO, "Calling JsonHelper to add the list of Products associated with the Coupon to the JSON Response");
+                    // add Products to JSON response
+                    jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
+                    logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
+                    response.setContentType(APPLICATION_JSON);
+                    PrintWriter writer = response.getWriter();
+                    writer.write(jsonResponse.toString());
+                    writer.close();
+                    buildResponse(response);
+                }
+                else {
+                    logService.log(LogService.LOG_ERROR, "Error. Coupon not found in the DB");
+                    buildErrorResponse(new Throwable("Error. Coupon not found in the DB"), response);
+                }
+            } catch (SQLException e) {
+                logService.log(LogService.LOG_ERROR, "SQL Exception. Cause: " + e.getMessage());
+                e.printStackTrace();
+                buildErrorResponse(new Throwable("SQL Exception. Cause: " + e.getMessage()), response);
+            }
+        }
+        else {
+            logService.log(LogService.LOG_ERROR, "Coupon code is empty or not valid");
+            buildErrorResponse(new Throwable("Coupon code is empty or not valid"), response);
         }
     }
 }
