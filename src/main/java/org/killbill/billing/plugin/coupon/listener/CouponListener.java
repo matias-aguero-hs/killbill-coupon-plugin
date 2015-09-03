@@ -164,11 +164,11 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
         if ((coupon != null) && (coupon.getDiscountType() != null)
             && (coupon.getDiscountType().equals(DiscountTypeEnum.percentage.toString()))) {
-            BigDecimal amount = item.getAmount()
-                                    .subtract((item.getAmount()
-                                                   .multiply(BigDecimal.valueOf(coupon.getPercentageDiscount()))
-                                                   .divide(BigDecimal.valueOf(100)))
-                                             );
+            BigDecimal discountAmount = (item.getAmount()
+                                   .multiply(BigDecimal.valueOf(coupon.getPercentageDiscount()))
+                                   .divide(BigDecimal.valueOf(100)));
+            logService.log(LogService.LOG_INFO, "Discount calculated: " + discountAmount);
+            return discountAmount;
         }
 
         logService.log(LogService.LOG_WARNING, "No discount type was found for coupon " + cApplied.getCouponCode());
