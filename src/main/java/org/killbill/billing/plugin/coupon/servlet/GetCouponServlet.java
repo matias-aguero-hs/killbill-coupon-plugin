@@ -18,7 +18,6 @@
 package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -33,6 +32,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProducts
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
+import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
 
 public class GetCouponServlet extends PluginServlet {
@@ -56,10 +56,12 @@ public class GetCouponServlet extends PluginServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        response.setContentType(APPLICATION_JSON);
+
         logService.log(LogService.LOG_INFO, "Getting couponCode from the Parameters of the Request");
         String couponCode = request.getParameter(Constants.COUPON_CODE);
 
-        if (!couponCode.isEmpty()) {
+        if (null != couponCode && !couponCode.isEmpty()) {
             try {
                 logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to get a Coupon with couponCode: " + couponCode);
                 CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
@@ -73,25 +75,31 @@ public class GetCouponServlet extends PluginServlet {
                     // add Products to JSON response
                     jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
                     logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
-                    response.setContentType(APPLICATION_JSON);
-                    PrintWriter writer = response.getWriter();
-                    writer.write(jsonResponse.toString());
-                    writer.close();
+                    ServletHelper.writeResponseToJson(response, jsonResponse.toString());
                     buildResponse(response);
                 }
                 else {
                     logService.log(LogService.LOG_ERROR, "Error. Coupon not found in the DB");
-                    buildErrorResponse(new Throwable("Error. Coupon not found in the DB"), response);
+                    JSONObject errorMessage = new JSONObject();
+                    errorMessage.put("Error", "Coupon not found in the DB");
+                    ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                    buildResponse(response);
                 }
             } catch (SQLException e) {
                 logService.log(LogService.LOG_ERROR, "SQL Exception. Cause: " + e.getMessage());
                 e.printStackTrace();
-                buildErrorResponse(new Throwable("SQL Exception. Cause: " + e.getMessage()), response);
+                JSONObject errorMessage = new JSONObject();
+                errorMessage.put("Error", "SQL Exception. Cause: " + e.getMessage());
+                ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                buildResponse(response);
             }
         }
         else {
             logService.log(LogService.LOG_ERROR, "Coupon code is empty or not valid");
-            buildErrorResponse(new Throwable("Coupon code is empty or not valid"), response);
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "Coupon code is empty or not valid");
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         }
     }
 }

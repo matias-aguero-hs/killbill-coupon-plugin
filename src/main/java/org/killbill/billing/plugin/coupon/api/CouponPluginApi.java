@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
@@ -31,6 +33,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProducts
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Coupon;
+import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
 import org.killbill.billing.tenant.api.TenantUserApi;
@@ -81,6 +84,16 @@ public class CouponPluginApi {
         }
         else logService.log(LogService.LOG_ERROR, "TenantUserApi is null or apiKey is Empty");
         throw new CouponApiException(new Throwable("Either TenantUserApi is null or apiKey is Empty"), 0, "Either TenantUserApi is null or apiKey is Empty");
+    }
+
+    public Object getObjectFromJsonRequest(HttpServletRequest request, LogService logService, Class clazz) {
+        Object result = null;
+        try {
+            result = JsonHelper.getObjectFromRequest(request, clazz, logService);
+        } catch (CouponApiException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID subscriptionId, final UUID accountId) throws SQLException {

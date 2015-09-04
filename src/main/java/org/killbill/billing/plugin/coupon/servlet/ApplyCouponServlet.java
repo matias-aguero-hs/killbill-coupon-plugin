@@ -1,7 +1,6 @@
 package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import javax.servlet.ServletException;
@@ -18,6 +17,7 @@ import org.killbill.billing.plugin.coupon.model.ApplyCouponRequest;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.CouponContext;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
+import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
 
 /**
@@ -46,7 +46,7 @@ public class ApplyCouponServlet extends PluginServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // TODO refactor
+        response.setContentType(APPLICATION_JSON);
         String apiKey = request.getHeader(Constants.X_KILLBILL_API_KEY);
 
         CouponContext context = null;
@@ -58,19 +58,26 @@ public class ApplyCouponServlet extends PluginServlet {
         } catch (CouponApiException ce) {
             logService.log(LogService.LOG_ERROR, "Exception trying to Create the Context. Cause: " + ce.getMessage());
             ce.printStackTrace();
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "CouponApiException. Cause: " + ce.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         }
 
         ApplyCouponRequest applyCouponRequest = null;
         try {
             logService.log(LogService.LOG_INFO, "Using JsonHelper to create an Object from the JSON Request: " + request);
-            applyCouponRequest = (ApplyCouponRequest) JsonHelper.getObjectFromRequest(request, ApplyCouponRequest.class, logService);
+            applyCouponRequest = (ApplyCouponRequest) couponPluginApi.getObjectFromJsonRequest(request, logService, ApplyCouponRequest.class);
             if (null == applyCouponRequest) {
                 throw new CouponApiException(new Throwable("Exception during generation of the Object from JSON"), 0, "Exception during generation of the Object from JSON");
             }
         } catch (CouponApiException e) {
             logService.log(LogService.LOG_ERROR, "Exception during generation of the Object from JSON. Cause: " + e.getMessage());
             e.printStackTrace();
-            buildErrorResponse(e.getCause(), response);
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "CouponApiException. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         }
 
         try {
@@ -90,29 +97,38 @@ public class ApplyCouponServlet extends PluginServlet {
                     logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon Applied created");
                     JSONObject jsonResponse = JsonHelper.buildCouponAppliedJsonResponse(couponApplied);
                     logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
-                    PrintWriter writer = response.getWriter();
-                    writer.write(jsonResponse.toString());
-                    writer.close();
-                    response.setContentType(APPLICATION_JSON);
+                    ServletHelper.writeResponseToJson(response, jsonResponse.toString());
                     buildResponse(response);
                 }
                 else {
                     logService.log(LogService.LOG_ERROR, "Error. Coupon Applied not found in the DB");
-                    buildErrorResponse(new Throwable("Error. Coupon Applied not found in the DB"), response);
+                    JSONObject errorMessage = new JSONObject();
+                    errorMessage.put("Error", "Coupon Applied not found in the DB");
+                    ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                    buildResponse(response);
                 }
             }
             else {
                 logService.log(LogService.LOG_ERROR, "Apply Coupon Request object is null");
-                buildErrorResponse(new Throwable("Apply Coupon Request object is null"), response);
+                JSONObject errorMessage = new JSONObject();
+                errorMessage.put("Error", "Apply Coupon Request object is null");
+                ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                buildResponse(response);
             }
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "SQL Exception. Cause: " + e.getMessage());
             e.printStackTrace();
-            buildErrorResponse(new Throwable("SQL Exception. Cause: " + e.getMessage()), response);
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "SQLException. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         } catch (AccountApiException e) {
             logService.log(LogService.LOG_ERROR, "Account API Exception. Cause: " + e.getMessage());
             e.printStackTrace();
-            buildErrorResponse(new Throwable("Account API Exception. Cause: " + e.getMessage()), response);
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "AccountApiException. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         }
     }
 }
