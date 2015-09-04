@@ -166,6 +166,24 @@ public class CouponDao extends PluginDao {
                        });
     }
 
+    /**
+     * Method to get all Coupons Applied object from the DB
+     * @return
+     * @throws SQLException
+     */
+    public List<CouponsAppliedRecord> getAllCouponsApplied() throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Get all Coupons in the DB");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
+                           @Override
+                           public Result<CouponsAppliedRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_APPLIED)
+                                         .fetch();
+                           }
+                       });
+    }
+
 
     // -----------------------------------------------------------------------------
     //                              APPLY COUPON METHODS

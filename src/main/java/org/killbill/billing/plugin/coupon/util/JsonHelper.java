@@ -79,6 +79,7 @@ public class JsonHelper {
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put(Constants.COUPON_CODE, couponAppliedRecord.getValue(COUPONS_APPLIED.COUPON_CODE));
         jsonResponse.put(Constants.ACCOUNT_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_ACCOUNT_ID));
+        jsonResponse.put(Constants.SUBSCRIPTION_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_SUBSCRIPTION_ID));
         jsonResponse.put(Constants.TENANT_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_TENANT_ID));
         return jsonResponse;
     }
@@ -92,6 +93,12 @@ public class JsonHelper {
     public static JSONObject buildCouponListJsonResponse(List<JSONObject> coupons) {
         JSONObject json = new JSONObject();
         json.put(Constants.COUPON_LIST, coupons);
+        return json;
+    }
+
+    public static JSONObject buildCouponsAppliedListJsonResponse(List<JSONObject> couponsApplied) {
+        JSONObject json = new JSONObject();
+        json.put(Constants.COUPONS_APPLIED_LIST, couponsApplied);
         return json;
     }
 

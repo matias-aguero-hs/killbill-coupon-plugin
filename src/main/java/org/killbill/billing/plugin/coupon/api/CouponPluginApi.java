@@ -60,6 +60,11 @@ public class CouponPluginApi {
         return dao.getAllCoupons();
     }
 
+    public List<CouponsAppliedRecord> getAllCouponsApplied() throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get all Coupons Applied");
+        return dao.getAllCouponsApplied();
+    }
+
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to get a Coupon by couponCode");
         return dao.getCouponByCode(couponCode);
