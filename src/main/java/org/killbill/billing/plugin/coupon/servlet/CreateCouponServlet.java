@@ -90,17 +90,7 @@ public class CreateCouponServlet extends PluginServlet {
                     || (null == coupon.getPercentageDiscount())) {
                 throw new CouponApiException(new Throwable("Exception during generation of the Object from JSON. Missing or invalid required parameters."), 0, "Exception during generation of the Object from JSON. Missing or invalid required parameters.");
             }
-        } catch (CouponApiException e) {
-            logService.log(LogService.LOG_ERROR, "Exception during generation of the Object from JSON. Cause: " + e.getMessage());
-            e.printStackTrace();
-            JSONObject errorMessage = new JSONObject();
-            errorMessage.put("Error", "CouponApiException. Cause: " + e.getMessage());
-            ServletHelper.writeResponseToJson(response, errorMessage.toString());
-            buildResponse(response);
-        }
-
-        try {
-            if (null != coupon) {
+            else {
                 if (coupon.getDiscountType().equals(DiscountTypeEnum.percentage)
                     && (coupon.getPercentageDiscount().doubleValue() <= 0 || coupon.getPercentageDiscount().doubleValue() > 100)) {
                     logService.log(LogService.LOG_ERROR, "Error. Percentage must be between 0 and 100");
@@ -109,44 +99,45 @@ public class CreateCouponServlet extends PluginServlet {
                     ServletHelper.writeResponseToJson(response, errorMessage.toString());
                     buildResponse(response);
                 }
-
-                logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to Create a new Coupon");
-                couponPluginApi.createCoupon(coupon, context);
-
-                logService.log(LogService.LOG_INFO, "Getting recently created Coupon using couponCode: " + coupon.getCouponCode());
-                CouponsRecord couponCreated = couponPluginApi.getCouponByCode(coupon.getCouponCode());
-
-                if (null != couponCreated) {
-                    // add Coupon to JSON response
-                    logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon created");
-                    JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(couponCreated);
-
-                    logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
-                    List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
-
-                    // add Products to JSON response
-                    logService.log(LogService.LOG_INFO, "Calling JsonHelper to add the list of Products associated with the Coupon to the JSON Response");
-                    jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
-
-                    logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
-                    ServletHelper.writeResponseToJson(response, jsonResponse.toString());
-                    buildResponse(response);
-                }
                 else {
-                    logService.log(LogService.LOG_ERROR, "Error. Coupon not found in the DB");
-                    JSONObject errorMessage = new JSONObject();
-                    errorMessage.put("Error", "Coupon not found in the DB");
-                    ServletHelper.writeResponseToJson(response, errorMessage.toString());
-                    buildResponse(response);
+                    logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to Create a new Coupon");
+                    couponPluginApi.createCoupon(coupon, context);
+
+                    logService.log(LogService.LOG_INFO, "Getting recently created Coupon using couponCode: " + coupon.getCouponCode());
+                    CouponsRecord couponCreated = couponPluginApi.getCouponByCode(coupon.getCouponCode());
+
+                    if (null != couponCreated) {
+                        // add Coupon to JSON response
+                        logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon created");
+                        JSONObject jsonResponse = JsonHelper.buildCouponJsonResponse(couponCreated);
+
+                        logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
+                        List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
+
+                        // add Products to JSON response
+                        logService.log(LogService.LOG_INFO, "Calling JsonHelper to add the list of Products associated with the Coupon to the JSON Response");
+                        jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
+
+                        logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
+                        ServletHelper.writeResponseToJson(response, jsonResponse.toString());
+                        buildResponse(response);
+                    }
+                    else {
+                        logService.log(LogService.LOG_ERROR, "Error. Coupon not found in the DB");
+                        JSONObject errorMessage = new JSONObject();
+                        errorMessage.put("Error", "Coupon not found in the DB");
+                        ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                        buildResponse(response);
+                    }
                 }
             }
-            else {
-                logService.log(LogService.LOG_ERROR, "Coupon object is null");
-                JSONObject errorMessage = new JSONObject();
-                errorMessage.put("Error", "Coupon object is null");
-                ServletHelper.writeResponseToJson(response, errorMessage.toString());
-                buildResponse(response);
-            }
+        } catch (CouponApiException e) {
+            logService.log(LogService.LOG_ERROR, "Exception during generation of the Object from JSON. Cause: " + e.getMessage());
+            e.printStackTrace();
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "CouponApiException. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "SQL Exception. Cause: " + e.getMessage());
             e.printStackTrace();

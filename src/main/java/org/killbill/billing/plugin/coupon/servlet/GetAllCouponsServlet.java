@@ -34,6 +34,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProducts
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
+import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
 
 public class GetAllCouponsServlet extends PluginServlet {
@@ -63,8 +64,6 @@ public class GetAllCouponsServlet extends PluginServlet {
             List<CouponsRecord> coupons = couponPluginApi.getAllCoupons();
 
             if (null != coupons) {
-
-
                 List<JSONObject> jsonCoupons = new ArrayList<JSONObject>();
                 for (CouponsRecord coupon : coupons) {
                     logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon");
@@ -75,7 +74,6 @@ public class GetAllCouponsServlet extends PluginServlet {
                     logService.log(LogService.LOG_INFO, "Calling JsonHelper to add the list of Products associated with the Coupon to the JSON Response");
                     JsonHelper.buildProductsAssociatedToCoupon(jsonCoupon, products);
                     jsonCoupons.add(jsonCoupon);
-
                 }
 
                 JSONObject jsonResponse = JsonHelper.buildCouponListJsonResponse(jsonCoupons);
@@ -87,10 +85,20 @@ public class GetAllCouponsServlet extends PluginServlet {
                 writer.close();
                 buildResponse(response);
             }
+            else {
+                logService.log(LogService.LOG_ERROR, "Error getting List of Coupons from the DB");
+                JSONObject errorMessage = new JSONObject();
+                errorMessage.put("Error", "Can't get List of Coupons from the DB. Response: null object");
+                ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                buildResponse(response);
+            }
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "SQL Exception. Cause: " + e.getMessage());
             e.printStackTrace();
-            buildErrorResponse(new Throwable("SQL Exception. Cause: " + e.getMessage()), response);
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "SQL Exception. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         }
 
     }

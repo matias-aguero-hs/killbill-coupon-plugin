@@ -34,6 +34,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
+import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
 
 public class GetAllCouponsAppliedServlet extends PluginServlet {
@@ -80,10 +81,20 @@ public class GetAllCouponsAppliedServlet extends PluginServlet {
                 writer.close();
                 buildResponse(response);
             }
+            else {
+                logService.log(LogService.LOG_ERROR, "Error getting List of Coupons Applied from the DB");
+                JSONObject errorMessage = new JSONObject();
+                errorMessage.put("Error", "Can't get List of Coupons Applied from the DB. Response: null object");
+                ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                buildResponse(response);
+            }
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "SQL Exception. Cause: " + e.getMessage());
             e.printStackTrace();
-            buildErrorResponse(new Throwable("SQL Exception. Cause: " + e.getMessage()), response);
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "SQL Exception. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
         }
 
     }
