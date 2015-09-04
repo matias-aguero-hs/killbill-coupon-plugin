@@ -84,8 +84,11 @@ public class CreateCouponServlet extends PluginServlet {
         try {
             logService.log(LogService.LOG_INFO, "Using JsonHelper to create an Object from the JSON Request: " + request);
             coupon = (Coupon) couponPluginApi.getObjectFromJsonRequest(request, logService, Coupon.class);
-            if (null == coupon) {
-                throw new CouponApiException(new Throwable("Exception during generation of the Object from JSON"), 0, "Exception during generation of the Object from JSON");
+            if (null == coupon || (null == coupon.getCouponCode() || coupon.getCouponCode().isEmpty())
+                    || (null == coupon.getCouponName() || coupon.getCouponName().isEmpty())
+                    || (null == coupon.getDiscountType())
+                    || (null == coupon.getPercentageDiscount())) {
+                throw new CouponApiException(new Throwable("Exception during generation of the Object from JSON. Missing or invalid required parameters."), 0, "Exception during generation of the Object from JSON. Missing or invalid required parameters.");
             }
         } catch (CouponApiException e) {
             logService.log(LogService.LOG_ERROR, "Exception during generation of the Object from JSON. Cause: " + e.getMessage());
