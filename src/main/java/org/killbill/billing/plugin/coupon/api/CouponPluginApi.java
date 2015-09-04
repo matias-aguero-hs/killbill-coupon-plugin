@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
+import org.killbill.billing.entitlement.api.Subscription;
+import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
@@ -51,6 +53,11 @@ public class CouponPluginApi {
         this.dao = dao;
         this.osgiKillbillAPI = osgiKillbillAPI;
         this.logService = logService;
+    }
+
+    public List<CouponsRecord> getAllCoupons() throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get all Coupons");
+        return dao.getAllCoupons();
     }
 
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
@@ -118,37 +125,74 @@ public class CouponPluginApi {
      * @param accountId
      * @throws SQLException
      */
-    public void applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context) throws SQLException, AccountApiException {
+    public void applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context)
+            throws SQLException, AccountApiException, SubscriptionApiException, CouponApiException {
 
         Account account = null;
+        Subscription subscription = null;
+
         logService.log(LogService.LOG_INFO, "Getting the Account User API from the OSGi Killbill API");
-        AccountUserApi accountUserApi = osgiKillbillAPI.getAccountUserApi();
-        if (null != accountUserApi && null != accountId) {
+
+        if (null != accountId) {
             logService.log(LogService.LOG_INFO, "Getting the Account using the accountID: " + accountId);
-            account = accountUserApi.getAccountById(accountId, context);
+            account = osgiKillbillAPI.getAccountUserApi().getAccountById(accountId, context);
         }
 
+        if (null != subscriptionId) {
+            logService.log(LogService.LOG_INFO, "Getting the Subscription using the accountID: " + subscriptionId);
+            subscription = osgiKillbillAPI.getSubscriptionApi().getSubscriptionForEntitlementId(subscriptionId, context);
+        }
 
-        if (null != account) {
+        if ((null != account) && (null != subscription)) {
             // Get Coupon by Code from DB
             logService.log(LogService.LOG_INFO, "Getting Coupon from the DB using couponCode: " + couponCode);
             CouponsRecord coupon = getCouponByCode(couponCode);
             if (null != coupon) {
                 logService.log(LogService.LOG_INFO, "Validating if Coupon can be applied");
-                // TODO validate if coupon can be applied
-
+                // validate if coupon can be applied
+                validateCoupon(coupon, account, subscription);
 
                 // save applied coupon
                 logService.log(LogService.LOG_INFO, "Accessing the DAO to apply a Coupon");
                 dao.applyCoupon(couponCode, subscriptionId, accountId, context);
             }
             else {
-                logService.log(LogService.LOG_ERROR, "Error getting Coupon from the DB for couponCode: " + couponCode);
+                String error = "Coupon does not exist. CouponCode = " + couponCode;
+                logService.log(LogService.LOG_ERROR, error);
+                throw new CouponApiException(new Throwable(error), 0, error);
             }
         }
         else {
-            logService.log(LogService.LOG_ERROR, "Error getting Account for accountId: " + accountId);
+            logService.log(LogService.LOG_ERROR, "There is no valid account ( " + accountId
+                                                 + ") or subscription (" + subscriptionId + ").");
         }
+    }
+
+    /**
+     * TODO document me
+     * @param coupon
+     * @param account
+     * @param subscription
+     * @throws CouponApiException
+     */
+    private void validateCoupon(final CouponsRecord coupon, final Account account, final Subscription subscription)
+            throws CouponApiException {
+
+        // check products
+        List<CouponsProductsRecord> products = getProductsOfCoupon(coupon.getCouponCode());
+        if ((products != null) && !products.isEmpty()) {
+            // TODO refactor
+            for (CouponsProductsRecord product : products) {
+                String subProductName = subscription.getSubscriptionEvents().get(0).getNextProduct().getName();
+                if (product.getProductName().equals(subProductName)) {
+                    logService.log(LogService.LOG_DEBUG, "Applicable coupon.");
+                    return;
+                }
+            }
+            String error = "Coupon " + coupon.getCouponCode() + " cannot be applied to subscription " + subscription.getId();
+            throw new CouponApiException(new Throwable(error), 0, error);
+        }
+
     }
 
     /**

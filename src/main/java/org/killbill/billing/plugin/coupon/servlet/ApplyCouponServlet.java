@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
-import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
@@ -89,8 +88,7 @@ public class ApplyCouponServlet extends PluginServlet {
                                                     + applyCouponRequest.getCouponCode()
                                                     + " and accountId: " + applyCouponRequest.getAccountId());
                 CouponsAppliedRecord couponApplied =
-                        couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getSubscriptionId(),
-                                                         applyCouponRequest.getAccountId());
+                        couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getSubscriptionId(), applyCouponRequest.getAccountId());
 
                 if (null != couponApplied) {
                     // add Coupon to JSON response
@@ -122,11 +120,18 @@ public class ApplyCouponServlet extends PluginServlet {
             errorMessage.put("Error", "SQLException. Cause: " + e.getMessage());
             ServletHelper.writeResponseToJson(response, errorMessage.toString());
             buildResponse(response);
-        } catch (AccountApiException e) {
-            logService.log(LogService.LOG_ERROR, "Account API Exception. Cause: " + e.getMessage());
+        } catch (CouponApiException e) {
+            logService.log(LogService.LOG_ERROR, "Coupon cannot be applied. Cause: " + e.getMessage());
             e.printStackTrace();
             JSONObject errorMessage = new JSONObject();
-            errorMessage.put("Error", "AccountApiException. Cause: " + e.getMessage());
+            errorMessage.put("Error", "Coupon cannot be applied. Cause: " + e.getMessage());
+            ServletHelper.writeResponseToJson(response, errorMessage.toString());
+            buildResponse(response);
+        } catch (Exception e) {
+            logService.log(LogService.LOG_ERROR, "API Exception. Cause: " + e.getMessage());
+            e.printStackTrace();
+            JSONObject errorMessage = new JSONObject();
+            errorMessage.put("Error", "API Exception. Cause: " + e.getMessage());
             ServletHelper.writeResponseToJson(response, errorMessage.toString());
             buildResponse(response);
         }

@@ -30,6 +30,7 @@ import org.killbill.billing.plugin.coupon.listener.CouponListener;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.servlet.ApplyCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.CreateCouponServlet;
+import org.killbill.billing.plugin.coupon.servlet.GetAllCouponsServlet;
 import org.killbill.billing.plugin.coupon.servlet.GetCouponServlet;
 import org.killbill.killbill.osgi.libs.killbill.KillbillActivatorBase;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
@@ -66,6 +67,10 @@ public class CouponActivator extends KillbillActivatorBase {
         // Register Apply Coupon Servlet
         final ApplyCouponServlet applyCouponServlet = new ApplyCouponServlet(logService, couponPluginApi);
         registerServlet(context, applyCouponServlet, Constants.APPLY_COUPON_PATH);
+
+        // Register Get All Coupons Servlet
+        final GetAllCouponsServlet getAllCouponServlet = new GetAllCouponsServlet(logService, couponPluginApi);
+        registerServlet(context, getAllCouponServlet, Constants.GET_ALL_COUPON_PATH);
     }
 
     private void registerCouponPluginApi(final BundleContext context, final CouponPluginApi couponPluginApi) {

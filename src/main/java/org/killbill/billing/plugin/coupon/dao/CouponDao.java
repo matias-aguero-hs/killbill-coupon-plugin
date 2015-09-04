@@ -47,6 +47,11 @@ public class CouponDao extends PluginDao {
         this.logService = logService;
     }
 
+
+    // -----------------------------------------------------------------------------
+    //                              COUPON METHODS
+    // -----------------------------------------------------------------------------
+
     /**
      * Method to get a Coupon object by couponCode from the DB
      * @param couponCode
@@ -123,6 +128,50 @@ public class CouponDao extends PluginDao {
     }
 
     /**
+     * Method to get a list of Products associated with a Coupon from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public Result<CouponsProductsRecord> getProductsOfCoupon(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Products associated with a Coupon from the DB");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsProductsRecord>>() {
+                           @Override
+                           public Result<CouponsProductsRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_PRODUCTS)
+                                         .where(COUPONS_PRODUCTS.COUPON_CODE.equal(couponCode))
+                                         .fetch();
+                           }
+                       });
+    }
+
+
+    /**
+     * Method to get all Coupons object from the DB
+     * @return
+     * @throws SQLException
+     */
+    public List<CouponsRecord> getAllCoupons() throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Get all Coupons in the DB");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsRecord>>() {
+                           @Override
+                           public Result<CouponsRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS)
+                                         .fetch();
+                           }
+                       });
+    }
+
+
+    // -----------------------------------------------------------------------------
+    //                              APPLY COUPON METHODS
+    // -----------------------------------------------------------------------------
+
+    /**
      * Method to store an applied Coupon with its respective subscriptionId and accountId in the DB
      * @param couponCode
      * @param accountId
@@ -170,35 +219,17 @@ public class CouponDao extends PluginDao {
                        });
     }
 
-    /**
-     * Method to get a list of Products associated with a Coupon from the DB
-     * @param couponCode
-     * @return
-     * @throws SQLException
-     */
-    public Result<CouponsProductsRecord> getProductsOfCoupon(final String couponCode) throws SQLException {
-        logService.log(LogService.LOG_INFO, "Executing query to get a List of Products associated with a Coupon from the DB");
-        return execute(dataSource.getConnection(),
-                       new WithConnectionCallback<Result<CouponsProductsRecord>>() {
-                           @Override
-                           public Result<CouponsProductsRecord> withConnection(final Connection conn) throws SQLException {
-                               return DSL.using(conn, dialect, settings)
-                                         .selectFrom(COUPONS_PRODUCTS)
-                                         .where(COUPONS_PRODUCTS.COUPON_CODE.equal(couponCode))
-                                         .fetch();
-                           }
-                       });
-    }
+
 
     /**
      * Method to get a Coupon Applied object by couponCode and accountId
      * @param couponCode
-     * @param accountId
      * @param subscriptionId
+     * @param accountId
      * @return
      * @throws SQLException
      */
-    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID accountId, final UUID subscriptionId) throws SQLException {
+    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID subscriptionId, final UUID accountId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to get a Coupon Applied object by couponCode and accountId from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsAppliedRecord>() {

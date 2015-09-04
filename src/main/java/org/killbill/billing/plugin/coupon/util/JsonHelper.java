@@ -89,6 +89,12 @@ public class JsonHelper {
         return json;
     }
 
+    public static JSONObject buildCouponListJsonResponse(List<JSONObject> coupons) {
+        JSONObject json = new JSONObject();
+        json.put(Constants.COUPON_LIST, coupons);
+        return json;
+    }
+
     private static List<String> buildProductList(final List<CouponsProductsRecord> products) {
         List<String> productsAsString = new ArrayList<String>();
         for (CouponsProductsRecord product : products) {

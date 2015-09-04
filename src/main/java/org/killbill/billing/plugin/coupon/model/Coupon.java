@@ -19,7 +19,6 @@ public class Coupon {
     private DiscountTypeEnum discountType;
     private Double percentageDiscount;
     private UUID tenantId;
-    @JsonIgnore
     private List<String> products;
 
     public String getCouponCode() {
