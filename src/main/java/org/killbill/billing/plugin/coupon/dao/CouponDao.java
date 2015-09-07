@@ -133,7 +133,7 @@ public class CouponDao extends PluginDao {
      * @return
      * @throws SQLException
      */
-    public Result<CouponsProductsRecord> getProductsOfCoupon(final String couponCode) throws SQLException {
+    public List<CouponsProductsRecord> getProductsOfCoupon(final String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to get a List of Products associated with a Coupon from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<Result<CouponsProductsRecord>>() {
@@ -223,7 +223,7 @@ public class CouponDao extends PluginDao {
      * @return
      * @throws SQLException
      */
-    public Result<CouponsAppliedRecord> getCouponsAppliedByAccountId(final UUID accountId) throws SQLException {
+    public List<CouponsAppliedRecord> getCouponsAppliedByAccountId(final UUID accountId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<Result<CouponsAppliedRecord>>() {

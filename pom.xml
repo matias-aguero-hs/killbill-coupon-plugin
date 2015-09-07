@@ -381,6 +381,44 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <check>
+                        <!-- Per-class thresholds -->
+                        <!--<lineRate>90</lineRate>-->
+                        <!--<branchRate>50</branchRate>-->
+                        <!-- Project-wide thresholds -->
+                        <!--<totalLineRate>90</totalLineRate>-->
+                        <!--<totalBranchRate>50</totalBranchRate>-->
+                    </check>
+                    <instrumentation>
+                        <ignores>
+                            <ignore>org.killbill.billing.plugin.coupon.dao.gen.*</ignore>
+                            <ignore>org.killbill.billing.plugin.coupon.exception.*</ignore>
+                            <ignore>org.killbill.billing.plugin.coupon.core.*</ignore>
+                            <ignore>org.killbill.billing.plugin.coupon.model.*</ignore>
+                            <ignore>org.killbill.billing.plugin.coupon.util.*</ignore>
+                            <ignore>org.killbill.billing.plugin.coupon.model.Constants</ignore>
+                        </ignores>
+                        <excludes>
+                            <exclude>org/killbill/billing/plugin/coupon/dao/gen/**/*.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/dao/gen/**/*Test.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/exception/**/*.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/exception/**/*Test.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/core/**/*.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/core/**/*Test.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/model/**/*.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/model/**/*Test.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/util/**/*.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/util/**/*Test.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/model/Constants.class</exclude>
+                        </excludes>
+                    </instrumentation>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

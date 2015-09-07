@@ -121,6 +121,7 @@ public class CouponPluginApi {
      * @throws SQLException
      */
     public CouponsAppliedRecord getCouponAppliedBySubscription(final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get an Applied Coupon by Subscription Id");
         return dao.getCouponAppliedBySubscription(subscriptionId);
     }
 
@@ -130,7 +131,7 @@ public class CouponPluginApi {
      * @param accountId
      * @throws SQLException
      */
-    public void applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context)
+    public boolean applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context)
             throws SQLException, AccountApiException, SubscriptionApiException, CouponApiException {
 
         Account account = null;
@@ -170,7 +171,9 @@ public class CouponPluginApi {
         else {
             logService.log(LogService.LOG_ERROR, "There is no valid account ( " + accountId
                                                  + ") or subscription (" + subscriptionId + ").");
+            return false;
         }
+        return true;
     }
 
     /**
@@ -181,7 +184,7 @@ public class CouponPluginApi {
      * @throws CouponApiException
      */
     private void validateCoupon(final CouponsRecord coupon, final Account account, final Subscription subscription)
-            throws CouponApiException {
+            throws CouponApiException, SQLException {
 
         // check products
         List<CouponsProductsRecord> products = getProductsOfCoupon(coupon.getCouponCode());
@@ -197,7 +200,6 @@ public class CouponPluginApi {
             String error = "Coupon " + coupon.getCouponCode() + " cannot be applied to subscription " + subscription.getId();
             throw new CouponApiException(new Throwable(error), 0, error);
         }
-
     }
 
     /**
@@ -221,7 +223,7 @@ public class CouponPluginApi {
      * @param couponCode
      * @return
      */
-    public List<CouponsProductsRecord> getProductsOfCoupon(String couponCode) {
+    public List<CouponsProductsRecord> getProductsOfCoupon(String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to get a list of Products associated with a Coupon with code: " + couponCode);
         try {
             return dao.getProductsOfCoupon(couponCode);
