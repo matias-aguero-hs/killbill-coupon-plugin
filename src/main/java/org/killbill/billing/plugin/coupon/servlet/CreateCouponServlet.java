@@ -34,7 +34,7 @@ import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
-import org.killbill.billing.plugin.coupon.util.CouponContext;
+import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
@@ -65,11 +65,11 @@ public class CreateCouponServlet extends PluginServlet {
         logService.log(LogService.LOG_INFO, "Getting apiKey parameter from the HTTP Request");
         String apiKey = request.getHeader(Constants.X_KILLBILL_API_KEY);
 
-        CouponContext context = null;
+        CouponTenantContext context = null;
         try {
             if (!apiKey.isEmpty()) {
                 logService.log(LogService.LOG_INFO, "Creating Context using apiKey: " + apiKey);
-                context = new CouponContext(couponPluginApi.getTenantId(apiKey));
+                context = new CouponTenantContext(couponPluginApi.getTenantId(apiKey));
             }
         } catch (CouponApiException ce) {
             logService.log(LogService.LOG_ERROR, "Exception trying to Create the Context. Cause: " + ce.getMessage());

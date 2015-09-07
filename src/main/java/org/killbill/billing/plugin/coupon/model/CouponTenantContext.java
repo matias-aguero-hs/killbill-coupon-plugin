@@ -1,4 +1,4 @@
-package org.killbill.billing.plugin.coupon.util;
+package org.killbill.billing.plugin.coupon.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -10,11 +10,11 @@ import java.util.UUID;
 /**
  * Created by maguero on 01/09/15.
  */
-public class CouponContext implements TenantContext {
+public class CouponTenantContext implements TenantContext {
 
     private final UUID tenantId;
 
-    public CouponContext(final UUID tenantId) {
+    public CouponTenantContext(final UUID tenantId) {
         this.tenantId = tenantId;
     }
 
@@ -34,7 +34,7 @@ public class CouponContext implements TenantContext {
         if (obj.getClass() != getClass()) {
             return false;
         }
-        CouponContext rhs = (CouponContext) obj;
+        CouponTenantContext rhs = (CouponTenantContext) obj;
         return new EqualsBuilder()
                 .append(this.tenantId, rhs.tenantId)
                 .isEquals();

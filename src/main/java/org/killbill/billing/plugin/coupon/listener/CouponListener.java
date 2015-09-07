@@ -20,12 +20,9 @@ package org.killbill.billing.plugin.coupon.listener;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.killbill.billing.catalog.api.Currency;
 import org.killbill.billing.invoice.api.Invoice;
 import org.killbill.billing.invoice.api.InvoiceApiException;
 import org.killbill.billing.invoice.api.InvoiceItem;
@@ -38,7 +35,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
-import org.killbill.billing.plugin.coupon.util.CouponContext;
+import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
@@ -101,7 +98,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
         osgiKillbillAPI.getSecurityApi().login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
 
         // get invoice
-        Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponContext(tenantId));
+        Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponTenantContext(tenantId));
 
         // get coupon applied by subscription id
         UUID subscriptionId = getSubcriptionIdFromInvoice(invoice); // TODO verify

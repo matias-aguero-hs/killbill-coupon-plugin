@@ -53,7 +53,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
-import org.killbill.billing.plugin.coupon.util.CouponContext;
+import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
 import org.killbill.billing.tenant.api.TenantUserApi;
@@ -250,7 +250,7 @@ public class TestCouponPluginApi extends Mockito {
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
 
-        TenantContext tenantContext = new CouponContext(couponPluginApi.getTenantId("apiKey"));
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         couponPluginApi.createCoupon(new Coupon(), tenantContext);
     }
 
@@ -275,7 +275,7 @@ public class TestCouponPluginApi extends Mockito {
         when(dao.getCouponByCode(anyString())).thenReturn(coupon);
         when(dao.getProductsOfCoupon(anyString())).thenReturn(couponProductsList);
 
-        TenantContext tenantContext = new CouponContext(couponPluginApi.getTenantId("apiKey"));
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
 
         assertTrue(result);
@@ -294,7 +294,7 @@ public class TestCouponPluginApi extends Mockito {
         when(subscriptionApi.getSubscriptionForEntitlementId(any(UUID.class), any(TenantContext.class))).thenReturn(subscription);
         when(dao.getCouponByCode(anyString())).thenReturn(null);
 
-        TenantContext tenantContext = new CouponContext(couponPluginApi.getTenantId("apiKey"));
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
     }
 
@@ -305,7 +305,7 @@ public class TestCouponPluginApi extends Mockito {
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
         when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
 
-        TenantContext tenantContext = new CouponContext(couponPluginApi.getTenantId("apiKey"));
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), null, tenantContext);
 
         assertFalse(result);
@@ -318,7 +318,7 @@ public class TestCouponPluginApi extends Mockito {
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
         when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
 
-        TenantContext tenantContext = new CouponContext(couponPluginApi.getTenantId("apiKey"));
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), tenantContext);
 
         assertFalse(result);
@@ -354,7 +354,7 @@ public class TestCouponPluginApi extends Mockito {
         when(dao.getCouponByCode(anyString())).thenReturn(coupon);
         when(dao.getProductsOfCoupon(anyString())).thenReturn(couponProductsList);
 
-        TenantContext tenantContext = new CouponContext(couponPluginApi.getTenantId("apiKey"));
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
     }
 
