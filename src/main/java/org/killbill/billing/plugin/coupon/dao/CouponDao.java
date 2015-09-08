@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
@@ -184,6 +185,27 @@ public class CouponDao extends PluginDao {
                        });
     }
 
+    /**
+     * Method to deactivate a Coupon object by couponCode from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public void deactivateCouponByCode(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Deactivate a Coupon by couponCode in the DB");
+        execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Void>() {
+                           @Override
+                           public Void withConnection(final Connection conn) throws SQLException {
+                               DSL.using(conn, dialect, settings)
+                                       .update(COUPONS)
+                                       .set(COUPONS.IS_ACTIVE, Byte.valueOf(Constants.ACTIVE_FALSE))
+                                       .where(COUPONS.COUPON_CODE.equal(couponCode))
+                                       .execute();
+                               return null;
+                           }
+                       });
+    }
 
     // -----------------------------------------------------------------------------
     //                              APPLY COUPON METHODS

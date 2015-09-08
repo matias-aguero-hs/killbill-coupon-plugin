@@ -34,6 +34,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.tenant.api.Tenant;
@@ -68,6 +69,11 @@ public class CouponPluginApi {
     public CouponsRecord getCouponByCode(final String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to get a Coupon by couponCode");
         return dao.getCouponByCode(couponCode);
+    }
+
+    public void deactivateCouponByCode(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to deactivate a Coupon by couponCode");
+        dao.deactivateCouponByCode(couponCode);
     }
 
     public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
@@ -134,25 +140,31 @@ public class CouponPluginApi {
     public boolean applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context)
             throws SQLException, AccountApiException, SubscriptionApiException, CouponApiException {
 
+        // Get Coupon by Code from DB
+        logService.log(LogService.LOG_INFO, "Getting Coupon from the DB using couponCode: " + couponCode);
+        CouponsRecord coupon = getCouponByCode(couponCode);
+        if (null != coupon && coupon.getIsActive().equals(Byte.valueOf(Constants.ACTIVE_FALSE))) {
+            String error = "Coupon " + couponCode + " is not active and can't be applied";
+            logService.log(LogService.LOG_ERROR, error);
+            throw new CouponApiException(new Throwable(error), 0, error);
+        }
+
         Account account = null;
         Subscription subscription = null;
 
         logService.log(LogService.LOG_INFO, "Getting the Account User API from the OSGi Killbill API");
-
         if (null != accountId) {
             logService.log(LogService.LOG_INFO, "Getting the Account using the accountID: " + accountId);
             account = osgiKillbillAPI.getAccountUserApi().getAccountById(accountId, context);
         }
 
+        logService.log(LogService.LOG_INFO, "Getting the Subscription User API from the OSGi Killbill API");
         if (null != subscriptionId) {
-            logService.log(LogService.LOG_INFO, "Getting the Subscription using the accountID: " + subscriptionId);
+            logService.log(LogService.LOG_INFO, "Getting the Subscription using the subscriptionID: " + subscriptionId);
             subscription = osgiKillbillAPI.getSubscriptionApi().getSubscriptionForEntitlementId(subscriptionId, context);
         }
 
         if ((null != account) && (null != subscription)) {
-            // Get Coupon by Code from DB
-            logService.log(LogService.LOG_INFO, "Getting Coupon from the DB using couponCode: " + couponCode);
-            CouponsRecord coupon = getCouponByCode(couponCode);
             if (null != coupon) {
                 logService.log(LogService.LOG_INFO, "Validating if Coupon can be applied");
                 // validate if coupon can be applied

@@ -43,7 +43,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestCreateCouponServlet extends Mockito {
 
-    public static final String COUPON_TEST_CODE = "couponTestCode";
     public static final String TEST_API_KEY = "hootsuite";
     private CreateCouponServlet createCouponServlet;
     private HttpServletRequest request;
@@ -76,7 +75,7 @@ public class TestCreateCouponServlet extends Mockito {
 
         createCouponServlet.doPost(request, response);
 
-        assertTrue(stringWriter.toString().contains(COUPON_TEST_CODE));
+        assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
 
     @Test
@@ -165,8 +164,8 @@ public class TestCreateCouponServlet extends Mockito {
 
     private Coupon buildSuccessfulCoupon(UUID randomTenantId) {
         Coupon result = new Coupon();
-        result.setCouponCode(COUPON_TEST_CODE);
-        result.setCouponName("couponTestName");
+        result.setCouponCode(Constants.COUPON_TEST_CODE);
+        result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType(DiscountTypeEnum.percentage);
         result.setPercentageDiscount(20d);
         result.setTenantId(randomTenantId);
@@ -175,10 +174,11 @@ public class TestCreateCouponServlet extends Mockito {
 
     private CouponsRecord buildSuccessfulCouponRecord() {
         CouponsRecord result = new CouponsRecord();
-        result.setCouponCode(COUPON_TEST_CODE);
-        result.setCouponName("couponTestName");
+        result.setCouponCode(Constants.COUPON_TEST_CODE);
+        result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType("percentage");
         result.setPercentageDiscount(20d);
+        result.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
         result.setKbTenantId(UUID.randomUUID().toString());
         return result;
     }

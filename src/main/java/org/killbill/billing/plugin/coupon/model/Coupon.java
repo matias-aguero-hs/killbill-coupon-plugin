@@ -20,6 +20,7 @@ public class Coupon {
     private Double percentageDiscount;
     private UUID tenantId;
     private List<String> products;
+    private boolean active;
 
     public String getCouponCode() {
         return couponCode;
@@ -69,6 +70,14 @@ public class Coupon {
         this.products = products;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(final boolean active) {
+        this.active = active;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -88,6 +97,7 @@ public class Coupon {
                 .append(this.percentageDiscount, rhs.percentageDiscount)
                 .append(this.tenantId, rhs.tenantId)
                 .append(this.products, rhs.products)
+                .append(this.active, rhs.active)
                 .isEquals();
     }
 
@@ -100,6 +110,7 @@ public class Coupon {
                 .append(percentageDiscount)
                 .append(tenantId)
                 .append(products)
+                .append(active)
                 .toHashCode();
     }
 
@@ -112,6 +123,7 @@ public class Coupon {
                 .append("percentageDiscount", percentageDiscount)
                 .append("tenantId", tenantId)
                 .append("products", products)
+                .append("active", active)
                 .toString();
     }
 }

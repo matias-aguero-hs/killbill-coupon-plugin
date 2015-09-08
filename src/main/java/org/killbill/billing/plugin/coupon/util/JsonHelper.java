@@ -71,7 +71,15 @@ public class JsonHelper {
         jsonResponse.put(Constants.COUPON_NAME, coupon.getValue(COUPONS.COUPON_NAME));
         jsonResponse.put(Constants.DISCOUNT_TYPE, coupon.getValue(COUPONS.DISCOUNT_TYPE));
         jsonResponse.put(Constants.PERCENTAGE_DISCOUNT, coupon.getValue(COUPONS.PERCENTAGE_DISCOUNT));
+        Boolean isActive = coupon.getValue(COUPONS.IS_ACTIVE).equals(Byte.valueOf(Constants.ACTIVE_TRUE));
+        jsonResponse.put(Constants.IS_ACTIVE, isActive.toString());
         jsonResponse.put(Constants.TENANT_ID, coupon.getValue(COUPONS.KB_TENANT_ID));
+        return jsonResponse;
+    }
+
+    public static JSONObject buildCouponDeactivatedJsonResponse(CouponsRecord coupon) {
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put(Constants.INFO, "Coupon " + coupon.getValue(COUPONS.COUPON_CODE) + " has been successfully deactivated");
         return jsonResponse;
     }
 

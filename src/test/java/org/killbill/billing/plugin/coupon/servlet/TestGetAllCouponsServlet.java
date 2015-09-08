@@ -44,7 +44,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestGetAllCouponsServlet extends Mockito {
 
-    public static final String COUPON_TEST_CODE = "couponTestCode";
     private GetAllCouponsServlet getAllCouponsServlet;
     private HttpServletRequest request;
     private HttpServletResponse response;
@@ -72,7 +71,7 @@ public class TestGetAllCouponsServlet extends Mockito {
 
         getAllCouponsServlet.doGet(request, response);
 
-        assertTrue(stringWriter.toString().contains(COUPON_TEST_CODE));
+        assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
 
     @Test
@@ -117,10 +116,11 @@ public class TestGetAllCouponsServlet extends Mockito {
     private List<CouponsRecord> buildSuccessfulCouponRecordList() {
         List<CouponsRecord> result = new ArrayList<>();
         CouponsRecord couponsRecord = new CouponsRecord();
-        couponsRecord.setCouponCode(COUPON_TEST_CODE);
-        couponsRecord.setCouponName("couponTestName");
+        couponsRecord.setCouponCode(Constants.COUPON_TEST_CODE);
+        couponsRecord.setCouponName(Constants.COUPON_TEST_NAME);
         couponsRecord.setDiscountType("percentage");
         couponsRecord.setPercentageDiscount(20d);
+        couponsRecord.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
         couponsRecord.setKbTenantId(UUID.randomUUID().toString());
         result.add(couponsRecord);
         return result;

@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.mockito.Mockito;
 import org.osgi.service.log.LogService;
 
@@ -41,7 +42,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestGetAllCouponsAppliedServlet extends Mockito {
 
-    public static final String COUPON_TEST_CODE = "couponTestCode";
     private GetAllCouponsAppliedServlet getAllCouponsAppliedServlet;
     private HttpServletRequest request;
     private HttpServletResponse response;
@@ -68,7 +68,7 @@ public class TestGetAllCouponsAppliedServlet extends Mockito {
 
         getAllCouponsAppliedServlet.doGet(request, response);
 
-        assertTrue(stringWriter.toString().contains(COUPON_TEST_CODE));
+        assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class TestGetAllCouponsAppliedServlet extends Mockito {
     private List<CouponsAppliedRecord> buildSuccessfulCouponAppliedRecordList() {
         List<CouponsAppliedRecord> result = new ArrayList<>();
         CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
-        couponsAppliedRecord.setCouponCode(COUPON_TEST_CODE);
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_TEST_CODE);
         couponsAppliedRecord.setKbAccountId(UUID.randomUUID().toString());
         couponsAppliedRecord.setKbSubscriptionId(UUID.randomUUID().toString());
         couponsAppliedRecord.setKbTenantId(UUID.randomUUID().toString());

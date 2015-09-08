@@ -43,7 +43,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestGetCouponServlet extends Mockito {
 
-    public static final String COUPON_TEST_CODE = "couponTestCode";
     private GetCouponServlet getCouponServlet;
     private HttpServletRequest request;
     private HttpServletResponse response;
@@ -65,14 +64,14 @@ public class TestGetCouponServlet extends Mockito {
         PrintWriter writer = new PrintWriter(stringWriter);
         CouponsRecord couponRecord = buildSuccessfulCouponRecord();
 
-        when(request.getParameter(Constants.COUPON_CODE)).thenReturn(COUPON_TEST_CODE);
+        when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(couponRecord);
         when(couponPluginApi.getProductsOfCoupon(anyString())).thenReturn(new ArrayList());
         when(response.getWriter()).thenReturn(writer);
 
         getCouponServlet.doGet(request, response);
 
-        assertTrue(stringWriter.toString().contains(COUPON_TEST_CODE));
+        assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
 
     @Test
@@ -80,7 +79,7 @@ public class TestGetCouponServlet extends Mockito {
         StringWriter stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
 
-        when(request.getParameter(Constants.COUPON_CODE)).thenReturn(COUPON_TEST_CODE);
+        when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(null);
         when(couponPluginApi.getProductsOfCoupon(anyString())).thenReturn(new ArrayList());
         when(response.getWriter()).thenReturn(writer);
@@ -96,7 +95,7 @@ public class TestGetCouponServlet extends Mockito {
         PrintWriter writer = new PrintWriter(stringWriter);
 
         when(response.getWriter()).thenReturn(writer);
-        when(request.getParameter(Constants.COUPON_CODE)).thenReturn(COUPON_TEST_CODE);
+        when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponByCode(anyString())).thenThrow(SQLException.class);
 
         getCouponServlet.doGet(request, response);
@@ -119,10 +118,11 @@ public class TestGetCouponServlet extends Mockito {
 
     private CouponsRecord buildSuccessfulCouponRecord() {
         CouponsRecord result = new CouponsRecord();
-        result.setCouponCode(COUPON_TEST_CODE);
-        result.setCouponName("couponTestName");
+        result.setCouponCode(Constants.COUPON_TEST_CODE);
+        result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType("percentage");
         result.setPercentageDiscount(20d);
+        result.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
         result.setKbTenantId(UUID.randomUUID().toString());
         return result;
     }

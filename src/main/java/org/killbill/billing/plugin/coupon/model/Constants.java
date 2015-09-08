@@ -26,6 +26,7 @@ public class Constants {
     public static final String COUPON_NAME = "couponName";
     public static final String DISCOUNT_TYPE = "discountType";
     public static final String PERCENTAGE_DISCOUNT = "percentageDiscount";
+    public static final String IS_ACTIVE = "isActive";
     public static final String TENANT_ID = "tenantId";
     public static final String ACCOUNT_ID = "accountId";
     public static final String SUBSCRIPTION_ID = "subscriptionId";
@@ -36,10 +37,16 @@ public class Constants {
     public static final String APPLY_COUPON_PATH = "-applycoupon";
     public static final String GET_ALL_COUPON_PATH = "-getallcoupons";
     public static final String GET_ALL_COUPONS_APPLIED_PATH = "-getallcouponsapplied";
+    public static final String DEACTIVATE_COUPON_PATH = "-deactivatecoupon";
     public static final String ADMIN_USER = "admin";
     public static final String ADMIN_PASSWORD = "password";
     public static final String PRODUCTS = "products";
     public static final String COUPON_LIST = "coupons";
     public static final String COUPONS_APPLIED_LIST = "Coupons Applied";
-
+    public static final String INFO = "Info";
+    public static final String STOP_HONOURING_COUPON = "stopHonouringCoupon";
+    public static final String ACTIVE_TRUE = "1";
+    public static final String ACTIVE_FALSE = "0";
+    public static final String COUPON_TEST_CODE = "couponTestCode";
+    public static final String COUPON_TEST_NAME = "couponTestName";
 }

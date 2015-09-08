@@ -261,6 +261,7 @@ public class TestCouponPluginApi extends Mockito {
         Subscription subscription = buildMockSubscription();
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
+        coupon.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeName");
@@ -340,6 +341,7 @@ public class TestCouponPluginApi extends Mockito {
         Subscription subscription = buildMockSubscription();
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
+        coupon.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeOtherName");
