@@ -80,9 +80,9 @@ public class DeactivateCouponServlet extends PluginServlet {
                         buildResponse(response);
                     }
                     else {
-                        logService.log(LogService.LOG_ERROR, "Error. Coupon is already not active");
+                        logService.log(LogService.LOG_ERROR, "Error. Coupon is already inactive");
                         JSONObject errorMessage = new JSONObject();
-                        errorMessage.put("Error", "Coupon is already not active");
+                        errorMessage.put("Error", "Coupon is already inactive");
                         ServletHelper.writeResponseToJson(response, errorMessage.toString());
                         buildResponse(response);
                     }

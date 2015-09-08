@@ -360,6 +360,12 @@ public class TestCouponPluginApi extends Mockito {
         couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
     }
 
+    @Test(expected = SQLException.class)
+    public void testDeactivateCouponSQLException() throws Exception {
+        doThrow(new SQLException()).when(dao).deactivateCouponByCode(anyString());
+        couponPluginApi.deactivateCouponByCode(Constants.COUPON_CODE);
+    }
+
     private Subscription buildMockSubscription() {
         Subscription subscription = new Subscription() {
             @Override
