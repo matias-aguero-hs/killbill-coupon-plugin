@@ -100,23 +100,25 @@ public class CouponListener implements OSGIKillbillEventHandler {
         // get invoice
         Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponTenantContext(tenantId));
 
-        // get coupon applied by subscription id
-        UUID subscriptionId = getSubcriptionIdFromInvoice(invoice); // TODO verify
-        logService.log(LogService.LOG_INFO, "getting coupons applied for account " + accountId);
-        CouponsAppliedRecord cApplied = couponPluginApi.getCouponAppliedBySubscription(subscriptionId);
-
-        if (cApplied == null) {
-            logService.log(LogService.LOG_INFO, "Subscription " + subscriptionId + " does not have active coupon applied.");
-            return;
-        }
-
         for (InvoiceItem item : invoice.getInvoiceItems()) {
             if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())) {
+
+                // TODO validate phase plan (EVERGREEN) ?
+                // item.getPhaseName().contains("evergreen");
 
                 logService.log(LogService.LOG_INFO, "RECURRING item " + item.getId() + " found for invoice " + invoice.getId());
 
                 // TODO refactor when implement coupon duration
-                // TODO validate phase plan (EVERGREEN) ?
+
+                // get coupon applied by subscription id
+                UUID subscriptionId = item.getSubscriptionId();
+                logService.log(LogService.LOG_INFO, "getting coupons applied for account " + accountId);
+                CouponsAppliedRecord cApplied = couponPluginApi.getCouponAppliedBySubscription(subscriptionId);
+
+                if (cApplied == null) {
+                    logService.log(LogService.LOG_INFO, "Subscription " + subscriptionId + " does not have active coupon applied.");
+                    return;
+                }
 
                 BigDecimal discountAmount = calculateDiscountAmount(item, cApplied);
 
@@ -132,17 +134,6 @@ public class CouponListener implements OSGIKillbillEventHandler {
             }
         }
 
-    }
-
-    /**
-     * Get the subscription id from an invoice
-     *
-     * @param invoice
-     * @return
-     */
-    private UUID getSubcriptionIdFromInvoice(final Invoice invoice) {
-        // TODO verify this code
-        return invoice.getInvoiceItems().get(0).getSubscriptionId();
     }
 
     /**
