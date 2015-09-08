@@ -7,8 +7,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * Created by maguero on 31/08/15.
  */
@@ -21,6 +19,8 @@ public class Coupon {
     private UUID tenantId;
     private List<String> products;
     private boolean active;
+    private DurationTypeEnum duration;
+    private Integer numberOfMonths;
 
     public String getCouponCode() {
         return couponCode;
@@ -78,6 +78,22 @@ public class Coupon {
         this.active = active;
     }
 
+    public DurationTypeEnum getDuration() {
+        return duration;
+    }
+
+    public void setDuration(final DurationTypeEnum duration) {
+        this.duration = duration;
+    }
+
+    public Integer getNumberOfMonths() {
+        return numberOfMonths;
+    }
+
+    public void setNumberOfMonths(final Integer numberOfMonths) {
+        this.numberOfMonths = numberOfMonths;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -98,6 +114,8 @@ public class Coupon {
                 .append(this.tenantId, rhs.tenantId)
                 .append(this.products, rhs.products)
                 .append(this.active, rhs.active)
+                .append(this.duration, rhs.duration)
+                .append(this.numberOfMonths, rhs.numberOfMonths)
                 .isEquals();
     }
 
@@ -111,6 +129,8 @@ public class Coupon {
                 .append(tenantId)
                 .append(products)
                 .append(active)
+                .append(duration)
+                .append(numberOfMonths)
                 .toHashCode();
     }
 
@@ -124,6 +144,8 @@ public class Coupon {
                 .append("tenantId", tenantId)
                 .append("products", products)
                 .append("active", active)
+                .append("duration", duration)
+                .append("numberOfMonths", numberOfMonths)
                 .toString();
     }
 }

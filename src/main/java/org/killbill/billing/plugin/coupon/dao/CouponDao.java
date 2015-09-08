@@ -31,6 +31,7 @@ import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.plugin.dao.PluginDao;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.osgi.service.log.LogService;
@@ -91,11 +92,15 @@ public class CouponDao extends PluginDao {
                                        COUPONS.COUPON_CODE,
                                        COUPONS.COUPON_NAME,
                                        COUPONS.DISCOUNT_TYPE,
+                                       COUPONS.DURATION,
+                                       COUPONS.NUMBER_MONTHS,
                                        COUPONS.PERCENTAGE_DISCOUNT,
                                        COUPONS.KB_TENANT_ID)
                            .values(coupon.getCouponCode(),
                                    coupon.getCouponName(),
                                    coupon.getDiscountType().toString(),
+                                   coupon.getDuration().toString(),
+                                   (coupon.getDuration().toString().equals(DurationTypeEnum.multi_month.toString())) ? coupon.getNumberOfMonths() : 0,
                                    coupon.getPercentageDiscount(),
                                    context.getTenantId().toString())
                            .execute();

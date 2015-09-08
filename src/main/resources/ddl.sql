@@ -8,6 +8,8 @@ CREATE TABLE coupons (
   discount_type VARCHAR(15) NOT NULL,
   percentage_discount FLOAT NOT NULL DEFAULT 0,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
+  duration VARCHAR(15) NOT NULL,
+  number_months int(3) DEFAULT 0,
   kb_tenant_id char(36) not null,
   PRIMARY KEY(record_id)
 ) /*! CHARACTER SET utf8 COLLATE utf8_bin */;

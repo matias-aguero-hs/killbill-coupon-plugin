@@ -121,6 +121,7 @@ public class TestGetAllCouponsServlet extends Mockito {
         couponsRecord.setDiscountType("percentage");
         couponsRecord.setPercentageDiscount(20d);
         couponsRecord.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        couponsRecord.setDuration("forever");
         couponsRecord.setKbTenantId(UUID.randomUUID().toString());
         result.add(couponsRecord);
         return result;

@@ -8,19 +8,18 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONObject;
-import org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.osgi.service.log.LogService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
-import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS;
 
 /**
  * Created by maguero on 01/09/15.
@@ -73,6 +72,10 @@ public class JsonHelper {
         jsonResponse.put(Constants.PERCENTAGE_DISCOUNT, coupon.getValue(COUPONS.PERCENTAGE_DISCOUNT));
         Boolean isActive = coupon.getValue(COUPONS.IS_ACTIVE).equals(Byte.valueOf(Constants.ACTIVE_TRUE));
         jsonResponse.put(Constants.IS_ACTIVE, isActive.toString());
+        jsonResponse.put(Constants.DURATION, coupon.getValue(COUPONS.DURATION));
+        if (coupon.getValue(COUPONS.DURATION).toString().equals(DurationTypeEnum.multi_month.toString())) {
+            jsonResponse.put(Constants.NUMBER_MONTHS, coupon.getValue(COUPONS.NUMBER_MONTHS));
+        }
         jsonResponse.put(Constants.TENANT_ID, coupon.getValue(COUPONS.KB_TENANT_ID));
         return jsonResponse;
     }

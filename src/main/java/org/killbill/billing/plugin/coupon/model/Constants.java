@@ -27,6 +27,8 @@ public class Constants {
     public static final String DISCOUNT_TYPE = "discountType";
     public static final String PERCENTAGE_DISCOUNT = "percentageDiscount";
     public static final String IS_ACTIVE = "isActive";
+    public static final String DURATION = "duration";
+    public static final String NUMBER_MONTHS = "numberOfMonths";
     public static final String TENANT_ID = "tenantId";
     public static final String ACCOUNT_ID = "accountId";
     public static final String SUBSCRIPTION_ID = "subscriptionId";
