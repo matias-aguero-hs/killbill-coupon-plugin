@@ -46,6 +46,7 @@ import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
 import org.killbill.billing.entitlement.api.SubscriptionEvent;
 import org.killbill.billing.entitlement.api.SubscriptionEventType;
+import org.killbill.billing.payment.api.PluginProperty;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
@@ -598,42 +599,42 @@ public class TestCouponPluginApi extends Mockito {
             }
 
             @Override
-            public Entitlement cancelEntitlementWithDate(final LocalDate localDate, final boolean b, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement cancelEntitlementWithDate(final LocalDate effectiveDate, final boolean overrideBillingEffectiveDate, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
             @Override
-            public Entitlement cancelEntitlementWithPolicy(final EntitlementActionPolicy entitlementActionPolicy, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement cancelEntitlementWithPolicy(final EntitlementActionPolicy policy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
             @Override
-            public Entitlement cancelEntitlementWithDateOverrideBillingPolicy(final LocalDate localDate, final BillingActionPolicy billingActionPolicy, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement cancelEntitlementWithDateOverrideBillingPolicy(final LocalDate effectiveDate, final BillingActionPolicy billingPolicy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
             @Override
-            public Entitlement cancelEntitlementWithPolicyOverrideBillingPolicy(final EntitlementActionPolicy entitlementActionPolicy, final BillingActionPolicy billingActionPolicy, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement cancelEntitlementWithPolicyOverrideBillingPolicy(final EntitlementActionPolicy policy, final BillingActionPolicy billingPolicy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
             @Override
-            public void uncancelEntitlement(final CallContext callContext) throws EntitlementApiException {
+            public void uncancelEntitlement(final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
 
             }
 
             @Override
-            public Entitlement changePlan(final String s, final BillingPeriod billingPeriod, final String s1, final List<PlanPhasePriceOverride> list, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement changePlan(final String productName, final BillingPeriod billingPeriod, final String priceList, final List<PlanPhasePriceOverride> overrides, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
             @Override
-            public Entitlement changePlanWithDate(final String s, final BillingPeriod billingPeriod, final String s1, final List<PlanPhasePriceOverride> list, final LocalDate localDate, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement changePlanWithDate(final String productName, final BillingPeriod billingPeriod, final String priceList, final List<PlanPhasePriceOverride> overrides, final LocalDate effectiveDate, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
             @Override
-            public Entitlement changePlanOverrideBillingPolicy(final String s, final BillingPeriod billingPeriod, final String s1, final List<PlanPhasePriceOverride> list, final LocalDate localDate, final BillingActionPolicy billingActionPolicy, final CallContext callContext) throws EntitlementApiException {
+            public Entitlement changePlanOverrideBillingPolicy(final String productName, final BillingPeriod billingPeriod, final String priceList, final List<PlanPhasePriceOverride> overrides, final LocalDate effectiveDate, final BillingActionPolicy billingPolicy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
                 return null;
             }
 
