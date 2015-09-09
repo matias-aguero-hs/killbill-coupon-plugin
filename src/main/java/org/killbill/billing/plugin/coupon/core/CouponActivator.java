@@ -23,7 +23,9 @@ import java.util.Hashtable;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
+import org.killbill.billing.entitlement.plugin.api.EntitlementPluginApi;
 import org.killbill.billing.osgi.api.OSGIPluginProperties;
+import org.killbill.billing.plugin.coupon.api.CouponEntitlementPluginApi;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.listener.CouponListener;
@@ -53,6 +55,11 @@ public class CouponActivator extends KillbillActivatorBase {
         // Register Plugin API
         final CouponPluginApi couponPluginApi = new CouponPluginApi(logService, dao, killbillAPI);
         registerCouponPluginApi(context, couponPluginApi);
+
+        // register a CouponEntitlementPluginApi
+        final EntitlementPluginApi entitlementPluginApi = new CouponEntitlementPluginApi(configProperties.getProperties(),
+                                                                                         killbillAPI, logService, couponPluginApi);
+        registerEntitlementPluginApi(context, entitlementPluginApi);
 
         // Register an event listener
         couponListener = new CouponListener(logService, killbillAPI, couponPluginApi);
@@ -103,6 +110,12 @@ public class CouponActivator extends KillbillActivatorBase {
         final Hashtable<String, String> props = new Hashtable<String, String>();
         props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, Constants.PLUGIN_NAME + subPath);
         registrar.registerService(context, Servlet.class, servlet, props);
+    }
+
+    private void registerEntitlementPluginApi(final BundleContext context, final EntitlementPluginApi api) {
+        final Hashtable<String, String> props = new Hashtable<String, String>();
+        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, Constants.PLUGIN_NAME);
+        registrar.registerService(context, EntitlementPluginApi.class, api, props);
     }
 
 }
