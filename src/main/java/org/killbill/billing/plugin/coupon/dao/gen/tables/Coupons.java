@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord> {
 
-	private static final long serialVersionUID = -1431407803;
+	private static final long serialVersionUID = 1399803532;
 
 	/**
 	 * The reference instance of <code>killbill.coupons</code>
@@ -67,9 +67,19 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> DURATION = createField("duration", org.jooq.impl.SQLDataType.VARCHAR.length(15).nullable(false), this, "");
 
 	/**
-	 * The column <code>killbill.coupons.number_months</code>.
+	 * The column <code>killbill.coupons.number_of_invoices</code>.
 	 */
-	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Integer> NUMBER_MONTHS = createField("number_months", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "");
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Integer> NUMBER_OF_INVOICES = createField("number_of_invoices", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "");
+
+	/**
+	 * The column <code>killbill.coupons.start_date</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.sql.Date> START_DATE = createField("start_date", org.jooq.impl.SQLDataType.DATE.nullable(false), this, "");
+
+	/**
+	 * The column <code>killbill.coupons.expiration_date</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.sql.Date> EXPIRATION_DATE = createField("expiration_date", org.jooq.impl.SQLDataType.DATE, this, "");
 
 	/**
 	 * The column <code>killbill.coupons.kb_tenant_id</code>.

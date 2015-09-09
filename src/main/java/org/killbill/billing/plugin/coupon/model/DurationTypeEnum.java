@@ -22,6 +22,6 @@ package org.killbill.billing.plugin.coupon.model;
  */
 public enum DurationTypeEnum {
     once,
-    forever,
-    multi_month;
+    multiple,
+    forever;
 }

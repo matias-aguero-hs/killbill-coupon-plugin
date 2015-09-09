@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
-import org.killbill.billing.account.api.AccountUserApi;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
@@ -74,6 +73,11 @@ public class CouponPluginApi {
     public void deactivateCouponByCode(final String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to deactivate a Coupon by couponCode");
         dao.deactivateCouponByCode(couponCode);
+    }
+
+    public void deactivateApplicationsOfCoupon(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to deactivate all the Applications of a Coupon by couponCode");
+        dao.deactivateApplicationsOfCoupon(couponCode);
     }
 
     public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
@@ -143,7 +147,7 @@ public class CouponPluginApi {
         // Get Coupon by Code from DB
         logService.log(LogService.LOG_INFO, "Getting Coupon from the DB using couponCode: " + couponCode);
         CouponsRecord coupon = getCouponByCode(couponCode);
-        if (null != coupon && coupon.getIsActive().equals(Byte.valueOf(Constants.ACTIVE_FALSE))) {
+        if (null != coupon && coupon.getIsActive().equals(Byte.valueOf(Constants.BYTE_FALSE))) {
             String error = "Coupon " + couponCode + " is not active and can't be applied";
             logService.log(LogService.LOG_ERROR, error);
             throw new CouponApiException(new Throwable(error), 0, error);

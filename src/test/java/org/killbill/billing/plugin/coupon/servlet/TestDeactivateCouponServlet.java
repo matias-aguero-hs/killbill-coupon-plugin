@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.servlet.ServletException;
@@ -119,7 +118,7 @@ public class TestDeactivateCouponServlet extends Mockito {
         StringWriter stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
         CouponsRecord couponRecord = buildSuccessfulCouponRecord();
-        couponRecord.setIsActive(Byte.valueOf(Constants.ACTIVE_FALSE));
+        couponRecord.setIsActive(Byte.valueOf(Constants.BYTE_FALSE));
 
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(couponRecord);
@@ -136,7 +135,7 @@ public class TestDeactivateCouponServlet extends Mockito {
         result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType("percentage");
         result.setPercentageDiscount(20d);
-        result.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        result.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
         result.setKbTenantId(UUID.randomUUID().toString());
         return result;
     }

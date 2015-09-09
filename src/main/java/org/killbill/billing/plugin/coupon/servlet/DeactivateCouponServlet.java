@@ -19,7 +19,6 @@ package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
-import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
@@ -61,9 +59,9 @@ public class DeactivateCouponServlet extends PluginServlet {
         logService.log(LogService.LOG_INFO, "Getting couponCode from the Parameters of the Request");
         String couponCode = request.getParameter(Constants.COUPON_CODE);
 
-        //TODO: refactor to inmediately stop all the discounts if the coupon is applied to any account or subscription
         logService.log(LogService.LOG_INFO, "Getting stopHonouringCoupon from the Parameters of the Request");
-        boolean stopHonouringCoupon = Boolean.valueOf(request.getParameter(Constants.STOP_HONOURING_COUPON));
+        String stopHonouring = request.getParameter(Constants.STOP_HONOURING);
+        boolean stopHonouringCoupon = (null != stopHonouring && !stopHonouring.isEmpty() && stopHonouring.equalsIgnoreCase("true"));
 
         if (null != couponCode && !couponCode.isEmpty()) {
             try {
@@ -71,8 +69,13 @@ public class DeactivateCouponServlet extends PluginServlet {
                 CouponsRecord coupon = couponPluginApi.getCouponByCode(couponCode);
 
                 if (null != coupon) {
-                    if (coupon.getIsActive().equals(Byte.valueOf(Constants.ACTIVE_TRUE))) {
+                    if (coupon.getIsActive().equals(Byte.valueOf(Constants.BYTE_TRUE))) {
                         couponPluginApi.deactivateCouponByCode(couponCode);
+                        if (stopHonouringCoupon) {
+                            //inmediately stop all the discounts if the coupon is applied to any account or subscription
+                            couponPluginApi.deactivateApplicationsOfCoupon(couponCode);
+                        }
+
                         logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response");
                         JSONObject jsonResponse = JsonHelper.buildCouponDeactivatedJsonResponse(coupon);
                         logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");

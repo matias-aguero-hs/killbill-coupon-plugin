@@ -19,6 +19,7 @@ package org.killbill.billing.plugin.coupon.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -92,16 +93,20 @@ public class CouponDao extends PluginDao {
                                        COUPONS.COUPON_CODE,
                                        COUPONS.COUPON_NAME,
                                        COUPONS.DISCOUNT_TYPE,
-                                       COUPONS.DURATION,
-                                       COUPONS.NUMBER_MONTHS,
                                        COUPONS.PERCENTAGE_DISCOUNT,
+                                       COUPONS.DURATION,
+                                       COUPONS.NUMBER_OF_INVOICES,
+                                       COUPONS.START_DATE,
+                                       COUPONS.EXPIRATION_DATE,
                                        COUPONS.KB_TENANT_ID)
                            .values(coupon.getCouponCode(),
                                    coupon.getCouponName(),
                                    coupon.getDiscountType().toString(),
-                                   coupon.getDuration().toString(),
-                                   (coupon.getDuration().toString().equals(DurationTypeEnum.multi_month.toString())) ? coupon.getNumberOfMonths() : 0,
                                    coupon.getPercentageDiscount(),
+                                   coupon.getDuration().toString(),
+                                   (coupon.getDuration().toString().equals(DurationTypeEnum.multiple.toString())) ? coupon.getNumberOfInvoices() : 0,
+                                   coupon.getStartDate(),
+                                   coupon.getExpirationDate(),
                                    context.getTenantId().toString())
                            .execute();
                         return null;
@@ -199,17 +204,42 @@ public class CouponDao extends PluginDao {
     public void deactivateCouponByCode(final String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to Deactivate a Coupon by couponCode in the DB");
         execute(dataSource.getConnection(),
-                       new WithConnectionCallback<Void>() {
-                           @Override
-                           public Void withConnection(final Connection conn) throws SQLException {
-                               DSL.using(conn, dialect, settings)
-                                       .update(COUPONS)
-                                       .set(COUPONS.IS_ACTIVE, Byte.valueOf(Constants.ACTIVE_FALSE))
-                                       .where(COUPONS.COUPON_CODE.equal(couponCode))
-                                       .execute();
-                               return null;
-                           }
-                       });
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .update(COUPONS)
+                           .set(COUPONS.IS_ACTIVE, Byte.valueOf(Constants.BYTE_FALSE))
+                           .where(COUPONS.COUPON_CODE.equal(couponCode))
+                           .execute();
+                        return null;
+                    }
+                });
+    }
+
+    /**
+     * Method to deactivate all the Applications of a Coupon object by couponCode from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public void deactivateApplicationsOfCoupon(final String couponCode) throws SQLException {
+        String notes = "Coupon deactivated on " + new Date();
+        logService.log(LogService.LOG_INFO, "Executing query to Deactivate all the Applications of a Coupon by couponCode in the DB");
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .update(COUPONS_APPLIED)
+                           .set(COUPONS_APPLIED.IS_ACTIVE, Byte.valueOf(Constants.BYTE_FALSE))
+                           .set(COUPONS_APPLIED.NOTES, notes)
+                           .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
+                           .and(COUPONS_APPLIED.IS_ACTIVE.equal(Byte.valueOf(Constants.BYTE_TRUE)))
+                           .execute();
+                        return null;
+                    }
+                });
     }
 
     // -----------------------------------------------------------------------------

@@ -262,7 +262,7 @@ public class TestCouponPluginApi extends Mockito {
         Subscription subscription = buildMockSubscription();
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
-        coupon.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeName");
@@ -342,7 +342,7 @@ public class TestCouponPluginApi extends Mockito {
         Subscription subscription = buildMockSubscription();
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
-        coupon.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeOtherName");
@@ -365,6 +365,12 @@ public class TestCouponPluginApi extends Mockito {
     public void testDeactivateCouponSQLException() throws Exception {
         doThrow(new SQLException()).when(dao).deactivateCouponByCode(anyString());
         couponPluginApi.deactivateCouponByCode(Constants.COUPON_CODE);
+    }
+
+    @Test(expected = SQLException.class)
+    public void testDeactivateApplicationsOfCouponSQLException() throws Exception {
+        doThrow(new SQLException()).when(dao).deactivateApplicationsOfCoupon(anyString());
+        couponPluginApi.deactivateApplicationsOfCoupon(Constants.COUPON_CODE);
     }
 
     private Subscription buildMockSubscription() {

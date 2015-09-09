@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class CouponsApplied extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord> {
 
-	private static final long serialVersionUID = -1301383047;
+	private static final long serialVersionUID = -979507167;
 
 	/**
 	 * The reference instance of <code>killbill.coupons_applied</code>
@@ -40,6 +40,26 @@ public class CouponsApplied extends org.jooq.impl.TableImpl<org.killbill.billing
 	 * The column <code>killbill.coupons_applied.coupon_code</code>.
 	 */
 	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.lang.String> COUPON_CODE = createField("coupon_code", org.jooq.impl.SQLDataType.VARCHAR.length(36).nullable(false), this, "");
+
+	/**
+	 * The column <code>killbill.coupons_applied.is_active</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.lang.Byte> IS_ACTIVE = createField("is_active", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>killbill.coupons_applied.created_date</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.sql.Date> CREATED_DATE = createField("created_date", org.jooq.impl.SQLDataType.DATE.nullable(false), this, "");
+
+	/**
+	 * The column <code>killbill.coupons_applied.number_of_invoices</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.lang.Integer> NUMBER_OF_INVOICES = createField("number_of_invoices", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "");
+
+	/**
+	 * The column <code>killbill.coupons_applied.notes</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord, java.lang.String> NOTES = createField("notes", org.jooq.impl.SQLDataType.VARCHAR.length(250), this, "");
 
 	/**
 	 * The column <code>killbill.coupons_applied.kb_subscription_id</code>.

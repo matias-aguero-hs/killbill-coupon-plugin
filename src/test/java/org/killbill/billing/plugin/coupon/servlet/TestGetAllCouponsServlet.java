@@ -17,7 +17,6 @@
 
 package org.killbill.billing.plugin.coupon.servlet;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -120,7 +118,7 @@ public class TestGetAllCouponsServlet extends Mockito {
         couponsRecord.setCouponName(Constants.COUPON_TEST_NAME);
         couponsRecord.setDiscountType("percentage");
         couponsRecord.setPercentageDiscount(20d);
-        couponsRecord.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        couponsRecord.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
         couponsRecord.setDuration("forever");
         couponsRecord.setKbTenantId(UUID.randomUUID().toString());
         result.add(couponsRecord);

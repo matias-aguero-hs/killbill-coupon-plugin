@@ -9,7 +9,9 @@ CREATE TABLE coupons (
   percentage_discount FLOAT NOT NULL DEFAULT 0,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   duration VARCHAR(15) NOT NULL,
-  number_months int(3) DEFAULT 0,
+  number_of_invoices int(3) DEFAULT 0,
+  start_date DATE NOT NULL,
+  expiration_date DATE,
   kb_tenant_id char(36) not null,
   PRIMARY KEY(record_id)
 ) /*! CHARACTER SET utf8 COLLATE utf8_bin */;
@@ -20,6 +22,10 @@ DROP TABLE IF EXISTS coupons_applied;
 CREATE TABLE coupons_applied (
   record_id int(11) unsigned not null auto_increment,
   coupon_code varchar(36) NOT NULL,
+  is_active TINYINT(1) NOT NULL DEFAULT 1,
+  created_date DATE NOT NULL,
+  number_of_invoices int(3) DEFAULT 0,
+  notes VARCHAR(250),
   kb_subscription_id char(36) not null,
   kb_account_id char(36) not null,
   kb_tenant_id char(36) not null,

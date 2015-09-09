@@ -1,5 +1,6 @@
 package org.killbill.billing.plugin.coupon.model;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,11 +17,13 @@ public class Coupon {
     private String couponName;
     private DiscountTypeEnum discountType;
     private Double percentageDiscount;
-    private UUID tenantId;
-    private List<String> products;
     private boolean active;
     private DurationTypeEnum duration;
-    private Integer numberOfMonths;
+    private Integer numberOfInvoices;
+    private Date startDate;
+    private Date expirationDate;
+    private List<String> products;
+    private UUID tenantId;
 
     public String getCouponCode() {
         return couponCode;
@@ -86,12 +89,28 @@ public class Coupon {
         this.duration = duration;
     }
 
-    public Integer getNumberOfMonths() {
-        return numberOfMonths;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setNumberOfMonths(final Integer numberOfMonths) {
-        this.numberOfMonths = numberOfMonths;
+    public void setStartDate(final Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(final Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public Integer getNumberOfInvoices() {
+        return numberOfInvoices;
+    }
+
+    public void setNumberOfInvoices(final Integer numberOfInvoices) {
+        this.numberOfInvoices = numberOfInvoices;
     }
 
     @Override
@@ -111,11 +130,13 @@ public class Coupon {
                 .append(this.couponName, rhs.couponName)
                 .append(this.discountType, rhs.discountType)
                 .append(this.percentageDiscount, rhs.percentageDiscount)
-                .append(this.tenantId, rhs.tenantId)
-                .append(this.products, rhs.products)
                 .append(this.active, rhs.active)
                 .append(this.duration, rhs.duration)
-                .append(this.numberOfMonths, rhs.numberOfMonths)
+                .append(this.numberOfInvoices, rhs.numberOfInvoices)
+                .append(this.startDate, rhs.startDate)
+                .append(this.expirationDate, rhs.expirationDate)
+                .append(this.products, rhs.products)
+                .append(this.tenantId, rhs.tenantId)
                 .isEquals();
     }
 
@@ -126,11 +147,13 @@ public class Coupon {
                 .append(couponName)
                 .append(discountType)
                 .append(percentageDiscount)
-                .append(tenantId)
-                .append(products)
                 .append(active)
                 .append(duration)
-                .append(numberOfMonths)
+                .append(numberOfInvoices)
+                .append(startDate)
+                .append(expirationDate)
+                .append(products)
+                .append(tenantId)
                 .toHashCode();
     }
 
@@ -141,11 +164,13 @@ public class Coupon {
                 .append("couponName", couponName)
                 .append("discountType", discountType)
                 .append("percentageDiscount", percentageDiscount)
-                .append("tenantId", tenantId)
-                .append("products", products)
                 .append("active", active)
                 .append("duration", duration)
-                .append("numberOfMonths", numberOfMonths)
+                .append("numberOfInvoices", numberOfInvoices)
+                .append("startDate", startDate)
+                .append("expirationDate", expirationDate)
+                .append("products", products)
+                .append("tenantId", tenantId)
                 .toString();
     }
 }

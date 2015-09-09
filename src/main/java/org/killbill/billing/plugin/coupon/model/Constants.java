@@ -28,7 +28,10 @@ public class Constants {
     public static final String PERCENTAGE_DISCOUNT = "percentageDiscount";
     public static final String IS_ACTIVE = "isActive";
     public static final String DURATION = "duration";
-    public static final String NUMBER_MONTHS = "numberOfMonths";
+    public static final String NUMBER_OF_INVOICES = "numberOfInvoices";
+    public static final String START_DATE = "startDate";
+    public static final String EXPIRATION_DATE = "expirationDate";
+    public static final String STOP_HONOURING = "stopHonouring";
     public static final String TENANT_ID = "tenantId";
     public static final String ACCOUNT_ID = "accountId";
     public static final String SUBSCRIPTION_ID = "subscriptionId";
@@ -46,9 +49,8 @@ public class Constants {
     public static final String COUPON_LIST = "coupons";
     public static final String COUPONS_APPLIED_LIST = "Coupons Applied";
     public static final String INFO = "Info";
-    public static final String STOP_HONOURING_COUPON = "stopHonouringCoupon";
-    public static final String ACTIVE_TRUE = "1";
-    public static final String ACTIVE_FALSE = "0";
+    public static final String BYTE_TRUE = "1";
+    public static final String BYTE_FALSE = "0";
     public static final String COUPON_TEST_CODE = "couponTestCode";
     public static final String COUPON_TEST_NAME = "couponTestName";
 }

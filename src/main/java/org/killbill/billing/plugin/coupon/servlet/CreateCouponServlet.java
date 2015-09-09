@@ -18,7 +18,9 @@
 package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -33,8 +35,9 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
-import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
+import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
@@ -87,7 +90,8 @@ public class CreateCouponServlet extends PluginServlet {
             if (null == coupon || (null == coupon.getCouponCode() || coupon.getCouponCode().isEmpty())
                     || (null == coupon.getCouponName() || coupon.getCouponName().isEmpty())
                     || (null == coupon.getDiscountType())
-                    || (null == coupon.getPercentageDiscount())) {
+                    || (null == coupon.getPercentageDiscount())
+                    || (null == coupon.getDuration())) {
                 throw new CouponApiException(new Throwable("Exception during generation of the Object from JSON. Missing or invalid required parameters."), 0, "Exception during generation of the Object from JSON. Missing or invalid required parameters.");
             }
             else {
@@ -99,7 +103,21 @@ public class CreateCouponServlet extends PluginServlet {
                     ServletHelper.writeResponseToJson(response, errorMessage.toString());
                     buildResponse(response);
                 }
+                else if (coupon.getDuration().equals(DurationTypeEnum.multiple)
+                        && (null == coupon.getNumberOfInvoices() || coupon.getNumberOfInvoices() < 1)) {
+                    logService.log(LogService.LOG_ERROR, "Error. The number of Invoices affected must be greater than 0 if the Duration is 'multiple'");
+                    JSONObject errorMessage = new JSONObject();
+                    errorMessage.put("Error", "Must specify the number of Invoices affected if the Duration is 'multiple'");
+                    ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                    buildResponse(response);
+                }
                 else {
+                    // if not specified start date, use current date
+                    if (null == coupon.getStartDate()) {
+                        Calendar c = Calendar.getInstance();
+                        coupon.setStartDate(new Date(c.getTimeInMillis()));
+                    }
+
                     logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to Create a new Coupon");
                     couponPluginApi.createCoupon(coupon, context);
 

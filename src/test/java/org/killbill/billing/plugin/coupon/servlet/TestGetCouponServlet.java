@@ -122,7 +122,7 @@ public class TestGetCouponServlet extends Mockito {
         result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType("percentage");
         result.setPercentageDiscount(20d);
-        result.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        result.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
         result.setDuration("forever");
         result.setKbTenantId(UUID.randomUUID().toString());
         return result;

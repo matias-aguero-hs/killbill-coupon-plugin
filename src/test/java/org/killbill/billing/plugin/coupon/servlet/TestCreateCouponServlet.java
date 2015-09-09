@@ -19,7 +19,10 @@ package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +36,7 @@ import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.mockito.Mockito;
 import org.osgi.service.log.LogService;
 
@@ -168,6 +172,11 @@ public class TestCreateCouponServlet extends Mockito {
         result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType(DiscountTypeEnum.percentage);
         result.setPercentageDiscount(20d);
+        result.setDuration(DurationTypeEnum.forever);
+        Calendar c = Calendar.getInstance();
+        result.setStartDate(new Date(c.getTimeInMillis()));
+        c.add(Calendar.DATE, 30);
+        result.setExpirationDate(new Date(c.getTimeInMillis()));
         result.setTenantId(randomTenantId);
         return result;
     }
@@ -178,7 +187,7 @@ public class TestCreateCouponServlet extends Mockito {
         result.setCouponName(Constants.COUPON_TEST_NAME);
         result.setDiscountType("percentage");
         result.setPercentageDiscount(20d);
-        result.setIsActive(Byte.valueOf(Constants.ACTIVE_TRUE));
+        result.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
         result.setDuration("forever");
         result.setKbTenantId(UUID.randomUUID().toString());
         return result;
