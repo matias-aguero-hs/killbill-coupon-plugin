@@ -80,6 +80,12 @@ public class CouponPluginApi {
         dao.deactivateApplicationsOfCoupon(couponCode);
     }
 
+    public void increaseNumberOfInvoicesAndSetActiveStatus(final String couponCode, final Integer numberOfInvoices, final Boolean deactivate, final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to increase the number of Invoices affected and deactivate or not a Coupon Application");
+        Byte deactivation = (deactivate ? new Byte(Constants.BYTE_FALSE) : new Byte(Constants.BYTE_TRUE));
+        dao.increaseNumberOfInvoicesAffected(couponCode, numberOfInvoices, deactivation, subscriptionId);
+    }
+
     public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to create a Coupon");
         dao.createCoupon(coupon, context);

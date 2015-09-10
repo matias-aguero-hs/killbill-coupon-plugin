@@ -18,8 +18,9 @@
 package org.killbill.billing.plugin.coupon.dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -224,7 +225,7 @@ public class CouponDao extends PluginDao {
      * @throws SQLException
      */
     public void deactivateApplicationsOfCoupon(final String couponCode) throws SQLException {
-        String notes = "Coupon deactivated on " + new Date();
+        String notes = "Coupon deactivated on " + new Date(Calendar.getInstance().getTimeInMillis());;
         logService.log(LogService.LOG_INFO, "Executing query to Deactivate all the Applications of a Coupon by couponCode in the DB");
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
@@ -236,6 +237,30 @@ public class CouponDao extends PluginDao {
                            .set(COUPONS_APPLIED.NOTES, notes)
                            .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
                            .and(COUPONS_APPLIED.IS_ACTIVE.equal(Byte.valueOf(Constants.BYTE_TRUE)))
+                           .execute();
+                        return null;
+                    }
+                });
+    }
+
+    /**
+     * Method to increase the number of invoices affected during the invoice generation
+     * @param couponCode
+     * @param numberOfInvoices
+     * @throws SQLException
+     */
+    public void increaseNumberOfInvoicesAffected(final String couponCode, final Integer numberOfInvoices, final Byte deactivation, final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Increase the number of invoices affected with the discount application and re-set its Active status");
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .update(COUPONS_APPLIED)
+                           .set(COUPONS_APPLIED.NUMBER_OF_INVOICES, numberOfInvoices)
+                           .set(COUPONS_APPLIED.IS_ACTIVE, deactivation)
+                           .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
+                           .and(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
                            .execute();
                         return null;
                     }
@@ -261,10 +286,12 @@ public class CouponDao extends PluginDao {
                         DSL.using(conn, dialect, settings)
                            .insertInto(COUPONS_APPLIED,
                                        COUPONS_APPLIED.COUPON_CODE,
+                                       COUPONS_APPLIED.CREATED_DATE,
                                        COUPONS_APPLIED.KB_SUBSCRIPTION_ID,
                                        COUPONS_APPLIED.KB_ACCOUNT_ID,
                                        COUPONS_APPLIED.KB_TENANT_ID)
                            .values(couponCode,
+                                   new Date(Calendar.getInstance().getTimeInMillis()),
                                    subscriptionId.toString(),
                                    accountId.toString(),
                                    context.getTenantId().toString())
