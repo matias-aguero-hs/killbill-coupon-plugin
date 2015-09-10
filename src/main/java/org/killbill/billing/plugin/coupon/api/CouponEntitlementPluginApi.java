@@ -33,8 +33,10 @@ import org.killbill.billing.entitlement.plugin.api.OnSuccessEntitlementResult;
 import org.killbill.billing.entitlement.plugin.api.OperationType;
 import org.killbill.billing.entitlement.plugin.api.PriorEntitlementResult;
 import org.killbill.billing.payment.api.PluginProperty;
+import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
+import org.killbill.billing.plugin.coupon.model.ErrorPriorEntitlementResult;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 import org.osgi.service.log.LogService;
@@ -60,6 +62,25 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
     @Override
     public PriorEntitlementResult priorCall(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties)
             throws EntitlementPluginApiException {
+
+        if (entitlementContext.getOperationType() != OperationType.CREATE_SUBSCRIPTION) {
+            return null;
+        }
+
+        final PluginProperty couponProperty = findCouponProperty(pluginProperties);
+        if (couponProperty == null) {
+            return null;
+        }
+        String couponCode = (String) couponProperty.getValue();
+        String productName = entitlementContext.getPlanPhaseSpecifier().getProductName();
+        try {
+            couponPluginApi.validateCoupon(couponCode, entitlementContext.getAccountId(), productName, entitlementContext);
+        } catch (CouponApiException e) {
+            // if validations don't pass, stop creating subscription
+            logService.log(LogService.LOG_ERROR, e.getMessage());
+            return new ErrorPriorEntitlementResult();
+        }
+
         return new DefaultPriorEntitlementResult();
     }
 

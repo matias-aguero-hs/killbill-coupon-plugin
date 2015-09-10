@@ -326,7 +326,7 @@ public class CouponDao extends PluginDao {
      * @return
      * @throws SQLException
      */
-    public CouponsAppliedRecord getCouponAppliedBySubscription(final UUID subscriptionId) throws SQLException {
+    public CouponsAppliedRecord getActiveCouponAppliedBySubscription(final UUID subscriptionId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB using subscriptionId");
         return execute(dataSource.getConnection(),
                        new WithConnectionCallback<CouponsAppliedRecord>() {
@@ -335,6 +335,29 @@ public class CouponDao extends PluginDao {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS_APPLIED)
                                          .where(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
+                                         .and(COUPONS_APPLIED.IS_ACTIVE.equal(Byte.valueOf(Constants.BYTE_TRUE)))
+                                         .fetchOne();
+                           }
+                       });
+    }
+
+    /**
+     * Method to get a Coupon Applied object by code and subscriptionId
+     * @param couponCode
+     * @param subscriptionId
+     * @return
+     * @throws SQLException
+     */
+    public CouponsAppliedRecord getCouponAppliedByCodeAndSubscription(final String couponCode, final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB using subscriptionId");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<CouponsAppliedRecord>() {
+                           @Override
+                           public CouponsAppliedRecord withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_APPLIED)
+                                         .where(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
+                                         .and(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
                                          .fetchOne();
                            }
                        });

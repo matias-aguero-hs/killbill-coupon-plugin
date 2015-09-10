@@ -129,7 +129,7 @@ public class TestCouponListener extends Mockito {
 
         when(invoiceUserApi.getInvoice(any(), any())).thenReturn(invoice);
         when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
-        when(couponPluginApi.getCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(coupon);
 
         when(invoiceUserApi.insertInvoiceItemAdjustment(any(), any(), any(), any(), any(), any(), any())).thenReturn(invoiceItem);
@@ -178,7 +178,7 @@ public class TestCouponListener extends Mockito {
 
         when(invoiceUserApi.getInvoice(any(), any())).thenReturn(invoice);
         when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
-        when(couponPluginApi.getCouponAppliedBySubscription(any(UUID.class))).thenReturn(null);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(null);
 
         doNothing().when(securityApi).login(any(), any());
 

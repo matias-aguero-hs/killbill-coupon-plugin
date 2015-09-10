@@ -77,6 +77,7 @@ public class ApplyCouponServlet extends PluginServlet {
             errorMessage.put("Error", "CouponApiException. Cause: " + e.getMessage());
             ServletHelper.writeResponseToJson(response, errorMessage.toString());
             buildResponse(response);
+            return;
         }
 
         try {

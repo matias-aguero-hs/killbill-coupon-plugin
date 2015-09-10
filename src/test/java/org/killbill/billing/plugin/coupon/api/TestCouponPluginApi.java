@@ -17,8 +17,10 @@
 
 package org.killbill.billing.plugin.coupon.api;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -199,17 +201,17 @@ public class TestCouponPluginApi extends Mockito {
     public void testGetCouponAppliedBySubscriptionOK() throws Exception {
         CouponsAppliedRecord couponApplied = new CouponsAppliedRecord();
         couponApplied.setCouponCode(Constants.COUPON_CODE);
-        when(dao.getCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
+        when(dao.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
 
-        CouponsAppliedRecord result = couponPluginApi.getCouponAppliedBySubscription(UUID.randomUUID());
+        CouponsAppliedRecord result = couponPluginApi.getActiveCouponAppliedBySubscription(UUID.randomUUID());
 
         assertEquals(result, couponApplied);
     }
 
     @Test(expected = SQLException.class)
     public void testGetCouponAppliedBySubscriptionSQLException() throws Exception {
-        when(dao.getCouponAppliedBySubscription(any(UUID.class))).thenThrow(SQLException.class);
-        couponPluginApi.getCouponAppliedBySubscription(UUID.randomUUID());
+        when(dao.getActiveCouponAppliedBySubscription(any(UUID.class))).thenThrow(SQLException.class);
+        couponPluginApi.getActiveCouponAppliedBySubscription(UUID.randomUUID());
     }
 
     @Test
@@ -263,6 +265,7 @@ public class TestCouponPluginApi extends Mockito {
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
         coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
+        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeName");
@@ -343,6 +346,7 @@ public class TestCouponPluginApi extends Mockito {
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
         coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
+        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeOtherName");
