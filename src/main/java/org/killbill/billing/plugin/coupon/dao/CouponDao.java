@@ -259,6 +259,11 @@ public class CouponDao extends PluginDao {
                            .update(COUPONS_APPLIED)
                            .set(COUPONS_APPLIED.NUMBER_OF_INVOICES, numberOfInvoices)
                            .set(COUPONS_APPLIED.IS_ACTIVE, deactivation)
+                           .set(COUPONS_APPLIED.NOTES,
+                                (deactivation.equals(Byte.valueOf(Constants.BYTE_FALSE))) ?
+                                "Coupon Application has been deactivated after being applied in " + numberOfInvoices +
+                                " different invoices (max. value of the Coupon " + couponCode + ") for this Subscription"
+                                : null)
                            .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
                            .and(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
                            .execute();
