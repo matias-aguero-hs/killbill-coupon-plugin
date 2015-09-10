@@ -36,6 +36,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
@@ -108,8 +109,6 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
                 logService.log(LogService.LOG_INFO, "RECURRING item " + item.getId() + " found for invoice " + invoice.getId());
 
-                // TODO refactor when implement coupon duration
-
                 // get coupon applied by subscription id
                 UUID subscriptionId = item.getSubscriptionId();
                 logService.log(LogService.LOG_INFO, "getting coupons applied for subscription " + subscriptionId);
@@ -119,20 +118,66 @@ public class CouponListener implements OSGIKillbillEventHandler {
                     return;
                 }
 
-                BigDecimal discountAmount = calculateDiscountAmount(item, cApplied);
+                // get coupon info from DB
+                CouponsRecord coupon = couponPluginApi.getCouponByCode(cApplied.getCouponCode());
 
-                PluginCallContext context = new PluginCallContext(Constants.PLUGIN_NAME, DateTime.now(), tenantId);
-                InvoiceItem invoiceItemAdjustment = osgiKillbillAPI.getInvoiceUserApi().insertInvoiceItemAdjustment(accountId, invoiceId, item.getId(),
-                                                                                item.getStartDate(), discountAmount,
-                                                                                item.getCurrency(), context);
+                // check if Coupon's application is still valid
+                if (validateCouponApplication(cApplied, coupon)) {
+                    BigDecimal discountAmount = calculateDiscountAmount(item, cApplied);
 
-                logService.log(LogService.LOG_INFO, "Invoice Item Adjustment added. ID: " + invoiceItemAdjustment.getId());
+                    PluginCallContext context = new PluginCallContext(Constants.PLUGIN_NAME, DateTime.now(), tenantId);
+                    InvoiceItem invoiceItemAdjustment = osgiKillbillAPI.getInvoiceUserApi().insertInvoiceItemAdjustment(accountId, invoiceId, item.getId(),
+                                                                                                                        item.getStartDate(), discountAmount,
+                                                                                                                        item.getCurrency(), context);
+                    if (null != invoiceItemAdjustment) {
+                        // add 1 to the number of Invoices affected
+                        cApplied.setNumberOfInvoices(cApplied.getNumberOfInvoices() + 1);
+                        // check if now the duration is completed (after adding the last discount)
+                        couponPluginApi.increaseNumberOfInvoicesAndSetActiveStatus(
+                                cApplied.getCouponCode(),
+                                cApplied.getNumberOfInvoices(),
+                                (coupon.getDuration().equals(DurationTypeEnum.once.toString())
+                                 || (coupon.getDuration().equals(DurationTypeEnum.multiple.toString())
+                                     && coupon.getNumberOfInvoices() <= cApplied.getNumberOfInvoices())),
+                                subscriptionId);
 
+                        logService.log(LogService.LOG_INFO, "Invoice Item Adjustment added. ID: " + invoiceItemAdjustment.getId());
+                    }
+                    else {
+                        logService.log(LogService.LOG_ERROR, "Error: Invoice Item Adjustment not added.");
+                    }
+                }
             } else {
                 logService.log(LogService.LOG_INFO, "Skipping invoice item " + item.getId() + "/" + item.getInvoiceItemType());
             }
         }
+    }
 
+    private boolean validateCouponApplication(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
+        if (cApplied.getIsActive().equals(Byte.valueOf(Constants.BYTE_TRUE))) {
+            // now check if it has not completed its duration yet
+            if (couponCanBeApplied(cApplied, coupon)) {
+                // coupon has not completed its duration and could be applied
+                return true;
+            }
+            else {
+                // coupon has completed its duration cannot be applied
+                logService.log(LogService.LOG_ERROR, "Error: Coupon Application has completed its duration and the discount cannot be applied again.");
+            }
+        }
+        else {
+            // coupon application is not active and the discount can't be applied
+            logService.log(LogService.LOG_ERROR, "Error: Coupon Application is not active and the discount cannot be applied again.");
+        }
+        return false;
+    }
+
+    private boolean couponCanBeApplied(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
+        return (coupon.getDuration().equals(DurationTypeEnum.once.toString())
+            && cApplied.getNumberOfInvoices().equals(0))
+                || (coupon.getDuration().equals(DurationTypeEnum.forever.toString()))
+                || (coupon.getDuration().equals(DurationTypeEnum.multiple.toString())
+                    && coupon.getNumberOfInvoices() > cApplied.getNumberOfInvoices());
     }
 
     /**

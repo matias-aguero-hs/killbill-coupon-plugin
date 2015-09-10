@@ -91,6 +91,10 @@ public class JsonHelper {
     public static JSONObject buildCouponAppliedJsonResponse(CouponsAppliedRecord couponAppliedRecord) {
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put(Constants.COUPON_CODE, couponAppliedRecord.getValue(COUPONS_APPLIED.COUPON_CODE));
+        jsonResponse.put(Constants.CREATED_DATE, couponAppliedRecord.getValue(COUPONS_APPLIED.CREATED_DATE));
+        jsonResponse.put(Constants.IS_ACTIVE, couponAppliedRecord.getValue(COUPONS_APPLIED.IS_ACTIVE));
+        jsonResponse.put(Constants.NUMBER_OF_INVOICES, couponAppliedRecord.getValue(COUPONS_APPLIED.NUMBER_OF_INVOICES));
+        jsonResponse.put(Constants.NOTES, couponAppliedRecord.getValue(COUPONS_APPLIED.NOTES));
         jsonResponse.put(Constants.ACCOUNT_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_ACCOUNT_ID));
         jsonResponse.put(Constants.SUBSCRIPTION_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_SUBSCRIPTION_ID));
         jsonResponse.put(Constants.TENANT_ID, couponAppliedRecord.getValue(COUPONS_APPLIED.KB_TENANT_ID));
