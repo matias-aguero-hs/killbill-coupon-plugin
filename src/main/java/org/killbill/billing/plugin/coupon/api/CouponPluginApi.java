@@ -34,6 +34,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.util.CouponHelper;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
