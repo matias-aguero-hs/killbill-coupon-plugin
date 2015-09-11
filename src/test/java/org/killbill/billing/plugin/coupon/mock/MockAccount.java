@@ -34,7 +34,7 @@ public class MockAccount implements Account {
     private String externalKey;
 
     public MockAccount(final UUID accountId, final String externalKey) {
-        id = accountId;
+        this.id = accountId;
         this.externalKey = externalKey;
     }
 
@@ -50,7 +50,7 @@ public class MockAccount implements Account {
 
     @Override
     public String getExternalKey() {
-        return null;
+        return externalKey;
     }
 
     @Override

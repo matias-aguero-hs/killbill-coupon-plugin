@@ -348,6 +348,7 @@ public class CouponPluginApi {
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "Error getting list of Products associated with a Coupon with code: " + couponCode + ". Cause: " + e.getMessage());
             e.printStackTrace();
+            // TODO check this block
         }
         return new ArrayList<>();
     }

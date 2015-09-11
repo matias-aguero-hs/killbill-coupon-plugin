@@ -46,7 +46,7 @@ import com.google.common.collect.Iterables;
 
 public class CouponEntitlementPluginApi implements EntitlementPluginApi {
 
-    private static final String COUPON_PROPERTY = Constants.PLUGIN_NAME + ":coupon";
+    public static final String COUPON_PROPERTY = Constants.PLUGIN_NAME + ":coupon";
 
     final OSGIKillbillLogService logService;
     final OSGIKillbillAPI killbillAPI;
@@ -64,12 +64,12 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             throws EntitlementPluginApiException {
 
         if (entitlementContext.getOperationType() != OperationType.CREATE_SUBSCRIPTION) {
-            return null;
+            return new DefaultPriorEntitlementResult();
         }
 
         final PluginProperty couponProperty = findCouponProperty(pluginProperties);
         if (couponProperty == null) {
-            return null;
+            return new DefaultPriorEntitlementResult();
         }
         String couponCode = (String) couponProperty.getValue();
         String productName = entitlementContext.getPlanPhaseSpecifier().getProductName();

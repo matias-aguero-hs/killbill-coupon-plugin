@@ -421,7 +421,7 @@
                     </check>
                     <instrumentation>
                         <ignores>
-                            <ignore>org.killbill.billing.plugin.coupon.dao.gen.*</ignore>
+                            <ignore>org.killbill.billing.plugin.coupon.dao.*</ignore>
                             <ignore>org.killbill.billing.plugin.coupon.exception.*</ignore>
                             <ignore>org.killbill.billing.plugin.coupon.core.*</ignore>
                             <ignore>org.killbill.billing.plugin.coupon.model.*</ignore>
@@ -429,8 +429,8 @@
                             <ignore>org.killbill.billing.plugin.coupon.model.Constants</ignore>
                         </ignores>
                         <excludes>
-                            <exclude>org/killbill/billing/plugin/coupon/dao/gen/**/*.class</exclude>
-                            <exclude>org/killbill/billing/plugin/coupon/dao/gen/**/*Test.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/dao/**/*.class</exclude>
+                            <exclude>org/killbill/billing/plugin/coupon/dao/**/*Test.class</exclude>
                             <exclude>org/killbill/billing/plugin/coupon/exception/**/*.class</exclude>
                             <exclude>org/killbill/billing/plugin/coupon/exception/**/*Test.class</exclude>
                             <exclude>org/killbill/billing/plugin/coupon/core/**/*.class</exclude>

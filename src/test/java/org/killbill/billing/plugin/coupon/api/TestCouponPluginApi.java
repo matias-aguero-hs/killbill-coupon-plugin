@@ -24,43 +24,29 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.killbill.billing.account.api.Account;
+import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
-import org.killbill.billing.account.api.MutableAccountData;
-import org.killbill.billing.catalog.api.BillingActionPolicy;
-import org.killbill.billing.catalog.api.BillingPeriod;
-import org.killbill.billing.catalog.api.Currency;
-import org.killbill.billing.catalog.api.Limit;
-import org.killbill.billing.catalog.api.Plan;
-import org.killbill.billing.catalog.api.PlanPhase;
-import org.killbill.billing.catalog.api.PlanPhasePriceOverride;
-import org.killbill.billing.catalog.api.PriceList;
-import org.killbill.billing.catalog.api.Product;
-import org.killbill.billing.catalog.api.ProductCategory;
-import org.killbill.billing.entitlement.api.Entitlement;
-import org.killbill.billing.entitlement.api.EntitlementApiException;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
-import org.killbill.billing.entitlement.api.SubscriptionEvent;
-import org.killbill.billing.entitlement.api.SubscriptionEventType;
-import org.killbill.billing.payment.api.PluginProperty;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
+import org.killbill.billing.plugin.coupon.mock.MockAccount;
+import org.killbill.billing.plugin.coupon.mock.MockSubscription;
+import org.killbill.billing.plugin.coupon.mock.MockTenant;
+import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
+import org.killbill.billing.plugin.coupon.util.CouponHelper;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
 import org.killbill.billing.tenant.api.TenantUserApi;
-import org.killbill.billing.util.callcontext.CallContext;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.mockito.Mockito;
@@ -69,6 +55,7 @@ import org.osgi.service.log.LogService;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created by jgomez on 07/09/15.
@@ -147,14 +134,14 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test
     public void testGetTenantIdOK() throws Exception {
-        Tenant tenant = buildMockTenant();
+        Tenant tenant = new MockTenant();
 
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
 
         UUID result = couponPluginApi.getTenantId("apiKey");
 
-        assertEquals(result, tenantId);
+        assertEquals(result, tenant.getId());
     }
 
     @Test(expected = CouponApiException.class)
@@ -249,7 +236,7 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test
     public void testCreateCouponOK() throws Exception {
-        Tenant tenant = buildMockTenant();
+        Tenant tenant = new MockTenant();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
 
@@ -259,9 +246,9 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test
     public void testApplyCouponOK() throws Exception {
-        Tenant tenant = buildMockTenant();
-        Account account = buildMockAccount();
-        Subscription subscription = buildMockSubscription();
+        Tenant tenant = new MockTenant();
+        Account account = new MockAccount(UUID.randomUUID(), "key");
+        Subscription subscription = new MockSubscription();
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
         coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
@@ -288,9 +275,9 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test(expected = CouponApiException.class)
     public void testApplyCouponWithCouponApiException() throws Exception {
-        Tenant tenant = buildMockTenant();
-        Account account = buildMockAccount();
-        Subscription subscription = buildMockSubscription();
+        Tenant tenant = new MockTenant();
+        Account account = new MockAccount(UUID.randomUUID(), "key");
+        Subscription subscription = new MockSubscription();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
         when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
@@ -305,7 +292,7 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test
     public void testApplyCouponWithNullAccount() throws Exception {
-        Tenant tenant = buildMockTenant();
+        Tenant tenant = new MockTenant();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
         when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
@@ -318,7 +305,7 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test
     public void testApplyCouponWithNullSubscription() throws Exception {
-        Tenant tenant = buildMockTenant();
+        Tenant tenant = new MockTenant();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
         when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
@@ -340,9 +327,9 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test(expected = CouponApiException.class)
     public void testApplyCouponWithCouponApiExceptionAfterValidation() throws Exception {
-        Tenant tenant = buildMockTenant();
-        Account account = buildMockAccount();
-        Subscription subscription = buildMockSubscription();
+        Tenant tenant = new MockTenant();
+        Account account = new MockAccount(UUID.randomUUID(), "key");
+        Subscription subscription = new MockSubscription();
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
         coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
@@ -377,420 +364,6 @@ public class TestCouponPluginApi extends Mockito {
         couponPluginApi.deactivateApplicationsOfCoupon(Constants.COUPON_CODE);
     }
 
-    private Subscription buildMockSubscription() {
-        Subscription subscription = new Subscription() {
-            @Override
-            public LocalDate getBillingStartDate() {
-                return null;
-            }
-
-            @Override
-            public LocalDate getBillingEndDate() {
-                return null;
-            }
-
-            @Override
-            public LocalDate getChargedThroughDate() {
-                return null;
-            }
-
-            @Override
-            public String getCurrentStateForService(final String s) {
-                return null;
-            }
-
-            @Override
-            public List<SubscriptionEvent> getSubscriptionEvents() {
-                List<SubscriptionEvent> result = new ArrayList<>();
-                SubscriptionEvent event = new SubscriptionEvent() {
-                    @Override
-                    public UUID getId() {
-                        return null;
-                    }
-
-                    @Override
-                    public UUID getEntitlementId() {
-                        return null;
-                    }
-
-                    @Override
-                    public LocalDate getEffectiveDate() {
-                        return null;
-                    }
-
-                    @Override
-                    public LocalDate getRequestedDate() {
-                        return null;
-                    }
-
-                    @Override
-                    public SubscriptionEventType getSubscriptionEventType() {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean isBlockedBilling() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean isBlockedEntitlement() {
-                        return false;
-                    }
-
-                    @Override
-                    public String getServiceName() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getServiceStateName() {
-                        return null;
-                    }
-
-                    @Override
-                    public Product getPrevProduct() {
-                        return null;
-                    }
-
-                    @Override
-                    public Plan getPrevPlan() {
-                        return null;
-                    }
-
-                    @Override
-                    public PlanPhase getPrevPhase() {
-                        return null;
-                    }
-
-                    @Override
-                    public PriceList getPrevPriceList() {
-                        return null;
-                    }
-
-                    @Override
-                    public BillingPeriod getPrevBillingPeriod() {
-                        return null;
-                    }
-
-                    @Override
-                    public Product getNextProduct() {
-                        Product product = new Product() {
-                            @Override
-                            public String getName() {
-                                return "fakeName";
-                            }
-
-                            @Override
-                            public boolean isRetired() {
-                                return false;
-                            }
-
-                            @Override
-                            public Product[] getAvailable() {
-                                return new Product[0];
-                            }
-
-                            @Override
-                            public Product[] getIncluded() {
-                                return new Product[0];
-                            }
-
-                            @Override
-                            public ProductCategory getCategory() {
-                                return null;
-                            }
-
-                            @Override
-                            public String getCatalogName() {
-                                return null;
-                            }
-
-                            @Override
-                            public Limit[] getLimits() {
-                                return new Limit[0];
-                            }
-
-                            @Override
-                            public boolean compliesWithLimits(final String s, final double v) {
-                                return false;
-                            }
-                        };
-                        return product;
-                    }
-
-                    @Override
-                    public Plan getNextPlan() {
-                        return null;
-                    }
-
-                    @Override
-                    public PlanPhase getNextPhase() {
-                        return null;
-                    }
-
-                    @Override
-                    public PriceList getNextPriceList() {
-                        return null;
-                    }
-
-                    @Override
-                    public BillingPeriod getNextBillingPeriod() {
-                        return null;
-                    }
-                };
-                result.add(event);
-                return result;
-            }
-
-            @Override
-            public UUID getBaseEntitlementId() {
-                return null;
-            }
-
-            @Override
-            public UUID getBundleId() {
-                return null;
-            }
-
-            @Override
-            public UUID getAccountId() {
-                return null;
-            }
-
-            @Override
-            public String getExternalKey() {
-                return null;
-            }
-
-            @Override
-            public EntitlementState getState() {
-                return null;
-            }
-
-            @Override
-            public EntitlementSourceType getSourceType() {
-                return null;
-            }
-
-            @Override
-            public LocalDate getEffectiveStartDate() {
-                return null;
-            }
-
-            @Override
-            public LocalDate getEffectiveEndDate() {
-                return null;
-            }
-
-            @Override
-            public Product getLastActiveProduct() {
-                return null;
-            }
-
-            @Override
-            public Plan getLastActivePlan() {
-                return null;
-            }
-
-            @Override
-            public PlanPhase getLastActivePhase() {
-                return null;
-            }
-
-            @Override
-            public PriceList getLastActivePriceList() {
-                return null;
-            }
-
-            @Override
-            public ProductCategory getLastActiveProductCategory() {
-                return null;
-            }
-
-            @Override
-            public Entitlement cancelEntitlementWithDate(final LocalDate effectiveDate, final boolean overrideBillingEffectiveDate, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public Entitlement cancelEntitlementWithPolicy(final EntitlementActionPolicy policy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public Entitlement cancelEntitlementWithDateOverrideBillingPolicy(final LocalDate effectiveDate, final BillingActionPolicy billingPolicy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public Entitlement cancelEntitlementWithPolicyOverrideBillingPolicy(final EntitlementActionPolicy policy, final BillingActionPolicy billingPolicy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public void uncancelEntitlement(final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-
-            }
-
-            @Override
-            public Entitlement changePlan(final String productName, final BillingPeriod billingPeriod, final String priceList, final List<PlanPhasePriceOverride> overrides, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public Entitlement changePlanWithDate(final String productName, final BillingPeriod billingPeriod, final String priceList, final List<PlanPhasePriceOverride> overrides, final LocalDate effectiveDate, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public Entitlement changePlanOverrideBillingPolicy(final String productName, final BillingPeriod billingPeriod, final String priceList, final List<PlanPhasePriceOverride> overrides, final LocalDate effectiveDate, final BillingActionPolicy billingPolicy, final Iterable<PluginProperty> properties, final CallContext context) throws EntitlementApiException {
-                return null;
-            }
-
-            @Override
-            public UUID getId() {
-                return null;
-            }
-
-            @Override
-            public DateTime getCreatedDate() {
-                return null;
-            }
-
-            @Override
-            public DateTime getUpdatedDate() {
-                return null;
-            }
-        };
-        return subscription;
-    }
-
-    private Account buildMockAccount() {
-        Account account = new Account() {
-            @Override
-            public MutableAccountData toMutableAccountData() {
-                return null;
-            }
-
-            @Override
-            public Account mergeWithDelegate(final Account account) {
-                return null;
-            }
-
-            @Override
-            public String getExternalKey() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public Integer getFirstNameLength() {
-                return null;
-            }
-
-            @Override
-            public String getEmail() {
-                return null;
-            }
-
-            @Override
-            public Integer getBillCycleDayLocal() {
-                return null;
-            }
-
-            @Override
-            public Currency getCurrency() {
-                return null;
-            }
-
-            @Override
-            public UUID getPaymentMethodId() {
-                return null;
-            }
-
-            @Override
-            public DateTimeZone getTimeZone() {
-                return null;
-            }
-
-            @Override
-            public String getLocale() {
-                return null;
-            }
-
-            @Override
-            public String getAddress1() {
-                return null;
-            }
-
-            @Override
-            public String getAddress2() {
-                return null;
-            }
-
-            @Override
-            public String getCompanyName() {
-                return null;
-            }
-
-            @Override
-            public String getCity() {
-                return null;
-            }
-
-            @Override
-            public String getStateOrProvince() {
-                return null;
-            }
-
-            @Override
-            public String getPostalCode() {
-                return null;
-            }
-
-            @Override
-            public String getCountry() {
-                return null;
-            }
-
-            @Override
-            public String getPhone() {
-                return null;
-            }
-
-            @Override
-            public Boolean isMigrated() {
-                return null;
-            }
-
-            @Override
-            public Boolean isNotifiedForInvoices() {
-                return null;
-            }
-
-            @Override
-            public UUID getId() {
-                return null;
-            }
-
-            @Override
-            public DateTime getCreatedDate() {
-                return null;
-            }
-
-            @Override
-            public DateTime getUpdatedDate() {
-                return null;
-            }
-        };
-        return account;
-    }
-
     private List<CouponsProductsRecord> buildListOfCouponProducts() {
         List<CouponsProductsRecord> result = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
@@ -799,38 +372,195 @@ public class TestCouponPluginApi extends Mockito {
         return result;
     }
 
-    private Tenant buildMockTenant() {
-        Tenant result = new Tenant() {
-            @Override
-            public UUID getId() {
-                return tenantId;
-            }
+    // -----------------------------------------
+    //       Validate Apply Coupon
+    // public boolean validateCoupon(String couponCode, UUID accountId, String subscriptionProduct, TenantContext context)
+    // -----------------------------------------
 
-            @Override
-            public DateTime getCreatedDate() {
-                return null;
-            }
+    @Test
+    public void testValidateNullCoupon() throws SQLException {
 
-            @Override
-            public DateTime getUpdatedDate() {
-                return null;
-            }
+        when(dao.getCouponByCode(any())).thenReturn(null);
 
-            @Override
-            public String getExternalKey() {
-                return null;
-            }
+        try {
+            couponPluginApi.validateCoupon("invalid", null, null, null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("does not exist"));
+            return;
+        }
 
-            @Override
-            public String getApiKey() {
-                return null;
-            }
+        fail();
 
-            @Override
-            public String getApiSecret() {
-                return null;
-            }
-        };
-        return result;
     }
+
+    @Test
+    public void testValidateCouponSQLException() throws SQLException {
+
+        when(dao.getCouponByCode(any())).thenThrow(SQLException.class);
+
+        try {
+            couponPluginApi.validateCoupon("invalid", null, null, null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("There is an error trying"));
+            return;
+        }
+
+        fail();
+
+    }
+
+    @Test
+    public void testValidateNullAccount() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(null);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), null, null, null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("does not exist"));
+            return;
+        }
+
+        fail();
+
+    }
+
+    @Test
+    public void testValidateExceptionAccount() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenThrow(AccountApiException.class);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), null, null, null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("There is an error trying to get Account"));
+            return;
+        }
+
+        fail();
+
+    }
+
+    @Test
+    public void testValidateInactiveCoupon() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        coupon.setIsActive(Byte.valueOf("0"));
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), null, null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("is not active"));
+            return;
+        }
+
+        fail();
+
+    }
+
+    @Test
+    public void testValidateCouponWithoutProducts() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), null, null);
+        } catch (CouponApiException e) {
+            fail();
+        }
+
+    }
+
+    @Test
+    public void testValidateCouponProductsSQLException() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(dao.getProductsOfCoupon(any())).thenThrow(SQLException.class);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), null, null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("is not active"));
+            return;
+        }
+
+        // TODO fail();
+    }
+
+    @Test
+    public void testValidateCouponWithProducts() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        CouponsProductsRecord product = new CouponsProductsRecord();
+        product.setProductName("Standard");
+        List<CouponsProductsRecord> products = new ArrayList<CouponsProductsRecord>();
+        products.add(product);
+
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(dao.getProductsOfCoupon(any())).thenReturn(products);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), "Standard", null);
+        } catch (CouponApiException e) {
+            fail();
+        }
+
+    }
+
+    @Test
+    public void testValidateCouponWithInvalidProducts() throws SQLException, AccountApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        CouponsProductsRecord product = new CouponsProductsRecord();
+        product.setProductName("Standard");
+        List<CouponsProductsRecord> products = new ArrayList<CouponsProductsRecord>();
+        products.add(product);
+
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(dao.getProductsOfCoupon(any())).thenReturn(products);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        try {
+            couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), "Super", null);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("it has not product"));
+            return;
+        }
+
+        fail();
+
+    }
+
 }
