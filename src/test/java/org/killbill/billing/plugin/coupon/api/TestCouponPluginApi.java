@@ -31,6 +31,7 @@ import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
+import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
@@ -72,7 +73,7 @@ public class TestCouponPluginApi extends Mockito {
     private UUID tenantId;
 
     @Before
-    public void setUp() {
+    public void setUp() throws SQLException {
         osgiKillbillAPI = mock(OSGIKillbillAPI.class);
         dao = mock(CouponDao.class);
         logService = mock(LogService.class);
@@ -81,6 +82,9 @@ public class TestCouponPluginApi extends Mockito {
         subscriptionApi = mock(SubscriptionApi.class);
         tenantId = UUID.randomUUID();
         couponPluginApi = new CouponPluginApi(logService, dao, osgiKillbillAPI);
+
+        when(dao.getActiveCouponAppliedBySubscription(any())).thenReturn(null);
+        when(dao.getCouponAppliedByCodeAndSubscription(any(), any())).thenReturn(null);
     }
 
     @Test
@@ -244,6 +248,10 @@ public class TestCouponPluginApi extends Mockito {
         couponPluginApi.createCoupon(new Coupon(), tenantContext);
     }
 
+    // ------------------------------------------------
+    //      APPLY COUPON
+    // ------------------------------------------------
+
     @Test
     public void testApplyCouponOK() throws Exception {
         Tenant tenant = new MockTenant();
@@ -271,6 +279,77 @@ public class TestCouponPluginApi extends Mockito {
         Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
 
         assertTrue(result);
+    }
+
+    @Test
+    public void testApplyCouponValidateActiveSubscription() throws Exception {
+        Tenant tenant = new MockTenant();
+        Account account = new MockAccount(UUID.randomUUID(), "key");
+        Subscription subscription = new MockSubscription();
+        CouponsRecord coupon = new CouponsRecord();
+        coupon.setCouponCode(Constants.COUPON_CODE);
+        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
+        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
+        List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
+        CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
+        couponsProductsRecord.setProductName("fakeName");
+        couponProductsList.add(couponsProductsRecord);
+
+        when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
+        when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(UUID.class), any(TenantContext.class))).thenReturn(account);
+        when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(UUID.class), any(TenantContext.class))).thenReturn(subscription);
+        when(dao.getCouponByCode(anyString())).thenReturn(coupon);
+        when(dao.getProductsOfCoupon(anyString())).thenReturn(couponProductsList);
+        when(dao.getActiveCouponAppliedBySubscription(any())).thenReturn(TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID()));
+
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
+        try {
+            couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+       } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("already has an active applied coupon"));
+            return;
+        }
+
+        fail();
+    }
+
+    @Test
+    public void testApplyCouponValidateAlreadyAppliedCouponToSubscription() throws Exception {
+        Tenant tenant = new MockTenant();
+        Account account = new MockAccount(UUID.randomUUID(), "key");
+        Subscription subscription = new MockSubscription();
+        CouponsRecord coupon = new CouponsRecord();
+        coupon.setCouponCode(Constants.COUPON_CODE);
+        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
+        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
+        List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
+        CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
+        couponsProductsRecord.setProductName("fakeName");
+        couponProductsList.add(couponsProductsRecord);
+
+        when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
+        when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(UUID.class), any(TenantContext.class))).thenReturn(account);
+        when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(UUID.class), any(TenantContext.class))).thenReturn(subscription);
+        when(dao.getCouponByCode(anyString())).thenReturn(coupon);
+        when(dao.getProductsOfCoupon(anyString())).thenReturn(couponProductsList);
+        when(dao.getActiveCouponAppliedBySubscription(any())).thenReturn(null);
+        when(dao.getCouponAppliedByCodeAndSubscription(any(), any())).thenReturn(TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID()));
+
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
+        try {
+            couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+        } catch (CouponApiException e) {
+            assertTrue(e.getMessage().contains("already had applied coupon"));
+            return;
+        }
+
+        fail();
     }
 
     @Test(expected = CouponApiException.class)
