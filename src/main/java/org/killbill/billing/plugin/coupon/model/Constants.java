@@ -49,7 +49,7 @@ public class Constants {
     public static final String ADMIN_PASSWORD = "password";
     public static final String PRODUCTS = "products";
     public static final String COUPON_LIST = "coupons";
-    public static final String COUPONS_APPLIED_LIST = "Coupons Applied";
+    public static final String COUPONS_APPLIED_LIST = "couponsApplied";
     public static final String INFO = "Info";
     public static final String BYTE_TRUE = "1";
     public static final String BYTE_FALSE = "0";
