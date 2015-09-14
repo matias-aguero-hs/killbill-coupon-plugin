@@ -45,6 +45,7 @@ public class Constants {
     public static final String GET_ALL_COUPON_PATH = "-getallcoupons";
     public static final String GET_ALL_COUPONS_APPLIED_PATH = "-getallcouponsapplied";
     public static final String DEACTIVATE_COUPON_PATH = "-deactivatecoupon";
+    public static final String DELETE_COUPON_PATH = "-deletecoupon";
     public static final String ADMIN_USER = "admin";
     public static final String ADMIN_PASSWORD = "password";
     public static final String PRODUCTS = "products";

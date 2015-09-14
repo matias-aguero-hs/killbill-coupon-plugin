@@ -81,6 +81,11 @@ public class CouponPluginApi {
         dao.deactivateCouponByCode(couponCode);
     }
 
+    public void deleteCouponByCode(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to delete a Coupon by couponCode");
+        dao.deleteCouponByCode(couponCode);
+    }
+
     public void deactivateApplicationsOfCoupon(final String couponCode) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to deactivate all the Applications of a Coupon by couponCode");
         dao.deactivateApplicationsOfCoupon(couponCode);
@@ -331,6 +336,22 @@ public class CouponPluginApi {
             return dao.getCouponsAppliedByAccountId(accountId);
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "Error getting list of Applied Coupons for accountId: " + accountId + ". Cause: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Get coupons applied to a customer using the couponCode
+     * @param couponCode
+     * @return
+     */
+    public List<CouponsAppliedRecord> getActiveCouponsAppliedByCouponCode(String couponCode) {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get a list of Active Applied Coupons from the DB using the couponCode");
+        try {
+            return dao.getActiveCouponsAppliedByCouponCode(couponCode);
+        } catch (SQLException e) {
+            logService.log(LogService.LOG_ERROR, "Error getting list of Applied Coupons for couponCode: " + couponCode + ". Cause: " + e.getMessage());
             e.printStackTrace();
         }
         return new ArrayList<>();

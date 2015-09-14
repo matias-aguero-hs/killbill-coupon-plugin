@@ -88,6 +88,12 @@ public class JsonHelper {
         return jsonResponse;
     }
 
+    public static JSONObject buildCouponDeletedJsonResponse(CouponsRecord coupon) {
+        JSONObject jsonResponse = new JSONObject();
+        jsonResponse.put(Constants.INFO, "Coupon " + coupon.getValue(COUPONS.COUPON_CODE) + " has been successfully deleted");
+        return jsonResponse;
+    }
+
     public static JSONObject buildCouponAppliedJsonResponse(CouponsAppliedRecord couponAppliedRecord) {
         JSONObject jsonResponse = new JSONObject();
         jsonResponse.put(Constants.COUPON_CODE, couponAppliedRecord.getValue(COUPONS_APPLIED.COUPON_CODE));

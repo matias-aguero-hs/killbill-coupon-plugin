@@ -438,6 +438,24 @@ public class TestCouponPluginApi extends Mockito {
     }
 
     @Test(expected = SQLException.class)
+    public void testDeleteCouponSQLException() throws Exception {
+        doThrow(new SQLException()).when(dao).deleteCouponByCode(anyString());
+        couponPluginApi.deleteCouponByCode(Constants.COUPON_CODE);
+    }
+
+    @Test(expected = SQLException.class)
+    public void testIncreaseNumberOfInvoicesAndSetActiveStatusSQLException() throws Exception {
+        doThrow(new SQLException()).when(dao).increaseNumberOfInvoicesAffected(anyString(), anyInt(), anyByte(), any(UUID.class));
+        couponPluginApi.increaseNumberOfInvoicesAndSetActiveStatus(Constants.COUPON_CODE, 0, true, UUID.randomUUID());
+    }
+
+    @Test(expected = SQLException.class)
+    public void testIncreaseNumberOfInvoicesAndSetActiveStatusWithFalseDeactivateSQLException() throws Exception {
+        doThrow(new SQLException()).when(dao).increaseNumberOfInvoicesAffected(anyString(), anyInt(), anyByte(), any(UUID.class));
+        couponPluginApi.increaseNumberOfInvoicesAndSetActiveStatus(Constants.COUPON_CODE, 0, false, UUID.randomUUID());
+    }
+
+    @Test(expected = SQLException.class)
     public void testDeactivateApplicationsOfCouponSQLException() throws Exception {
         doThrow(new SQLException()).when(dao).deactivateApplicationsOfCoupon(anyString());
         couponPluginApi.deactivateApplicationsOfCoupon(Constants.COUPON_CODE);

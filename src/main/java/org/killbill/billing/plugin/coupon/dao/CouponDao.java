@@ -219,6 +219,27 @@ public class CouponDao extends PluginDao {
     }
 
     /**
+     * Method to delete a Coupon object by couponCode from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public void deleteCouponByCode(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Delete a Coupon by couponCode in the DB");
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .delete(COUPONS)
+                           .where(COUPONS.COUPON_CODE.equal(couponCode))
+                           .execute();
+                        return null;
+                    }
+                });
+    }
+
+    /**
      * Method to deactivate all the Applications of a Coupon object by couponCode from the DB
      * @param couponCode
      * @return
@@ -326,7 +347,26 @@ public class CouponDao extends PluginDao {
                        });
     }
 
-
+    /**
+     * Method to get a list of Active Coupons Applied from the DB using its couponCode
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public List<CouponsAppliedRecord> getActiveCouponsAppliedByCouponCode(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Active Coupons Applied from the DB");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
+                           @Override
+                           public Result<CouponsAppliedRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_APPLIED)
+                                         .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
+                                         .and(COUPONS_APPLIED.IS_ACTIVE.equal(Byte.valueOf(Constants.BYTE_TRUE)))
+                                         .fetch();
+                           }
+                       });
+    }
 
     /**
      * Method to get a Coupon Applied object by couponCode and accountId
