@@ -97,6 +97,7 @@ public class CreateCouponServlet extends PluginServlet {
             else {
                 if (coupon.getDiscountType().equals(DiscountTypeEnum.percentage)
                     && (coupon.getPercentageDiscount().doubleValue() <= 0 || coupon.getPercentageDiscount().doubleValue() > 100)) {
+                    // TODO include amount verification
                     logService.log(LogService.LOG_ERROR, "Error. Percentage must be between 0 and 100");
                     JSONObject errorMessage = new JSONObject();
                     errorMessage.put("Error", "Percentage must be between 0 and 100");

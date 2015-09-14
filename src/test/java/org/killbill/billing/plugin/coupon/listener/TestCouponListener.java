@@ -246,6 +246,7 @@ public class TestCouponListener extends Mockito {
             }
         };
 
+        invoice.getInvoiceItems().clear();
         invoice.addInvoiceItem(invoiceItem);
 
         // mocks

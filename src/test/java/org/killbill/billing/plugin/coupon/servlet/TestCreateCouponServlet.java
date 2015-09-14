@@ -166,6 +166,27 @@ public class TestCreateCouponServlet extends Mockito {
         assertTrue(stringWriter.toString().contains("CouponApiException"));
     }
 
+    @Test
+    public void testCreateCouponServletInvalidDuration() throws Exception {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+        UUID randomTenantId = UUID.randomUUID();
+        Coupon coupon = buildSuccessfulCoupon(randomTenantId);
+        coupon.setDuration(DurationTypeEnum.multiple);
+        coupon.setNumberOfInvoices(0);
+        CouponsRecord couponRecord = buildSuccessfulCouponRecord();
+
+        when(request.getHeader(Constants.X_KILLBILL_API_KEY)).thenReturn(TEST_API_KEY);
+        when(couponPluginApi.getTenantId(anyString())).thenReturn(randomTenantId);
+        when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(coupon);
+        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(couponRecord);
+        when(response.getWriter()).thenReturn(writer);
+
+        createCouponServlet.doPost(request, response);
+
+        assertTrue(stringWriter.toString().contains("Must specify the number of Invoices"));
+    }
+
     private Coupon buildSuccessfulCoupon(UUID randomTenantId) {
         Coupon result = new Coupon();
         result.setCouponCode(Constants.COUPON_TEST_CODE);
@@ -188,7 +209,7 @@ public class TestCreateCouponServlet extends Mockito {
         result.setDiscountType("percentage");
         result.setPercentageDiscount(20d);
         result.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
-        result.setDuration("forever");
+        result.setDuration(DurationTypeEnum.forever.toString());
         result.setKbTenantId(UUID.randomUUID().toString());
         return result;
     }

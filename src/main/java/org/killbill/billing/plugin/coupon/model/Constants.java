@@ -38,7 +38,7 @@ public class Constants {
     public static final String ACCOUNT_ID = "accountId";
     public static final String SUBSCRIPTION_ID = "subscriptionId";
     public static final String X_KILLBILL_API_KEY = "X-Killbill-ApiKey";
-    public static final String PLUGIN_NAME = "hootsuite";
+    public static final String PLUGIN_NAME = "coupon";
     public static final String GET_COUPON_PATH = "-getcoupon";
     public static final String CREATE_COUPON_PATH = "-createcoupon";
     public static final String APPLY_COUPON_PATH = "-applycoupon";

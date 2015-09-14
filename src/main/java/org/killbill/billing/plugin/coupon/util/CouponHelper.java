@@ -20,13 +20,19 @@ package org.killbill.billing.plugin.coupon.util;
 import java.util.Date;
 import java.util.Calendar;
 
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 
 /**
  * Created by maguero on 10/09/15.
  */
 public class CouponHelper {
+
+    // --------------------------------------------------------
+    //                          COUPON
+    // --------------------------------------------------------
 
     /**
      * Check if the coupon is active.
@@ -68,5 +74,47 @@ public class CouponHelper {
         return res;
     }
 
+
+    // --------------------------------------------------------
+    //                     COUPON APPLIED
+    // --------------------------------------------------------
+
+
+    /**
+     * Check if the applied coupon is active.
+     * @param couponApplied
+     * @return
+     */
+    public static boolean isCouponAppliedActive(CouponsAppliedRecord couponApplied) {
+        return couponApplied.getIsActive().equals(Byte.valueOf(Constants.BYTE_TRUE));
+    }
+
+    /**
+     * Checks if the coupon can be applied comparing duration between Coupon and CouponApplied
+     *
+     * @param cApplied
+     * @param coupon
+     * @return
+     */
+    public static boolean canCouponCanBeAppliedByDuration(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
+        return (coupon.getDuration().equals(DurationTypeEnum.once.toString())
+                && cApplied.getNumberOfInvoices().equals(0))
+               || (coupon.getDuration().equals(DurationTypeEnum.forever.toString()))
+               || (coupon.getDuration().equals(DurationTypeEnum.multiple.toString())
+                   && coupon.getNumberOfInvoices() > cApplied.getNumberOfInvoices());
+    }
+
+    /**
+     * Determines if the applied coupon should be disabled because it finished the application.
+     *
+     * @param cApplied
+     * @param coupon
+     * @return
+     */
+    public static boolean shouldDeactivateCouponApplied(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
+        return coupon.getDuration().equals(DurationTypeEnum.once.toString())
+               || (coupon.getDuration().equals(DurationTypeEnum.multiple.toString())
+                   && coupon.getNumberOfInvoices() <= cApplied.getNumberOfInvoices());
+    }
 
 }
