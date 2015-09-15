@@ -141,6 +141,18 @@ public class CouponPluginApi {
     }
 
     /**
+     * Method to get a Coupon Applied by an specific pair of couponCode and subscriptionId
+     * @param couponCode
+     * @param subscriptionId
+     * @return
+     * @throws SQLException
+     */
+    public CouponsAppliedRecord getCouponApplied(final String couponCode, final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get an Applied Coupon with couponCode and subscriptionId");
+        return dao.getCouponApplied(couponCode, subscriptionId);
+    }
+
+    /**
      * Get a coupon applied to a specific subscription
      *
      * @param subscriptionId
@@ -343,6 +355,16 @@ public class CouponPluginApi {
 
     /**
      * Get coupons applied to a customer using the couponCode
+     * @param couponCode
+     * @return
+     */
+    public List<CouponsAppliedRecord> getCouponsAppliedByCouponCode(String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get a list of Applied Coupons from the DB using the couponCode");
+        return dao.getCouponsAppliedByCouponCode(couponCode);
+    }
+
+    /**
+     * Get active coupons applied to a customer using the couponCode
      * @param couponCode
      * @return
      */

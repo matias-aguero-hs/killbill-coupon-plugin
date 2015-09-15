@@ -120,6 +120,22 @@ public class TestCouponPluginApi extends Mockito {
     }
 
     @Test
+    public void testGetCouponsAppliedByCouponCodeOK() throws Exception {
+        when(dao.getCouponsAppliedByCouponCode(anyString())).thenReturn(new ArrayList<>());
+
+        List<CouponsAppliedRecord> result = couponPluginApi.getCouponsAppliedByCouponCode(Constants.COUPON_CODE);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test(expected = SQLException.class)
+    public void testGetCouponsAppliedByCouponCodeSQLException() throws Exception {
+        when(dao.getCouponsAppliedByCouponCode(anyString())).thenThrow(SQLException.class);
+
+        couponPluginApi.getCouponsAppliedByCouponCode(Constants.COUPON_CODE);
+    }
+
+    @Test
     public void testGetCouponByCodeOK() throws Exception {
         CouponsRecord coupon = new CouponsRecord();
         coupon.setCouponCode(Constants.COUPON_CODE);
@@ -189,6 +205,23 @@ public class TestCouponPluginApi extends Mockito {
     }
 
     @Test
+    public void testGetCouponAppliedByCouponCodeAndSubscriptionOK() throws Exception {
+        CouponsAppliedRecord couponApplied = new CouponsAppliedRecord();
+        couponApplied.setCouponCode(Constants.COUPON_CODE);
+        when(dao.getCouponApplied(anyString(), any(UUID.class))).thenReturn(couponApplied);
+
+        CouponsAppliedRecord result = couponPluginApi.getCouponApplied(Constants.COUPON_CODE, UUID.randomUUID());
+
+        assertEquals(result, couponApplied);
+    }
+
+    @Test(expected = SQLException.class)
+    public void testGetCouponAppliedByCouponCodeAndSubscriptionSQLException() throws Exception {
+        when(dao.getCouponApplied(anyString(), any(UUID.class))).thenThrow(SQLException.class);
+        couponPluginApi.getCouponApplied(Constants.COUPON_CODE, UUID.randomUUID());
+    }
+
+    @Test
     public void testGetCouponAppliedBySubscriptionOK() throws Exception {
         CouponsAppliedRecord couponApplied = new CouponsAppliedRecord();
         couponApplied.setCouponCode(Constants.COUPON_CODE);
@@ -223,6 +256,28 @@ public class TestCouponPluginApi extends Mockito {
         when(dao.getCouponsAppliedByAccountId(any(UUID.class))).thenThrow(SQLException.class);
 
         List<CouponsAppliedRecord> result = couponPluginApi.getCouponsAppliedByAccountId(UUID.randomUUID());
+
+        assertEquals(result, new ArrayList<CouponsProductsRecord>());
+    }
+
+    @Test
+    public void testGetActiveCouponsAppliedByCouponCodeOK() throws Exception {
+        List<CouponsAppliedRecord> couponsAppliedList = new ArrayList<>();
+        CouponsAppliedRecord couponApplied = new CouponsAppliedRecord();
+        couponApplied.setCouponCode(Constants.COUPON_CODE);
+        couponsAppliedList.add(couponApplied);
+        when(dao.getActiveCouponsAppliedByCouponCode(anyString())).thenReturn(couponsAppliedList);
+
+        List<CouponsAppliedRecord> result = couponPluginApi.getActiveCouponsAppliedByCouponCode(Constants.COUPON_CODE);
+
+        assertEquals(result, couponsAppliedList);
+    }
+
+    @Test
+    public void testGetActiveCouponsAppliedByCouponCodeSQLException() throws Exception {
+        when(dao.getActiveCouponsAppliedByCouponCode(anyString())).thenThrow(SQLException.class);
+
+        List<CouponsAppliedRecord> result = couponPluginApi.getActiveCouponsAppliedByCouponCode(Constants.COUPON_CODE);
 
         assertEquals(result, new ArrayList<CouponsProductsRecord>());
     }

@@ -40,10 +40,12 @@ public class Constants {
     public static final String X_KILLBILL_API_KEY = "X-Killbill-ApiKey";
     public static final String PLUGIN_NAME = "coupon";
     public static final String GET_COUPON_PATH = "-getcoupon";
+    public static final String GET_COUPON_APPLIED_PATH = "-getcouponapplied";
     public static final String CREATE_COUPON_PATH = "-createcoupon";
     public static final String APPLY_COUPON_PATH = "-applycoupon";
     public static final String GET_ALL_COUPON_PATH = "-getallcoupons";
     public static final String GET_ALL_COUPONS_APPLIED_PATH = "-getallcouponsapplied";
+    public static final String GET_ALL_ACCOUNTS_WITH_COUPON_PATH = "-getallaccountswithcoupon";
     public static final String DEACTIVATE_COUPON_PATH = "-deactivatecoupon";
     public static final String DELETE_COUPON_PATH = "-deletecoupon";
     public static final String ADMIN_USER = "admin";
@@ -52,8 +54,10 @@ public class Constants {
     public static final String COUPON_LIST = "coupons";
     public static final String COUPONS_APPLIED_LIST = "couponsApplied";
     public static final String INFO = "Info";
+    public static final String ERROR = "Error";
     public static final String BYTE_TRUE = "1";
     public static final String BYTE_FALSE = "0";
     public static final String COUPON_TEST_CODE = "couponTestCode";
     public static final String COUPON_TEST_NAME = "couponTestName";
+    public static final String SUBSCRIPTION_TEST_ID = "5c90a2f6-c351-404c-aea2-f87b6e88826b";
 }

@@ -34,13 +34,14 @@ import org.killbill.billing.plugin.coupon.servlet.ApplyCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.CreateCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.DeactivateCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.DeleteCouponServlet;
+import org.killbill.billing.plugin.coupon.servlet.GetAllAccountsWithCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.GetAllCouponsAppliedServlet;
 import org.killbill.billing.plugin.coupon.servlet.GetAllCouponsServlet;
+import org.killbill.billing.plugin.coupon.servlet.GetCouponAppliedServlet;
 import org.killbill.billing.plugin.coupon.servlet.GetCouponServlet;
 import org.killbill.killbill.osgi.libs.killbill.KillbillActivatorBase;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.log.LogService;
 
 public class CouponActivator extends KillbillActivatorBase {
 
@@ -70,6 +71,10 @@ public class CouponActivator extends KillbillActivatorBase {
         final GetCouponServlet getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
         registerServlet(context, getCouponServlet, Constants.GET_COUPON_PATH);
 
+        // Register Get Coupon Applied Servlet
+        final GetCouponAppliedServlet getCouponAppliedServlet = new GetCouponAppliedServlet(logService, couponPluginApi);
+        registerServlet(context, getCouponAppliedServlet, Constants.GET_COUPON_APPLIED_PATH);
+
         // Register Create Coupon Servlet
         final CreateCouponServlet createCouponServlet = new CreateCouponServlet(logService, couponPluginApi);
         registerServlet(context, createCouponServlet, Constants.CREATE_COUPON_PATH);
@@ -85,6 +90,10 @@ public class CouponActivator extends KillbillActivatorBase {
         // Register Get All Coupons Applied Servlet
         final GetAllCouponsAppliedServlet getAllCouponsAppliedServlet = new GetAllCouponsAppliedServlet(logService, couponPluginApi);
         registerServlet(context, getAllCouponsAppliedServlet, Constants.GET_ALL_COUPONS_APPLIED_PATH);
+
+        // Register Get All Accounts With Coupon Servlet
+        final GetAllAccountsWithCouponServlet getAllAccountsWithCouponServlet = new GetAllAccountsWithCouponServlet(logService, couponPluginApi);
+        registerServlet(context, getAllAccountsWithCouponServlet, Constants.GET_ALL_ACCOUNTS_WITH_COUPON_PATH);
 
         // Register Deactivate Coupon Servlet
         final DeactivateCouponServlet deactivateCouponServlet = new DeactivateCouponServlet(logService, couponPluginApi);
