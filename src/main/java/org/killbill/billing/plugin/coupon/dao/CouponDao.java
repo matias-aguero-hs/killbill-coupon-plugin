@@ -265,6 +265,32 @@ public class CouponDao extends PluginDao {
     }
 
     /**
+     * Method to deactivate the Application of a Coupon object by couponCode and subscriptionId from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public void deactivateApplicationOfCouponByCodeAndSubscription(final String couponCode, final UUID subscriptionId) throws SQLException {
+        String notes = "Coupon deactivated on " + new Date(Calendar.getInstance().getTimeInMillis());;
+        logService.log(LogService.LOG_INFO, "Executing query to Deactivate the Application of a Coupon by couponCode and subscription Id in the DB");
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .update(COUPONS_APPLIED)
+                           .set(COUPONS_APPLIED.IS_ACTIVE, Byte.valueOf(Constants.BYTE_FALSE))
+                           .set(COUPONS_APPLIED.NOTES, notes)
+                           .where(COUPONS_APPLIED.COUPON_CODE.equal(couponCode))
+                           .and(COUPONS_APPLIED.KB_SUBSCRIPTION_ID.equal(subscriptionId.toString()))
+                           .and(COUPONS_APPLIED.IS_ACTIVE.equal(Byte.valueOf(Constants.BYTE_TRUE)))
+                           .execute();
+                        return null;
+                    }
+                });
+    }
+
+    /**
      * Method to increase the number of invoices affected during the invoice generation
      * @param couponCode
      * @param numberOfInvoices

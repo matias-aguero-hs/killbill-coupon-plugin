@@ -17,6 +17,7 @@
 
 package org.killbill.billing.plugin.coupon.api;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -96,16 +97,30 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             return null;
         }
 
-        if (entitlementContext.getOperationType() != OperationType.CANCEL_SUBSCRIPTION) {
-            // TODO deactivate couponApplied
-        }
-
-        if (entitlementContext.getOperationType() != OperationType.CHANGE_PLAN) {
-            // verify billing period changes
-            // TODO deactivate couponApplied
+        if (entitlementContext.getOperationType().equals(OperationType.CHANGE_PLAN)
+                || entitlementContext.getOperationType().equals(OperationType.CANCEL_SUBSCRIPTION)) {
+            deactivateCoupon(entitlementContext);
         }
 
         return null;
+    }
+
+    private void deactivateCoupon(EntitlementContext entitlementContext) throws EntitlementPluginApiException {
+        try {
+            UUID subscriptionId = getEntitlementId(entitlementContext);
+            CouponsAppliedRecord couponsAppliedRecord = couponPluginApi.getActiveCouponAppliedBySubscription(subscriptionId);
+            if (null != couponsAppliedRecord) {
+                couponPluginApi.deactivateApplicationOfCouponByCodeAndSubscription(couponsAppliedRecord.getCouponCode(), subscriptionId);
+            }
+        } catch (EntitlementApiException e) {
+            String error = "Error getting EntitlementId";
+            logService.log(LogService.LOG_ERROR, error);
+            throw new EntitlementPluginApiException(error);
+        } catch (SQLException e) {
+            String error = "Error deactivating Coupon";
+            logService.log(LogService.LOG_ERROR, error);
+            throw new EntitlementPluginApiException(error);
+        }
     }
 
     /**
