@@ -17,6 +17,7 @@
 
 package org.killbill.billing.plugin.coupon.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -33,6 +34,8 @@ import org.killbill.billing.entitlement.plugin.api.OnSuccessEntitlementResult;
 import org.killbill.billing.entitlement.plugin.api.OperationType;
 import org.killbill.billing.entitlement.plugin.api.PriorEntitlementResult;
 import org.killbill.billing.payment.api.PluginProperty;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
@@ -67,11 +70,11 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             return new DefaultPriorEntitlementResult();
         }
 
-        final PluginProperty couponProperty = findCouponProperty(pluginProperties);
-        if (couponProperty == null) {
+        String couponCode = findCouponInRequest(pluginProperties);
+        if (couponCode == null) {
             return new DefaultPriorEntitlementResult();
         }
-        String couponCode = (String) couponProperty.getValue();
+
         String productName = entitlementContext.getPlanPhaseSpecifier().getProductName();
         try {
             couponPluginApi.validateCoupon(couponCode, entitlementContext.getAccountId(), productName, entitlementContext);
@@ -89,16 +92,50 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             throws EntitlementPluginApiException {
 
         if (entitlementContext.getOperationType() != OperationType.CREATE_SUBSCRIPTION) {
+            applyCouponToNewSubscription(entitlementContext, pluginProperties);
             return null;
         }
 
-        final PluginProperty couponProperty = findCouponProperty(pluginProperties);
-        if (couponProperty == null) {
-            return null;
+        if (entitlementContext.getOperationType() != OperationType.CANCEL_SUBSCRIPTION) {
+            // TODO deactivate couponApplied
         }
-        String couponCode = (String) couponProperty.getValue();
+
+        if (entitlementContext.getOperationType() != OperationType.CHANGE_PLAN) {
+            // verify billing period changes
+            // TODO deactivate couponApplied
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param entitlementContext
+     * @param pluginProperties
+     * @return
+     */
+    private boolean applyCouponToNewSubscription(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties) {
+
+        String couponCode = findCouponInRequest(pluginProperties);
+        CouponsRecord requestCoupon = null;
+        List<CouponsAppliedRecord> couponsApplied = new ArrayList<CouponsAppliedRecord>();
+        List<CouponsRecord> appliedCoupons = new ArrayList<CouponsRecord>();
 
         try {
+            // TODO get coupon from request
+            if (couponCode == null) {
+                requestCoupon = couponPluginApi.getCouponByCode(couponCode);
+            }
+
+            // TODO get active coupons applied
+            couponsApplied = couponPluginApi.getCouponsAppliedByAccountId(entitlementContext.getAccountId());
+            appliedCoupons = getCouponsForApplications(couponsApplied);
+
+            // TODO compare discounts
+
+            // TODO if needed, calculate number of invoices
+
+            // TODO apply coupon with higger discount
             logService.log(LogService.LOG_INFO, "Going to get subscription id from externalkey = " + entitlementContext.getExternalKey());
             UUID entitlementId = getEntitlementId(entitlementContext);
             if (entitlementId == null) {
@@ -112,12 +149,24 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
 
             // TODO inform user that coupon was applied ??
 
+            return true;
+
         } catch (Exception e) {
             // TODO inform user that the coupon couldn't be applied
             // TODO this exception won't stop Subscription creation.
-            throw new EntitlementPluginApiException(e);
+            // throw new EntitlementPluginApiException(e);
         }
+        return false;
+    }
 
+    /**
+     * TODO document me
+     *
+     * @param couponsApplied
+     * @return
+     */
+    private List<CouponsRecord> getCouponsForApplications(final List<CouponsAppliedRecord> couponsApplied) {
+        // TODO implement
         return null;
     }
 
@@ -147,17 +196,19 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
      * @param pluginProperties
      * @return
      */
-    private PluginProperty findCouponProperty(@Nullable final Iterable<PluginProperty> pluginProperties) {
+    private String findCouponInRequest(@Nullable final Iterable<PluginProperty> pluginProperties) {
 
         if ((pluginProperties == null) || !pluginProperties.iterator().hasNext()) {
             return null;
         }
 
-        return Iterables.tryFind(pluginProperties, new Predicate<PluginProperty>() {
+        PluginProperty coupon = Iterables.tryFind(pluginProperties, new Predicate<PluginProperty>() {
             @Override
             public boolean apply(@Nullable PluginProperty input) {
                 return input.getKey().equals(COUPON_PROPERTY);
             }
         }).orNull();
+
+        return (coupon != null) ? (String) coupon.getValue() : null;
     }
 }
