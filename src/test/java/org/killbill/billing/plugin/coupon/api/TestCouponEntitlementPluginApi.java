@@ -20,6 +20,7 @@ package org.killbill.billing.plugin.coupon.api;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,11 +35,15 @@ import org.killbill.billing.entitlement.plugin.api.OnSuccessEntitlementResult;
 import org.killbill.billing.entitlement.plugin.api.OperationType;
 import org.killbill.billing.entitlement.plugin.api.PriorEntitlementResult;
 import org.killbill.billing.payment.api.PluginProperty;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.mock.MockEntitlement;
 import org.killbill.billing.plugin.coupon.mock.MockEntitlementContext;
 import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.plugin.coupon.model.ErrorPriorEntitlementResult;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
@@ -72,7 +77,7 @@ public class TestCouponEntitlementPluginApi extends Mockito {
 
         context = new MockEntitlementContext();
         entitlement = new MockEntitlement();
-        pluginProperty = new PluginProperty(CouponEntitlementPluginApi.COUPON_PROPERTY, "10", false);
+        pluginProperty = new PluginProperty(CouponEntitlementPluginApi.COUPON_PROPERTY, Constants.COUPON_CODE, false);
         properties = new ArrayList<PluginProperty>();
         properties.add(pluginProperty);
 
@@ -163,9 +168,12 @@ public class TestCouponEntitlementPluginApi extends Mockito {
     }
 
     @Test
-    public void testOnSuccessCallCouponNoEntitlement() throws EntitlementApiException {
+    public void testOnSuccessCallCouponNoEntitlement() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
 
+        when(couponPluginApi.getCouponByCode(any())).thenReturn(TestCouponHelper.createBaseCoupon());
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(null);
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
         OnSuccessEntitlementResult result = null;
         try {
@@ -206,7 +214,9 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
 
+        when(couponPluginApi.getCouponByCode(any())).thenReturn(TestCouponHelper.createBaseCoupon());
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
         OnSuccessEntitlementResult result = null;
@@ -219,5 +229,159 @@ public class TestCouponEntitlementPluginApi extends Mockito {
 
     }
 
+    @Test
+    public void testOnSuccessCallNoCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+
+        when(couponPluginApi.getCouponByCode(any())).thenReturn(null);
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
+
+        OnSuccessEntitlementResult result = null;
+        try {
+            result = entitlementPluginApi.onSuccessCall(context, null);
+        } catch (EntitlementPluginApiException e) {
+            fail();
+        }
+        assertTrue(result == null);
+
+    }
+
+    @Test
+    public void testOnSuccessCallAppliedCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+
+        CouponsRecord c1 = TestCouponHelper.createBaseCoupon();
+        c1.setCouponCode("c1");
+        c1.setDuration(DurationTypeEnum.once.toString());
+        c1.setNumberOfInvoices(1);
+        c1.setPercentageDiscount(15D);
+
+        CouponsRecord c2 = TestCouponHelper.createBaseCoupon();
+        c2.setCouponCode("c2");
+        c2.setDuration(DurationTypeEnum.multiple.toString());
+        c2.setNumberOfInvoices(6);
+        c2.setPercentageDiscount(20D);
+
+        CouponsAppliedRecord coupon1 = TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID());
+        coupon1.setCouponCode("c1");
+        coupon1.setNumberOfInvoices(2);
+
+        CouponsAppliedRecord coupon2 = TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID());
+        coupon2.setCouponCode("c2");
+        coupon2.setNumberOfInvoices(4);
+
+        List<CouponsAppliedRecord> appliedCoupons = new ArrayList<CouponsAppliedRecord>();
+        appliedCoupons.add(coupon1);
+        appliedCoupons.add(coupon2);
+
+        when(couponPluginApi.getCouponByCode(Constants.COUPON_CODE)).thenReturn(null);
+        when(couponPluginApi.getCouponByCode("c1")).thenReturn(c1);
+        when(couponPluginApi.getCouponByCode("c2")).thenReturn(c2);
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(appliedCoupons);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
+
+        OnSuccessEntitlementResult result = null;
+        try {
+            result = entitlementPluginApi.onSuccessCall(context, null);
+        } catch (EntitlementPluginApiException e) {
+            fail();
+        }
+        assertTrue(result == null);
+
+    }
+
+    @Test
+    public void testOnSuccessCallAppliedCouponsSameDiscount() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+
+        CouponsRecord c1 = TestCouponHelper.createBaseCoupon();
+        c1.setCouponCode("c1");
+        c1.setDuration(DurationTypeEnum.once.toString());
+        c1.setNumberOfInvoices(1);
+        c1.setPercentageDiscount(20D);
+
+        CouponsRecord c2 = TestCouponHelper.createBaseCoupon();
+        c2.setCouponCode("c2");
+        c2.setDuration(DurationTypeEnum.multiple.toString());
+        c2.setNumberOfInvoices(6);
+        c2.setPercentageDiscount(20D);
+
+        CouponsAppliedRecord coupon1 = TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID());
+        coupon1.setCouponCode("c1");
+        coupon1.setNumberOfInvoices(2);
+
+        CouponsAppliedRecord coupon2 = TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID());
+        coupon2.setCouponCode("c2");
+        coupon2.setNumberOfInvoices(4);
+
+        List<CouponsAppliedRecord> appliedCoupons = new ArrayList<CouponsAppliedRecord>();
+        appliedCoupons.add(coupon1);
+        appliedCoupons.add(coupon2);
+
+        when(couponPluginApi.getCouponByCode(Constants.COUPON_CODE)).thenReturn(null);
+        when(couponPluginApi.getCouponByCode("c1")).thenReturn(c1);
+        when(couponPluginApi.getCouponByCode("c2")).thenReturn(c2);
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(appliedCoupons);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
+
+        OnSuccessEntitlementResult result = null;
+        try {
+            result = entitlementPluginApi.onSuccessCall(context, null);
+        } catch (EntitlementPluginApiException e) {
+            fail();
+        }
+        assertTrue(result == null);
+
+    }
+
+    @Test
+    public void testOnSuccessCallWithCouponAndAppliedCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+
+        CouponsRecord c1 = TestCouponHelper.createBaseCoupon();
+        c1.setDuration(DurationTypeEnum.multiple.toString());
+        c1.setNumberOfInvoices(4);
+        c1.setPercentageDiscount(25D);
+
+        CouponsRecord c2 = TestCouponHelper.createBaseCoupon();
+        c2.setCouponCode("c2");
+        c2.setDuration(DurationTypeEnum.multiple.toString());
+        c2.setNumberOfInvoices(6);
+        c2.setPercentageDiscount(20D);
+
+        CouponsAppliedRecord coupon1 = TestCouponHelper.createBaseCouponApplied(UUID.randomUUID(), UUID.randomUUID());
+        coupon1.setCouponCode("c2");
+        coupon1.setNumberOfInvoices(2);
+
+        List<CouponsAppliedRecord> appliedCoupons = new ArrayList<CouponsAppliedRecord>();
+        appliedCoupons.add(coupon1);
+
+        when(couponPluginApi.getCouponByCode(Constants.COUPON_CODE)).thenReturn(c1);
+        when(couponPluginApi.getCouponByCode("c2")).thenReturn(c2);
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(appliedCoupons);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
+
+        OnSuccessEntitlementResult result = null;
+        try {
+            result = entitlementPluginApi.onSuccessCall(context, properties);
+        } catch (EntitlementPluginApiException e) {
+            fail();
+        }
+        assertTrue(result == null);
+
+    }
 
 }
