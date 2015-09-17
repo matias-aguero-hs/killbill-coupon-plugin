@@ -91,6 +91,11 @@ public class CouponPluginApi {
         dao.deactivateApplicationsOfCoupon(couponCode);
     }
 
+    public void deactivateApplicationOfCouponByCodeAndSubscription(final String couponCode, final UUID subscriptionId) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to deactivate the Application of a Coupon by couponCode and subscriptionId");
+        dao.deactivateApplicationOfCouponByCodeAndSubscription(couponCode, subscriptionId);
+    }
+
     public void increaseNumberOfInvoicesAndSetActiveStatus(final String couponCode, final Integer numberOfInvoices, final Boolean deactivate, final UUID subscriptionId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to increase the number of Invoices affected and deactivate or not a Coupon Application");
         Byte deactivation = (deactivate ? new Byte(Constants.BYTE_FALSE) : new Byte(Constants.BYTE_TRUE));

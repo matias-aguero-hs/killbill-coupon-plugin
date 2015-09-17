@@ -19,6 +19,7 @@ package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -27,6 +28,11 @@ import javax.annotation.Nullable;
 
 import org.killbill.billing.entitlement.api.Entitlement;
 import org.killbill.billing.entitlement.api.EntitlementApiException;
+import org.killbill.billing.entitlement.api.Subscription;
+import org.killbill.billing.entitlement.api.SubscriptionApi;
+import org.killbill.billing.entitlement.api.SubscriptionApiException;
+import org.killbill.billing.entitlement.api.SubscriptionEvent;
+import org.killbill.billing.entitlement.api.SubscriptionEventType;
 import org.killbill.billing.entitlement.plugin.api.EntitlementContext;
 import org.killbill.billing.entitlement.plugin.api.EntitlementPluginApi;
 import org.killbill.billing.entitlement.plugin.api.EntitlementPluginApiException;
@@ -99,16 +105,66 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             return null;
         }
 
-        if (entitlementContext.getOperationType() == OperationType.CANCEL_SUBSCRIPTION) {
-            // TODO deactivate couponApplied
+        if (entitlementContext.getOperationType().equals(OperationType.CANCEL_SUBSCRIPTION)) {
+            deactivateIfHasCoupon(entitlementContext);
         }
 
-        if (entitlementContext.getOperationType() == OperationType.CHANGE_PLAN) {
-            // verify billing period changes
-            // TODO deactivate couponApplied
+        if (entitlementContext.getOperationType().equals(OperationType.CHANGE_PLAN)) {
+            if (hasChangedBillingPeriodOrProduct(entitlementContext)) {
+                deactivateIfHasCoupon(entitlementContext);
+            }
         }
-
         return null;
+    }
+
+    private boolean hasChangedBillingPeriodOrProduct(EntitlementContext entitlementContext) {
+        // check what kind of "change" was made to the plan, if it was billing period or type of product, deactivate the coupon applied!
+        SubscriptionEvent lastChangeEvent = null;
+        try {
+            SubscriptionApi subscriptionApi = killbillAPI.getSubscriptionApi();
+            if (null != subscriptionApi) {
+                Subscription subscription = subscriptionApi.getSubscriptionForEntitlementId(getEntitlementId(entitlementContext), entitlementContext);
+                if (null != subscription) {
+                    List<SubscriptionEvent> subscriptionEvents = subscription.getSubscriptionEvents();
+
+                    for (SubscriptionEvent subscriptionEvent : subscriptionEvents) {
+                        if (null != subscriptionEvent.getSubscriptionEventType() && subscriptionEvent.getSubscriptionEventType().equals(SubscriptionEventType.CHANGE)) {
+                            lastChangeEvent = subscriptionEvent;
+                        }
+                    }
+                    // billing period or product have changed, so deactivate the coupon applied
+                    return (null != lastChangeEvent
+                            && null != lastChangeEvent.getPrevBillingPeriod()
+                            && null != lastChangeEvent.getNextBillingPeriod()
+                            && null != lastChangeEvent.getPrevProduct()
+                            && null != lastChangeEvent.getNextProduct()
+                            && (!lastChangeEvent.getPrevBillingPeriod().equals(lastChangeEvent.getNextBillingPeriod())
+                            || !lastChangeEvent.getPrevProduct().equals(lastChangeEvent.getNextProduct())));
+                }
+            }
+        } catch (SubscriptionApiException e) {
+            e.printStackTrace();
+        } catch (EntitlementApiException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    private void deactivateIfHasCoupon(EntitlementContext entitlementContext) throws EntitlementPluginApiException {
+        try {
+            UUID subscriptionId = getEntitlementId(entitlementContext);
+            CouponsAppliedRecord couponsAppliedRecord = couponPluginApi.getActiveCouponAppliedBySubscription(subscriptionId);
+            if (null != couponsAppliedRecord) {
+                couponPluginApi.deactivateApplicationOfCouponByCodeAndSubscription(couponsAppliedRecord.getCouponCode(), subscriptionId);
+            }
+        } catch (EntitlementApiException e) {
+            String error = "Error getting EntitlementId";
+            logService.log(LogService.LOG_ERROR, error);
+            throw new EntitlementPluginApiException(error);
+        } catch (SQLException e) {
+            String error = "Error deactivating Coupon";
+            logService.log(LogService.LOG_ERROR, error);
+            throw new EntitlementPluginApiException(error);
+        }
     }
 
     /**
