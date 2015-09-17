@@ -114,7 +114,7 @@ public class CouponHelper {
     public static boolean shouldDeactivateCouponApplied(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
         return coupon.getDuration().equals(DurationTypeEnum.once.toString())
                || (coupon.getDuration().equals(DurationTypeEnum.multiple.toString())
-                   && coupon.getNumberOfInvoices() <= cApplied.getNumberOfInvoices());
+                   && cApplied.getMaxInvoices() <= cApplied.getNumberOfInvoices());
     }
 
 }
