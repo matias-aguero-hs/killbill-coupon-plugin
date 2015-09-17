@@ -516,6 +516,12 @@ public class TestCouponPluginApi extends Mockito {
         couponPluginApi.deactivateApplicationsOfCoupon(Constants.COUPON_CODE);
     }
 
+    @Test(expected = SQLException.class)
+    public void testDeactivateApplicationOfCouponByCodeAndSubscriptionSQLException() throws Exception {
+        doThrow(new SQLException()).when(dao).deactivateApplicationOfCouponByCodeAndSubscription(anyString(), any(UUID.class));
+        couponPluginApi.deactivateApplicationOfCouponByCodeAndSubscription(Constants.COUPON_CODE, UUID.randomUUID());
+    }
+
     private List<CouponsProductsRecord> buildListOfCouponProducts() {
         List<CouponsProductsRecord> result = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
