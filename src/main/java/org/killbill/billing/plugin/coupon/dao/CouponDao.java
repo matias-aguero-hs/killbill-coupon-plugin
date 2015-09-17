@@ -303,7 +303,7 @@ public class CouponDao extends PluginDao {
      * @param accountId
      * @throws SQLException
      */
-    public void applyCoupon(final String couponCode, final UUID subscriptionId, final UUID accountId, final TenantContext context) throws SQLException {
+    public void applyCoupon(final String couponCode, final int maxInvoices, final UUID subscriptionId, final UUID accountId, final TenantContext context) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to store an applied Coupon with its subscriptionId and accountId in the DB");
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
@@ -313,11 +313,13 @@ public class CouponDao extends PluginDao {
                            .insertInto(COUPONS_APPLIED,
                                        COUPONS_APPLIED.COUPON_CODE,
                                        COUPONS_APPLIED.CREATED_DATE,
+                                       COUPONS_APPLIED.MAX_INVOICES,
                                        COUPONS_APPLIED.KB_SUBSCRIPTION_ID,
                                        COUPONS_APPLIED.KB_ACCOUNT_ID,
                                        COUPONS_APPLIED.KB_TENANT_ID)
                            .values(couponCode,
                                    new Date(Calendar.getInstance().getTimeInMillis()),
+                                   maxInvoices,
                                    subscriptionId.toString(),
                                    accountId.toString(),
                                    context.getTenantId().toString())
@@ -477,4 +479,29 @@ public class CouponDao extends PluginDao {
                            }
                        });
     }
+
+    /**
+     * Method to get a list of Coupons Applied from the DB using its accountId
+     * @param accountId
+     * @return
+     * @throws SQLException
+     */
+    public List<CouponsAppliedRecord> getActiveCouponsAppliedByAccountIdAndProduct(final UUID accountId, final String productName) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Coupons Applied from the DB");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsAppliedRecord>>() {
+                           @Override
+                           public Result<CouponsAppliedRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                       .select(COUPONS_APPLIED.fields())
+                                       .from(COUPONS_APPLIED)
+                                       .join(COUPONS_PRODUCTS)
+                                       .on(COUPONS_APPLIED.COUPON_CODE.equal(COUPONS_PRODUCTS.COUPON_CODE))
+                                       .where(COUPONS_APPLIED.KB_ACCOUNT_ID.equal(accountId.toString()))
+                                       .and(COUPONS_PRODUCTS.PRODUCT_NAME.equal(productName))
+                                       .fetch().into(COUPONS_APPLIED);
+                           }
+                       });
+    }
+
 }

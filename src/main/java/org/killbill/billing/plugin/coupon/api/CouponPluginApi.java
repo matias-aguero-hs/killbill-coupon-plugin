@@ -170,7 +170,7 @@ public class CouponPluginApi {
      * @param accountId
      * @throws SQLException
      */
-    public boolean applyCoupon(String couponCode, UUID subscriptionId, UUID accountId, TenantContext context)
+    public boolean applyCoupon(String couponCode, Integer maxNumberOfInvoices, UUID subscriptionId, UUID accountId, TenantContext context)
             throws SQLException, AccountApiException, SubscriptionApiException, CouponApiException {
 
         // Get Coupon by Code from DB
@@ -219,8 +219,10 @@ public class CouponPluginApi {
                 validateCoupon(coupon, account, subProductName);
 
                 // save applied coupon
+                int maxInvoices = ((maxNumberOfInvoices != null) && (maxNumberOfInvoices.intValue() >= 0)) ?
+                                  maxNumberOfInvoices.intValue() : coupon.getNumberOfInvoices();
                 logService.log(LogService.LOG_INFO, "Accessing the DAO to apply a Coupon");
-                dao.applyCoupon(couponCode, subscriptionId, accountId, context);
+                dao.applyCoupon(couponCode, maxInvoices, subscriptionId, accountId, context);
             }
             else {
                 String error = "Coupon does not exist. CouponCode = " + couponCode;
@@ -350,7 +352,25 @@ public class CouponPluginApi {
             logService.log(LogService.LOG_ERROR, "Error getting list of Applied Coupons for accountId: " + accountId + ". Cause: " + e.getMessage());
             e.printStackTrace();
         }
-        return new ArrayList<>();
+        return new ArrayList<CouponsAppliedRecord>();
+    }
+
+    /**
+     * Get active coupons applied to customer using the accountId and productName
+     * @param accountId
+     * @return
+     */
+    public List<CouponsAppliedRecord> getActiveCouponsAppliedByAccountIdAndProduct(UUID accountId, String productName) {
+        logService.log(LogService.LOG_INFO,
+                       "Accessing the DAO to get a list of Active Applied Coupons from the DB using the accountId and productName");
+        try {
+            return dao.getActiveCouponsAppliedByAccountIdAndProduct(accountId, productName);
+        } catch (SQLException e) {
+            logService.log(LogService.LOG_ERROR, "Error getting list of Active Applied Coupons for accountId and productName: "
+                                                 + accountId + ". Cause: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return new ArrayList<CouponsAppliedRecord>();
     }
 
     /**
@@ -376,7 +396,7 @@ public class CouponPluginApi {
             logService.log(LogService.LOG_ERROR, "Error getting list of Applied Coupons for couponCode: " + couponCode + ". Cause: " + e.getMessage());
             e.printStackTrace();
         }
-        return new ArrayList<>();
+        return new ArrayList<CouponsAppliedRecord>();
     }
 
     /**
@@ -393,6 +413,6 @@ public class CouponPluginApi {
             e.printStackTrace();
             // TODO check this block
         }
-        return new ArrayList<>();
+        return new ArrayList<CouponsProductsRecord>();
     }
 }

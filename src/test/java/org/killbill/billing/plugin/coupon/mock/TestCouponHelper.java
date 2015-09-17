@@ -62,6 +62,7 @@ public class TestCouponHelper {
         couponApplied.setKbSubscriptionId(subscriptionId.toString());
         couponApplied.setKbAccountId(accountId.toString());
         couponApplied.setNumberOfInvoices(0);
+        couponApplied.setMaxInvoices(6);
         couponApplied.setIsActive(Byte.valueOf("1"));
 
         return couponApplied;

@@ -25,6 +25,7 @@ CREATE TABLE coupons_applied (
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_date DATE NOT NULL,
   number_of_invoices int(3) DEFAULT 0,
+  max_invoices int(3) NOT NULL DEFAULT 0,
   notes VARCHAR(250),
   kb_subscription_id char(36) not null,
   kb_account_id char(36) not null,

@@ -137,8 +137,7 @@ public class TestCouponPluginApi extends Mockito {
 
     @Test
     public void testGetCouponByCodeOK() throws Exception {
-        CouponsRecord coupon = new CouponsRecord();
-        coupon.setCouponCode(Constants.COUPON_CODE);
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
         when(dao.getCouponByCode(anyString())).thenReturn(coupon);
 
         CouponsRecord result = couponPluginApi.getCouponByCode(Constants.COUPON_CODE);
@@ -312,10 +311,7 @@ public class TestCouponPluginApi extends Mockito {
         Tenant tenant = new MockTenant();
         Account account = new MockAccount(UUID.randomUUID(), "key");
         Subscription subscription = new MockSubscription();
-        CouponsRecord coupon = new CouponsRecord();
-        coupon.setCouponCode(Constants.COUPON_CODE);
-        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
-        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeName");
@@ -331,7 +327,7 @@ public class TestCouponPluginApi extends Mockito {
         when(dao.getProductsOfCoupon(anyString())).thenReturn(couponProductsList);
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
-        Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+        Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
 
         assertTrue(result);
     }
@@ -341,10 +337,7 @@ public class TestCouponPluginApi extends Mockito {
         Tenant tenant = new MockTenant();
         Account account = new MockAccount(UUID.randomUUID(), "key");
         Subscription subscription = new MockSubscription();
-        CouponsRecord coupon = new CouponsRecord();
-        coupon.setCouponCode(Constants.COUPON_CODE);
-        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
-        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeName");
@@ -362,7 +355,7 @@ public class TestCouponPluginApi extends Mockito {
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         try {
-            couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+            couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
        } catch (CouponApiException e) {
             assertTrue(e.getMessage().contains("already has an active applied coupon"));
             return;
@@ -376,10 +369,7 @@ public class TestCouponPluginApi extends Mockito {
         Tenant tenant = new MockTenant();
         Account account = new MockAccount(UUID.randomUUID(), "key");
         Subscription subscription = new MockSubscription();
-        CouponsRecord coupon = new CouponsRecord();
-        coupon.setCouponCode(Constants.COUPON_CODE);
-        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
-        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeName");
@@ -398,7 +388,7 @@ public class TestCouponPluginApi extends Mockito {
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
         try {
-            couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+            couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
         } catch (CouponApiException e) {
             assertTrue(e.getMessage().contains("already had applied coupon"));
             return;
@@ -421,7 +411,7 @@ public class TestCouponPluginApi extends Mockito {
         when(dao.getCouponByCode(anyString())).thenReturn(null);
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
-        couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+        couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
     }
 
     @Test
@@ -432,7 +422,7 @@ public class TestCouponPluginApi extends Mockito {
         when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
-        Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), null, tenantContext);
+        Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), null, tenantContext);
 
         assertFalse(result);
     }
@@ -445,7 +435,7 @@ public class TestCouponPluginApi extends Mockito {
         when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
-        Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), tenantContext);
+        Boolean result = couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, null, UUID.randomUUID(), tenantContext);
 
         assertFalse(result);
     }
@@ -464,10 +454,7 @@ public class TestCouponPluginApi extends Mockito {
         Tenant tenant = new MockTenant();
         Account account = new MockAccount(UUID.randomUUID(), "key");
         Subscription subscription = new MockSubscription();
-        CouponsRecord coupon = new CouponsRecord();
-        coupon.setCouponCode(Constants.COUPON_CODE);
-        coupon.setIsActive(Byte.valueOf(Constants.BYTE_TRUE));
-        coupon.setStartDate(new Date(Calendar.getInstance().getTimeInMillis()));
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
         List<CouponsProductsRecord> couponProductsList = new ArrayList<>();
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setProductName("fakeOtherName");
@@ -483,7 +470,7 @@ public class TestCouponPluginApi extends Mockito {
         when(dao.getProductsOfCoupon(anyString())).thenReturn(couponProductsList);
 
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
-        couponPluginApi.applyCoupon(Constants.COUPON_CODE, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
+        couponPluginApi.applyCoupon(Constants.COUPON_CODE, null, UUID.randomUUID(), UUID.randomUUID(), tenantContext);
     }
 
     @Test(expected = SQLException.class)

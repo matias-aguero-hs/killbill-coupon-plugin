@@ -17,6 +17,7 @@
 
 package org.killbill.billing.plugin.coupon.api;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -39,6 +40,8 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
+import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
+import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.plugin.coupon.model.ErrorPriorEntitlementResult;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
@@ -91,16 +94,16 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
     public OnSuccessEntitlementResult onSuccessCall(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties)
             throws EntitlementPluginApiException {
 
-        if (entitlementContext.getOperationType() != OperationType.CREATE_SUBSCRIPTION) {
+        if (entitlementContext.getOperationType().equals(OperationType.CREATE_SUBSCRIPTION)) {
             applyCouponToNewSubscription(entitlementContext, pluginProperties);
             return null;
         }
 
-        if (entitlementContext.getOperationType() != OperationType.CANCEL_SUBSCRIPTION) {
+        if (entitlementContext.getOperationType() == OperationType.CANCEL_SUBSCRIPTION) {
             // TODO deactivate couponApplied
         }
 
-        if (entitlementContext.getOperationType() != OperationType.CHANGE_PLAN) {
+        if (entitlementContext.getOperationType() == OperationType.CHANGE_PLAN) {
             // verify billing period changes
             // TODO deactivate couponApplied
         }
@@ -109,33 +112,40 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
     }
 
     /**
+     * Find the best coupon to apply automatically
      *
      * @param entitlementContext
      * @param pluginProperties
      * @return
      */
-    private boolean applyCouponToNewSubscription(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties) {
+    private boolean applyCouponToNewSubscription(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties) throws EntitlementPluginApiException {
 
         String couponCode = findCouponInRequest(pluginProperties);
         CouponsRecord requestCoupon = null;
         List<CouponsAppliedRecord> couponsApplied = new ArrayList<CouponsAppliedRecord>();
-        List<CouponsRecord> appliedCoupons = new ArrayList<CouponsRecord>();
 
         try {
-            // TODO get coupon from request
-            if (couponCode == null) {
+            // get coupon from request
+            if (couponCode != null) {
                 requestCoupon = couponPluginApi.getCouponByCode(couponCode);
             }
 
-            // TODO get active coupons applied
-            couponsApplied = couponPluginApi.getCouponsAppliedByAccountId(entitlementContext.getAccountId());
-            appliedCoupons = getCouponsForApplications(couponsApplied);
+            // get active coupons applied
+            String productName = entitlementContext.getPlanPhaseSpecifier().getProductName();
+            couponsApplied = couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(entitlementContext.getAccountId(), productName);
 
-            // TODO compare discounts
+            // compare discounts and get the coupon to apply
+            CouponsRecord couponToApply = findBestCouponToApply(requestCoupon, couponsApplied);
 
-            // TODO if needed, calculate number of invoices
+            if (couponToApply == null) {
+                logService.log(LogService.LOG_INFO, "Nothing to apply.");
+                return true;
+            }
 
-            // TODO apply coupon with higger discount
+            // if needed, calculate number of invoices
+            Integer maxInvoices = calculateMaxInvoicesToApply(couponToApply, couponsApplied);
+
+            // apply coupon with higher discount
             logService.log(LogService.LOG_INFO, "Going to get subscription id from externalkey = " + entitlementContext.getExternalKey());
             UUID entitlementId = getEntitlementId(entitlementContext);
             if (entitlementId == null) {
@@ -145,7 +155,7 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             }
 
             logService.log(LogService.LOG_INFO, "Going to apply coupon " + couponCode + " to subscription " + entitlementId);
-            couponPluginApi.applyCoupon(couponCode, entitlementId, entitlementContext.getAccountId(), entitlementContext);
+            couponPluginApi.applyCoupon(couponToApply.getCouponCode(), maxInvoices, entitlementId, entitlementContext.getAccountId(), entitlementContext);
 
             // TODO inform user that coupon was applied ??
 
@@ -154,20 +164,111 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
         } catch (Exception e) {
             // TODO inform user that the coupon couldn't be applied
             // TODO this exception won't stop Subscription creation.
-            // throw new EntitlementPluginApiException(e);
+            throw new EntitlementPluginApiException(e);
         }
-        return false;
+
     }
 
     /**
-     * TODO document me
+     * Calculate how many invoices need to apply discounts
      *
+     * @param couponToApply
      * @param couponsApplied
      * @return
      */
-    private List<CouponsRecord> getCouponsForApplications(final List<CouponsAppliedRecord> couponsApplied) {
-        // TODO implement
-        return null;
+    private Integer calculateMaxInvoicesToApply(final CouponsRecord couponToApply, final List<CouponsAppliedRecord> couponsApplied) {
+
+        if (couponToApply.getDuration().equals(DurationTypeEnum.forever.toString())) {
+            return 0;
+        }
+
+        CouponsAppliedRecord appliedCoupon = Iterables.tryFind(couponsApplied, new Predicate<CouponsAppliedRecord>() {
+            @Override
+            public boolean apply(@Nullable CouponsAppliedRecord input) {
+                return input.getCouponCode().equals(couponToApply.getCouponCode());
+            }
+        }).orNull();
+
+        return (appliedCoupon != null) ? (appliedCoupon.getMaxInvoices() - appliedCoupon.getNumberOfInvoices())
+                                       : couponToApply.getNumberOfInvoices();
+    }
+
+    /**
+     * Find the best coupon to apply based on higher discount and duration
+     *
+     * @param requestCoupon
+     * @param couponsApplied
+     * @return
+     */
+    private CouponsRecord findBestCouponToApply(final CouponsRecord requestCoupon, final List<CouponsAppliedRecord> couponsApplied) {
+
+        if ((requestCoupon == null) && ((couponsApplied == null) || couponsApplied.isEmpty())) {
+            logService.log(LogService.LOG_INFO, "There are no coupons to apply automatically.");
+            return null;
+        }
+
+        if ((requestCoupon != null) && ((couponsApplied == null) || couponsApplied.isEmpty())) {
+            logService.log(LogService.LOG_INFO,
+                           "There are no active apply coupons for this account. Apply automatically coupon from request "
+                           + requestCoupon.getCouponCode());
+            return requestCoupon;
+        }
+
+        List<CouponsRecord> candidateCoupons = new ArrayList<CouponsRecord>();
+
+        if ((couponsApplied != null) && !couponsApplied.isEmpty()) {
+            logService.log(LogService.LOG_INFO,
+                           "There are active apply coupons for this account.");
+
+            for (CouponsAppliedRecord couponApplied : couponsApplied) {
+                try {
+                    candidateCoupons.add(couponPluginApi.getCouponByCode(couponApplied.getCouponCode()));
+                    logService.log(LogService.LOG_INFO,
+                                   "Coupon " + couponApplied.getCouponCode() + " + added as a candidate.");
+                } catch (SQLException e) {
+                    logService.log(LogService.LOG_ERROR, "Error getting coupon " + couponApplied.getCouponCode());
+                }
+            }
+
+            if (requestCoupon != null) {
+                candidateCoupons.add(requestCoupon);
+                logService.log(LogService.LOG_INFO,
+                               "Coupon " + requestCoupon.getCouponCode() + " + added as a candidate.");
+            }
+        }
+
+        return compareAndGetBestCouponToApply(candidateCoupons);
+    }
+
+    /**
+     *
+     *
+     * @param candidateCoupons
+     * @return
+     */
+    private CouponsRecord compareAndGetBestCouponToApply(final List<CouponsRecord> candidateCoupons) {
+
+        Double biggerDiscount = 0D;
+        CouponsRecord bestCoupon = null;
+
+        for (CouponsRecord coupon : candidateCoupons) {
+            // TODO change next line when discountAmount type is implemented
+            Double couponDiscount = (coupon.getDiscountType().equals(DiscountTypeEnum.percentage.toString())) ? coupon.getPercentageDiscount() : 0 ;
+            if (couponDiscount.compareTo(biggerDiscount) > 0) {
+                biggerDiscount = couponDiscount;
+                bestCoupon = coupon;
+            } else if (couponDiscount.compareTo(biggerDiscount) == 0) {
+                // equal discount
+                if (coupon.getDuration().equals(DurationTypeEnum.forever)) {
+                    bestCoupon = coupon;
+                } else if ((coupon.getDuration().equals(DurationTypeEnum.multiple))
+                           && (bestCoupon.getDuration().equals(DurationTypeEnum.once))) {
+                    bestCoupon = coupon;
+                }
+            }
+        }
+
+        return bestCoupon;
     }
 
     /**

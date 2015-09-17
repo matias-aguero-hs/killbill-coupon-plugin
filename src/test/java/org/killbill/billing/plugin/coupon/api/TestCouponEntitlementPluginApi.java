@@ -37,6 +37,7 @@ import org.killbill.billing.payment.api.PluginProperty;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.mock.MockEntitlement;
 import org.killbill.billing.plugin.coupon.mock.MockEntitlementContext;
+import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
 import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
 import org.killbill.billing.plugin.coupon.model.ErrorPriorEntitlementResult;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
@@ -182,8 +183,10 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
 
+        when(couponPluginApi.getCouponByCode(any())).thenReturn(TestCouponHelper.createBaseCoupon());
+        when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
-        when(couponPluginApi.applyCoupon(any(), any(), any(), any())).thenThrow(CouponApiException.class);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenThrow(CouponApiException.class);
 
         OnSuccessEntitlementResult result = null;
         try {
@@ -204,7 +207,7 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         entitlements.add(entitlement);
 
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
-        when(couponPluginApi.applyCoupon(any(), any(), any(), any())).thenReturn(true);
+        when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
         OnSuccessEntitlementResult result = null;
         try {
