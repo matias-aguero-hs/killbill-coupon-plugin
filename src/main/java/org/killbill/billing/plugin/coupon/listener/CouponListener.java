@@ -116,7 +116,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
                 CouponsAppliedRecord cApplied = couponPluginApi.getActiveCouponAppliedBySubscription(subscriptionId);
                 if (cApplied == null) {
                     logService.log(LogService.LOG_INFO, "Subscription " + subscriptionId + " does not have active coupon applied.");
-                    return;
+                    continue;
                 }
 
                 // get coupon info from DB
