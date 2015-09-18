@@ -49,6 +49,7 @@ import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
 import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.plugin.coupon.model.ErrorPriorEntitlementResult;
+import org.killbill.billing.plugin.coupon.util.CouponHelper;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 import org.osgi.service.log.LogService;
@@ -275,7 +276,13 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
 
             for (CouponsAppliedRecord couponApplied : couponsApplied) {
                 try {
-                    candidateCoupons.add(couponPluginApi.getCouponByCode(couponApplied.getCouponCode()));
+                    CouponsRecord coupon = couponPluginApi.getCouponByCode(couponApplied.getCouponCode());
+                    if ((coupon == null) || !CouponHelper.isApplicable(coupon)) {
+                        logService.log(LogService.LOG_INFO,
+                                       "Coupon " + couponApplied.getCouponCode() + " + is not applicable.");
+                        continue;
+                    }
+                    candidateCoupons.add(coupon);
                     logService.log(LogService.LOG_INFO,
                                    "Coupon " + couponApplied.getCouponCode() + " + added as a candidate.");
                 } catch (SQLException e) {
