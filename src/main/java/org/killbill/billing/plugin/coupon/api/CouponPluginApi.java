@@ -306,9 +306,21 @@ public class CouponPluginApi {
 
         String error = "";
 
-        // validate expiration date and is_active
-        if (!CouponHelper.isActive(coupon) || CouponHelper.hasExpired(coupon)) {
-            error = "Coupon " + coupon.getCouponCode() + " is not active or has expired.";
+        // validate is_active
+        if (!CouponHelper.isActive(coupon)) {
+            error = "Coupon " + coupon.getCouponCode() + " is not active.";
+            logService.log(LogService.LOG_ERROR,error);
+            throw new CouponApiException(new Throwable(error), 0, error);
+        }
+        // validate expiration date
+        if (CouponHelper.hasExpired(coupon)) {
+            error = "Coupon " + coupon.getCouponCode() + " has expired.";
+            logService.log(LogService.LOG_ERROR,error);
+            throw new CouponApiException(new Throwable(error), 0, error);
+        }
+        // validate start date
+        if (!CouponHelper.isStarted(coupon)) {
+            error = "Coupon " + coupon.getCouponCode() + " has a Start Date on " + coupon.getStartDate().toString();
             logService.log(LogService.LOG_ERROR,error);
             throw new CouponApiException(new Throwable(error), 0, error);
         }
