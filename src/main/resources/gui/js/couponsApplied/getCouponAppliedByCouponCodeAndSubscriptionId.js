@@ -24,6 +24,7 @@ function initializeGetCouponAppliedByCouponCodeAndSubscriptionIdForm() {
     $("#accountId").val("");
     $("#isActive").val("");
     $("#numberOfInvoices").val("");
+    $("#maxInvoices").val("");
     $("#notes").val("");
     $("#createdDate").val("");
     $("#tenantId").val("");
@@ -41,6 +42,7 @@ function getCouponAppliedByCouponCodeAndSubscriptionId() {
         var isActive =  $("#isActive");
         var tenantId =  $("#tenantId");
         var numberOfInvoices =  $("#numberOfInvoices");
+        var maxInvoices =  $("#maxInvoices");
         var createdDate =  $("#createdDate");
         if (xmlhttp.readyState == 4) {
             if ( xmlhttp.status == 200) {
@@ -58,6 +60,7 @@ function getCouponAppliedByCouponCodeAndSubscriptionId() {
                     isActive.val(det.isActive);
                     tenantId.val(det.tenantId);
                     numberOfInvoices.val(det.numberOfInvoices);
+                    maxInvoices.val(det.maxInvoices);
                     createdDate.val(det.createdDate);
                 }
             }

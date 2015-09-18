@@ -29,6 +29,7 @@ public class Constants {
     public static final String IS_ACTIVE = "isActive";
     public static final String DURATION = "duration";
     public static final String NUMBER_OF_INVOICES = "numberOfInvoices";
+    public static final String MAX_INVOICES = "maxInvoices";
     public static final String CREATED_DATE = "createdDate";
     public static final String NOTES = "notes";
     public static final String START_DATE = "startDate";
