@@ -35,13 +35,30 @@ public class CouponHelper {
     // --------------------------------------------------------
 
     /**
+     * Check if the coupon is applicable.
+     * @param coupon
+     * @return
+     */
+    public static boolean isApplicable(CouponsRecord coupon) {
+        return isActive(coupon) && isStarted(coupon) && !hasExpired(coupon);
+    }
+
+    /**
      * Check if the coupon is active.
      * @param coupon
      * @return
      */
     public static boolean isActive(CouponsRecord coupon) {
-        return coupon.getIsActive().equals(Byte.valueOf(Constants.BYTE_TRUE))
-               && !getZeroTimeDate(coupon.getStartDate()).after(getZeroTimeDate(new Date()));
+        return coupon.getIsActive().equals(Byte.valueOf(Constants.BYTE_TRUE));
+    }
+
+    /**
+     * Check if the coupon's start date is today or in the past.
+     * @param coupon
+     * @return
+     */
+    public static boolean isStarted(CouponsRecord coupon) {
+        return !getZeroTimeDate(coupon.getStartDate()).after(getZeroTimeDate(new Date()));
     }
 
     /**
