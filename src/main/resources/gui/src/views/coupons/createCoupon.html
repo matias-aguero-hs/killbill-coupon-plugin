@@ -1,0 +1,52 @@
+<div id="createCouponContainer" class="container">
+    <h3>Create Coupon Service</h3>
+    <table>
+        <tr>
+            <td>Coupon Code:</td>
+            <td><input type="text" id="couponCodeCreate" size="10"/>
+        </tr>
+        <tr>
+            <td>Coupon Name:</td>
+            <td><input type="text" id="couponNameCreate" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Discount Type: </td>
+            <td>
+                <select id="discountTypeCreate">
+                    <option value="percentage">Percentage</option>
+                    <option value="amount">Amount</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Percentage Discount: </td>
+            <td><input type="text" id="percentageDiscountCreate" size="3"/></td>
+        </tr>
+        <tr>
+            <td>Duration: </td>
+            <td><select id="durationCreate">
+                    <option value="once">Once</option>
+                    <option value="multiple">Multiple</option>
+                <option value="forever">Forever</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Number of Invoices: </td>
+            <td><input type="text" id="numberOfInvoicesCreate" size="2"/> </td>
+        </tr>
+        <tr>
+            <td>Start date: </td>
+            <td><input type="text" class="dateField" id="startDateCreate" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Expiration date: </td>
+            <td><input type="text" class="dateField" id="expirationDateCreate" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Products: </td>
+            <td><input type="text" id="productCreate" size="100"/> </td>
+        </tr>
+    </table>
+    <input type="button" id="createCouponButton" value="Create Coupon" onclick="createCoupon()"/>
+</div>

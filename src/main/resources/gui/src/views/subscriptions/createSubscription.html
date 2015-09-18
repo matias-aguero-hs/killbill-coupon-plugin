@@ -1,0 +1,37 @@
+<div id="createSubscriptionContainer" class="container">
+    <h3>Create Subscription Service</h3>
+    <table>
+        <tr>
+            <td>Account Id:</td>
+            <td><input type="text" id="accountIdCreate" size="10"/></td>
+        </tr>
+        <tr>
+            <td>External Key:</td>
+            <td><input type="text" id="externalKeyCreate" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Product Name:</td>
+            <td><input type="text" id="productNameCreate" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Product Category:</td>
+            <td><input type="text" id="productCategoryCreate" size="20" value="BASE"/> </td>
+        </tr>
+        <tr>
+            <td>Billing Period: </td>
+            <td>
+                <select id="billingPeriodCreate">
+                    <option value="QUARTERLY">Quarterly</option>
+                    <option value="MONTHLY" selected>Monthly</option>
+                    <option value="ANNUAL">Annual</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Price List: </td>
+            <td><input type="text" id="priceListCreate" value="DEFAULT"/></td>
+        </tr>
+    </table>
+    <input type="button" id="createSubscriptionButton" value="Create Subscription" onclick="createSubscription()"/>
+    <br/>
+</div>

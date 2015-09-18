@@ -1,0 +1,34 @@
+<div id="getCouponAppliedByCouponCodeAndSubscriptionIdContainer" class="container">
+    <h3>Get Coupon Applied by Coupon Code And Subscription Id Service</h3>
+    <table>
+        <tr>
+            <td id="couponCodeLabel">Enter Coupon Code:  </td>
+            <td><input type="text" id="couponCode" size="10"/>
+        </tr>
+        <tr>
+            <td id="subscriptionIdLabel">Enter SubscriptionId:  </td>
+            <td><input type="text" id="subscriptionId" size="10"/>
+                <input type="button" id="getCouponAppliedInfoButton" value="Get Coupon Applied Information" onclick="getCouponAppliedByCouponCodeAndSubscriptionId()"/>
+        </tr>
+        <tr>
+            <td>Account Id:  </td>
+            <td><input type="text" readonly="true" id="accountId" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Is active?:  </td>
+            <td><input type="text" readonly="true" id="isActive" size="10"/> </td>
+        </tr>
+        <tr>
+            <td>Tenant Id: </td>
+            <td><input type="text" readonly="true" id="tenantId" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Number of Invoices: </td>
+            <td><input type="text" readonly="true" id="numberOfInvoices" size="2"/> </td>
+        </tr>
+        <tr>
+            <td>Created date: </td>
+            <td><input type="text" readonly="true" id="createdDate" size="20"/> </td>
+        </tr>
+    </table>
+</div>

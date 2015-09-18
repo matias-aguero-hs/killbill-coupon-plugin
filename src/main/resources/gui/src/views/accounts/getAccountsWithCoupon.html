@@ -1,0 +1,18 @@
+<div id="getAccountsWithCouponContainer" class="container">
+    <h3>Get Accounts With Coupon Service</h3>
+    <table>
+        <tr>
+            <td id="couponCodeLabel">Enter Coupon Code:</td>
+            <td>
+                <input type="text" id="couponCode" size="10"/><input type="button" id="getAccountsButton" value="Get Accounts by Coupon code" onclick="getAccountsByCouponCode()"/>
+            </td>
+        </tr>
+    </table>
+    <table id="accountsTable" style="width:100%;">
+    </table>
+    <div id="overlay-inAbox" class="overlay">
+        <div class="toolbar"><a class="close" onclick="closeOverlay()" href="#"><span>CLOSE</span></a></div>
+        <div class="wrapper">
+        </div>
+    </div>
+</div>

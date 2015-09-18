@@ -1,0 +1,50 @@
+<div id="getSubscriptionByIdContainer" class="container">
+    <h3>Get Subscription by Id Service</h3>
+    <table>
+        <tr>
+            <td id="subscriptionIdLabel">Enter Subscription Id:  </td>
+            <td><input type="text" id="subscriptionId"/>
+            <input type="button" id="getSubscriptionInfoButton" value="Get Subscription Information" onclick="getSubscriptionById()"/>
+        </tr>
+        <tr>
+            <td>Account Id:</td>
+            <td><input type="text" style="width:280px;" readonly="true" id="accountId" /></td>
+        </tr>
+        <tr>
+            <td>Bundle Id:</td>
+            <td><input type="text" style="width:280px;" readonly="true" id="bundleId" /></td>
+        </tr>
+        <tr><td>External Key:</td>
+            <td><input type="text" readonly="true" id="externalKey"/></td>
+        </tr>
+        <tr><td>Start Date:</td>
+            <td><input type="text" readonly="true" id="startDate"/></td>
+        </tr>
+        <tr><td>Product Name:</td>
+            <td><input type="text" readonly="true" id="productName"/></td>
+        </tr>
+        <tr><td>Product Category:</td>
+            <td><input type="text" readonly="true" id="productCategory"/></td>
+        </tr>
+        <tr><td>Billing Period:</td>
+            <td><input type="text" readonly="true" id="billingPeriod"/></td>
+        </tr>
+        <tr><td>Phase Type:</td>
+            <td><input type="text" readonly="true" id="phaseType"/></td>
+        </tr>
+        <tr><td>Price List:</td>
+            <td><input type="text" readonly="true" id="priceList"/></td>
+        </tr>
+        <tr><td>State:</td>
+            <td><input type="text" readonly="true" id="state"/></td>
+        </tr>
+        <tr><td>Source Type:</td>
+            <td><input type="text" readonly="true" id="sourceType"/></td>
+        </tr>
+        <tr><td>Billing Start Date:</td>
+            <td><input type="text" readonly="true" id="billingStartDate"/></td>
+        </tr>
+    </table>
+    <table id="subscriptionEventTable">
+    </table>
+</div>

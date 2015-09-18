@@ -1,0 +1,43 @@
+<div id="getInvoiceByIdContainer" class="container">
+    <h3>Get Invoice by Id Service</h3>
+    <table>
+        <tr>
+            <td id="invoiceIdLabel">Enter Invoice Id:  </td>
+            <td><input type="text" id="invoiceId"/>
+            <input type="button" id="getInvoiceInfoButton" value="Get Invoice Information" onclick="getInvoiceById()"/>
+        </tr>
+        <tr>
+            <td>Amount:</td>
+            <td><input type="text" readonly="true" id="amount" /></td>
+        </tr>
+        <tr><td>Currency:</td>
+            <td><input type="text" readonly="true" id="currency"/></td>
+        </tr>
+        <tr><td>Credit Adjustment:</td>
+            <td><input type="text" readonly="true" id="creditAdj"/></td>
+        </tr>
+        <tr><td>Refund Adjustment:</td>
+            <td><input type="text" readonly="true" id="refundAdj"/></td>
+        </tr>
+        <tr><td>Invoice Id:</td>
+            <td><input type="text" style="width:280px;" readonly="true" id="gotInvoiceId"/></td>
+        </tr>
+        <tr><td>Invoice Date:</td>
+            <td><input type="text" readonly="true" id="invoiceDate"/></td>
+        </tr>
+        <tr><td>Target Date:</td>
+            <td><input type="text" readonly="true" id="targetDate"/></td>
+        </tr>
+        <tr><td>Invoice Number:</td>
+            <td><input type="text" readonly="true" id="invoiceNumber"/></td>
+        </tr>
+        <tr><td>Balance:</td>
+            <td><input type="text" readonly="true" id="balance"/></td>
+        </tr>
+        <tr><td>Account Id:</td>
+            <td><input type="text" style="width:280px;" readonly="true" id="accountId"/></td>
+        </tr>
+    </table>
+    <table id="invoiceItemTable">
+    </table>
+</div>

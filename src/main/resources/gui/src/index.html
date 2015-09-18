@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>KillBill Coupon Plugin API Client</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="https://code.jquery.com/ui/1.11.4/themes/cupertino/jquery-ui.css" rel="stylesheet">
+        <link href="css/overlay.css" rel="stylesheet">
+        <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+        <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+        <script src="js/coupons/getCouponByCouponCode.js"></script>
+        <script src="js/coupons/getAllCoupons.js"></script>
+        <script src="js/coupons/deactivateCouponByCouponCode.js"></script>
+        <script src="js/coupons/deleteCouponByCouponCode.js"></script>
+        <script src="js/coupons/createCoupon.js"></script>
+        <script src="js/coupons/applyCoupon.js"></script>
+        <script src="js/couponsApplied/getAllCouponsApplied.js"></script>
+        <script src="js/couponsApplied/getCouponAppliedByCouponCodeAndSubscriptionId.js"></script>
+        <script src="js/invoices/getInvoices.js"></script>
+        <script src="js/invoices/getInvoiceById.js"></script>
+        <script src="js/dateTests/getCurrentDate.js"></script>
+        <script src="js/dateTests/moveOneMonth.js"></script>
+        <script src="js/accounts/getAccountsWithCoupon.js"></script>
+        <script src="js/accounts/getAccountById.js"></script>
+        <script src="js/subscriptions/createSubscription.js"></script>
+        <script src="js/subscriptions/getSubscriptionById.js"></script>
+        <script src="js/subscriptions/changeSubscription.js"></script>
+        <script src="js/overlay.js"></script>
+    </head>
+    <body onload="init()">
+        <div class="navbar">
+            <div class="navbar-inner">
+                <a class="brand" href="#">KillBill Coupon Plugin API Client</a>
+                <ul class="nav navbar-nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Coupons <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" id="dropdownCoupons">
+                            <li><a id="createCoupon" href="#">Create Coupon</a></li>
+                            <li><a id="getCoupon" href="#">Get Coupon by Coupon Code</a></li>
+                            <li><a id="getAllCoupons" href="#">Get All Coupons</a></li>
+                            <li><a id="deactivateCoupon" href="#">Deactivate Coupon</a></li>
+                            <li><a id="deleteCoupon" href="#">Delete Coupon</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Coupon Applications <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" id="dropdownCouponApplications">
+                            <li><a id="applyCoupon" href="#">Apply Coupon</a></li>
+                            <li><a id="getAllCouponsApplied" href="#">Get All Coupons Applied</a></li>
+                            <li><a id="getCouponApplied" href="#">Get Coupon Applied by Coupon Code and Subscription Id</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Invoices<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" id="dropdownInvoices">
+                            <li><a id="getInvoices" href="#">Get Invoices</a></li>
+                            <li><a id="getInvoice" href="#">Get Invoice by ID</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Date Tests<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" id="dropdownDates">
+                            <li><a id="getCurrentDate" href="#">Get Current Date</a></li>
+                            <li><a id="moveOneMonth" href="#">Move forward 1 Month</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Accounts<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" id="dropdownAccounts">
+                            <li><a id="getAllAccountsWithCoupon" href="#">Get Accounts With Coupon Applied</a></li>
+                            <li><a id="getAccount" href="#">Get Account by ID</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            Subscriptions<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" id="dropdownSubscriptions">
+                            <li><a id="createSubscription" href="#">Create a Subscription</a></li>
+                            <li><a id="getSubscription" href="#">Get Subscription by ID</a></li>
+                            <li><a id="changeSubscription" href="#">Change a Subscription</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div id="logos" style="float:right; margin-top:8px;">
+                    <img src="images/killbill_logo.png" style="height:25px;"/>
+                    <img src="images/hootsuite_logo.png" style="height:25px;"/>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var xmlhttp;
+            var defaultUrl;
+            function init() {
+                // put more code here in case you are concerned about browsers that do not provide XMLHttpRequest object directly
+                xmlhttp = new XMLHttpRequest();
+                defaultUrl = "http://localhost:8080/plugins/coupon-";
+            }
+            $(".brand").click(function() {
+                $(".container").fadeOut();
+            });
+
+            function importHtmlWithCouponCode(url, couponCode) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(data)
+                    {
+                        $("#getCouponByCouponCodeContainer").remove();
+                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#couponCode").val(couponCode);
+                        getCouponByCouponCode();
+
+                        $("#getCouponByCouponCodeContainer").children("h3").html("Coupon Details");
+                        $("#getCouponByCouponCodeContainer").children("h3").attr("style", "text-align:center;");
+                        $("#getCouponByCouponCodeContainer").attr("style", "width:100%");
+                        $("#couponCodeLabel").html("Coupon Code:");
+                        $("#couponCode").attr("readonly", true);
+
+                        $("#getCouponInfoButton").remove();
+                        openOverlay('#overlay-inAbox');
+                    },
+                    error: function() {
+                        alert("Error");
+                    },
+                    dataType: "html"
+                });
+            }
+
+            function importHtmlWithCouponAppliedCodeAndSubscription(url, couponCode, subscriptionId) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(data)
+                    {
+                        $("#getCouponAppliedByCouponCodeAndSubscriptionIdContainer").remove();
+                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#couponCode").val(couponCode);
+                        $("#subscriptionId").val(subscriptionId);
+                        getCouponAppliedByCouponCodeAndSubscriptionId();
+
+                        $("#getCouponAppliedByCouponCodeAndSubscriptionIdContainer").children("h3").html("Coupon Applied Details");
+                        $("#getCouponAppliedByCouponCodeAndSubscriptionIdContainer").children("h3").attr("style", "text-align:center;");
+                        $("#getCouponAppliedByCouponCodeAndSubscriptionIdContainer").attr("style", "width:100%");
+                        $("#couponCodeLabel").html("Coupon Code:");
+                        $("#subscriptionIdLabel").html("Subscription Id:");
+                        $("#couponCode").attr("readonly", true);
+                        $("#subscriptionId").attr("readonly", true);
+                        $("#getCouponAppliedInfoButton").remove();
+                        openOverlay('#overlay-inAbox');
+                    },
+                    error: function() {
+                        alert("Error");
+                    },
+                    dataType: "html"
+                });
+            }
+
+            function importHtmlWithAccountId(url, accountId) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(data)
+                    {
+                        $("#getAccountByIdContainer").remove();
+                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#accountId").val(accountId);
+                        getAccountById();
+                        $("#getAccountByIdContainer").children("h3").html("Account Details");
+                        $("#getAccountByIdContainer").children("h3").attr("style", "text-align:center;");
+                        $("#getAccountByIdContainer").attr("style", "width:100%");
+                        $("#accountIdLabel").html("Account Id:");
+                        $("#accountId").attr("readonly", true);
+                        $("#getAccountInfoButton").remove();
+                        openOverlay('#overlay-inAbox');
+                    },
+                    error: function() {
+                        alert("Error");
+                    },
+                    dataType: "html"
+                });
+            }
+
+            function importHtmlWithInvoiceId(url, invoiceId) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(data)
+                    {
+                        $("#getInvoiceByIdContainer").remove();
+                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#invoiceId").val(invoiceId);
+                        getInvoiceById();
+                        $("#getInvoiceByIdContainer").children("h3").html("Invoice Details");
+                        $("#getInvoiceByIdContainer").children("h3").attr("style", "text-align:center;");
+                        $("#getInvoiceByIdContainer").attr("style", "width:100%");
+                        $("#invoiceIdLabel").html("Invoice Id:");
+                        $("#invoiceId").attr("readonly", true);
+                        $("#getInvoiceInfoButton").remove();
+                        openOverlay('#overlay-inAbox');
+                    },
+                    error: function() {
+                        alert("Error");
+                    },
+                    dataType: "html"
+                });
+            }
+
+            function importHtmlWithSubscriptionId(url, subscriptionId) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(data)
+                    {
+                        $("#getSubscriptionByIdContainer").remove();
+                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#subscriptionId").val(subscriptionId);
+                        getSubscriptionById();
+                        $("#getSubscriptionByIdContainer").children("h3").html("Subscription Details");
+                        $("#getSubscriptionByIdContainer").children("h3").attr("style", "text-align:center;");
+                        $("#getSubscriptionByIdContainer").attr("style", "width:100%");
+                        $("#subscriptionIdLabel").html("Subscription Id:");
+                        $("#subscriptionId").attr("readonly", true);
+                        $("#getSubscriptionInfoButton").remove();
+                        openOverlay('#overlay-inAbox');
+                    },
+                    error: function() {
+                        alert("Error");
+                    },
+                    dataType: "html"
+                });
+            }
+
+            function importHtml(url) {
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    success: function(data)
+                    {
+                        $(".container").remove();
+                        $(data).appendTo("body").hide().fadeIn();
+                        $(".dateField").datepicker({ dateFormat: 'yy-mm-dd' });
+                    },
+                    error: function() {
+                        alert("Error");
+                    },
+                    dataType: "html"
+                });
+            }
+
+            $(document).ready(function() {
+                $(".container").hide();
+                $(".dateField").datepicker({ dateFormat: 'yy-mm-dd' });
+
+                // Coupons operations
+                $("#getCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetCouponByCouponCodeForm();
+                    importHtml("views/coupons/getCouponByCouponCode.html");
+                });
+                $("#deactivateCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeDeactivateCouponByCouponCodeForm();
+                    importHtml("views/coupons/deactivateCoupon.html");
+                });
+                $("#deleteCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeDeleteCouponByCouponCodeForm();
+                    importHtml("views/coupons/deleteCoupon.html");
+                });
+                $("#getAllCoupons").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetAllCouponsForm();
+                    importHtml("views/coupons/getAllCoupons.html");
+                });
+                $("#createCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeCreateCouponForm();
+                    importHtml("views/coupons/createCoupon.html");
+                });
+
+                // Coupons Applied operations
+                $("#applyCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeApplyCouponForm();
+                    importHtml("views/couponsApplied/applyCoupon.html");
+                });
+                $("#getAllCouponsApplied").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetAllCouponsAppliedForm();
+                    importHtml("views/couponsApplied/getAllCouponsApplied.html");
+                });
+                $("#getCouponApplied").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetCouponAppliedByCouponCodeAndSubscriptionIdForm();
+                    importHtml("views/couponsApplied/getCouponAppliedByCouponCodeAndSubscriptionId.html");
+                });
+
+                // Invoices operations
+                $("#getInvoices").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetInvoicesForm();
+                    importHtml("views/invoices/getInvoices.html");
+                });
+                $("#getInvoice").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetInvoiceByIdForm();
+                    importHtml("views/invoices/getInvoiceById.html");
+                });
+
+                // Date operations
+                $("#getCurrentDate").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetCurrentDateForm();
+                    importHtml("views/dateTests/getCurrentDate.html");
+                });
+                $("#moveOneMonth").click(function()
+                {
+                    $(".container").hide();
+                    initializeMoveOneMonthForm();
+                    importHtml("views/dateTests/moveOneMonth.html");
+                });
+
+                // Accounts operations
+                $("#getAllAccountsWithCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetAccountsWithCouponForm();
+                    importHtml("views/accounts/getAccountsWithCoupon.html");
+                });
+                $("#getAccount").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetAccountByIdForm();
+                    importHtml("views/accounts/getAccountById.html");
+                });
+
+                // Subscription operations
+                $("#createSubscription").click(function()
+                {
+                    $(".container").hide();
+                    initializeCreateSubscriptionForm();
+                    importHtml("views/subscriptions/createSubscription.html");
+                });
+                $("#changeSubscription").click(function()
+                {
+                    $(".container").hide();
+                    initializeChangeSubscriptionForm();
+                    importHtml("views/subscriptions/changeSubscription.html");
+                });
+                $("#getSubscription").click(function()
+                {
+                    $(".container").hide();
+                    initializeGetSubscriptionByIdForm();
+                    importHtml("views/subscriptions/getSubscriptionById.html");
+                });
+            });
+        </script>
+        <br/>
+    </body>
+</html>

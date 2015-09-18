@@ -1,0 +1,41 @@
+<div id="changeSubscriptionContainer" class="container">
+    <h3>Change Subscription Service</h3>
+    <table>
+        <tr>
+            <td id="subscriptionIdLabel">Enter Subscription Id:  </td>
+            <td><input type="text" id="subscriptionId"/>
+                <input type="button" id="getSubscriptionInfoButton" value="Get Subscription Information" onclick="getSubscriptionById()"/>
+        </tr>
+        <tr>
+            <td>Account Id:</td>
+            <td><input type="text" id="accountId" size="10"/>
+        </tr>
+        <tr>
+            <td>External Key:</td>
+            <td><input type="text" id="externalKey" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Product Name:</td>
+            <td><input type="text" id="productName" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Product Category:</td>
+            <td><input type="text" id="productCategory" size="20"/> </td>
+        </tr>
+        <tr>
+            <td>Billing Period: </td>
+            <td>
+                <select id="billingPeriod">
+                    <option value="QUARTERLY">Quarterly</option>
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="ANNUAL">Annual</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Price List: </td>
+            <td><input type="text" id="priceList"/></td>
+        </tr>
+    </table>
+    <input type="button" id="changeSubscriptionButton" value="Change Subscription" onclick="changeSubscription()"/>
+</div>
