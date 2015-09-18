@@ -214,15 +214,12 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             couponPluginApi.applyCoupon(couponToApply.getCouponCode(), maxInvoices, entitlementId, entitlementContext.getAccountId(), entitlementContext);
 
             // TODO inform user that coupon was applied ??
-
-            return true;
-
         } catch (Exception e) {
             // TODO inform user that the coupon couldn't be applied
             // TODO this exception won't stop Subscription creation.
-            throw new EntitlementPluginApiException(e);
+            //            throw new EntitlementPluginApiException(e);
         }
-
+        return true;
     }
 
     /**

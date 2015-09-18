@@ -27,6 +27,7 @@
         <script src="js/subscriptions/createSubscription.js"></script>
         <script src="js/subscriptions/getSubscriptionById.js"></script>
         <script src="js/subscriptions/changeSubscription.js"></script>
+        <script src="js/subscriptions/cancelSubscription.js"></script>
         <script src="js/overlay.js"></script>
     </head>
     <body onload="init()">
@@ -91,6 +92,7 @@
                             <li><a id="createSubscription" href="#">Create a Subscription</a></li>
                             <li><a id="getSubscription" href="#">Get Subscription by ID</a></li>
                             <li><a id="changeSubscription" href="#">Change a Subscription</a></li>
+                            <li><a id="cancelSubscription" href="#">Cancel a Subscription</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -376,6 +378,12 @@
                     $(".container").hide();
                     initializeGetSubscriptionByIdForm();
                     importHtml("views/subscriptions/getSubscriptionById.html");
+                });
+                $("#cancelSubscription").click(function()
+                {
+                    $(".container").hide();
+                    initializeCancelSubscriptionForm();
+                    importHtml("views/subscriptions/cancelSubscription.html");
                 });
             });
         </script>
