@@ -1,4 +1,4 @@
 language: java
 script: mvn clean install -Ptravis
 # Remove --quiet to avoid timeouts
-install: mvn clean install cobertura:cobertura
+install: mvn install cobertura:cobertura
