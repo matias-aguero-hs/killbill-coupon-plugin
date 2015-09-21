@@ -1,4 +1,8 @@
 language: java
 script: mvn clean install -Ptravis
+
 # Remove --quiet to avoid timeouts
-install: mvn install cobertura:cobertura
+install: mvn install
+
+jdk:
+  - oraclejdk8
