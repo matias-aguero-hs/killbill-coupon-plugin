@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.killbill.billing.entitlement.plugin.api.EntitlementPluginApiException;
 import org.killbill.billing.invoice.api.Invoice;
 import org.killbill.billing.invoice.api.InvoiceApiException;
 import org.killbill.billing.invoice.api.InvoiceItem;
@@ -34,9 +35,8 @@ import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
-import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
-import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
+import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.util.CouponHelper;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
@@ -58,8 +58,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
     @Override
     public void handleKillbillEvent(final ExtBusEvent killbillEvent) {
-
-        // catch only invoice creations events
+        // invoice creations events
         if (ExtBusEventType.INVOICE_CREATION.equals(killbillEvent.getEventType())) {
 
             logEvent(killbillEvent);
@@ -70,7 +69,29 @@ public class CouponListener implements OSGIKillbillEventHandler {
                 logService.log(LogService.LOG_ERROR,
                                "There is an error trying to validate and apply a coupon discount", e);
             }
+        }
+        else if (ExtBusEventType.SUBSCRIPTION_CANCEL.equals(killbillEvent.getEventType())) {
+            // cancel a subscription event
+            try {
+                deactivateIfHasCoupon(killbillEvent);
+            } catch (EntitlementPluginApiException e) {
+                logService.log(LogService.LOG_ERROR,
+                               "There is an error trying to deactivate a coupon application", e);
+            }
+        }
+    }
 
+    private void deactivateIfHasCoupon(ExtBusEvent killbillEvent) throws EntitlementPluginApiException {
+        try {
+            UUID subscriptionId = killbillEvent.getObjectId();
+            CouponsAppliedRecord couponsAppliedRecord = couponPluginApi.getActiveCouponAppliedBySubscription(subscriptionId);
+            if (null != couponsAppliedRecord) {
+                couponPluginApi.deactivateApplicationOfCouponByCodeAndSubscription(couponsAppliedRecord.getCouponCode(), subscriptionId);
+            }
+        } catch (SQLException e) {
+            String error = "Error deactivating Coupon";
+            logService.log(LogService.LOG_ERROR, error);
+            throw new EntitlementPluginApiException(error);
         }
     }
 

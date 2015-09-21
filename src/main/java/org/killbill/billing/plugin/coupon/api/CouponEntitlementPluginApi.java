@@ -19,7 +19,6 @@ package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -104,10 +103,6 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
         if (entitlementContext.getOperationType().equals(OperationType.CREATE_SUBSCRIPTION)) {
             applyCouponToNewSubscription(entitlementContext, pluginProperties);
             return null;
-        }
-
-        if (entitlementContext.getOperationType().equals(OperationType.CANCEL_SUBSCRIPTION)) {
-            deactivateIfHasCoupon(entitlementContext);
         }
 
         if (entitlementContext.getOperationType().equals(OperationType.CHANGE_PLAN)) {
