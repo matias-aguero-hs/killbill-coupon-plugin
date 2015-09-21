@@ -553,55 +553,116 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         assertTrue(result == null);
     }
 
-    @Test
-    public void testOnSuccessCallCancelPlan() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    @Test(expected = EntitlementPluginApiException.class)
+    public void testOnSuccessCallChangePlanEntitlementPluginApiException() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
         MockEntitlementContext otherContext = new MockEntitlementContext() {
             @Override
             public OperationType getOperationType() {
-                return OperationType.CANCEL_SUBSCRIPTION;
+                return OperationType.CHANGE_PLAN;
             }
         };
+        MockSubscription otherSubscription = new MockSubscription() {
+            @Override
+            public List<SubscriptionEvent> getSubscriptionEvents() {
+                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
+                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
+                    @Override
+                    public SubscriptionEventType getSubscriptionEventType() {
+                        return SubscriptionEventType.CHANGE;
+                    }
+
+                    @Override
+                    public BillingPeriod getPrevBillingPeriod() {
+                        return BillingPeriod.MONTHLY;
+                    }
+
+                    @Override
+                    public BillingPeriod getNextBillingPeriod() {
+                        return BillingPeriod.ANNUAL;
+                    }
+
+                    @Override
+                    public Product getPrevProduct() {
+                        MockProduct product = new MockProduct();
+                        return product;
+                    }
+
+                    @Override
+                    public Product getNextProduct() {
+                        MockProduct product = new MockProduct();
+                        return product;
+                    }
+                };
+                result.add(subscriptionEvent);
+                return result;
+            }
+        };
+
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
         CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
         couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
 
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
-        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
-
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(otherContext, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
-    }
-
-    @Test(expected = EntitlementPluginApiException.class)
-    public void testOnSuccessCallCancelPlanEntitlementPluginApiException() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
-        MockEntitlementContext otherContext = new MockEntitlementContext() {
-            @Override
-            public OperationType getOperationType() {
-                return OperationType.CANCEL_SUBSCRIPTION;
-            }
-        };
-
-        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenThrow(EntitlementApiException.class);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenThrow(EntitlementApiException.class);
 
         entitlementPluginApi.onSuccessCall(otherContext, properties);
     }
 
     @Test(expected = EntitlementPluginApiException.class)
-    public void testOnSuccessCallCancelPlanSQLException() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
+    public void testOnSuccessCallChangePlanSQLException() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
         MockEntitlementContext otherContext = new MockEntitlementContext() {
             @Override
             public OperationType getOperationType() {
-                return OperationType.CANCEL_SUBSCRIPTION;
+                return OperationType.CHANGE_PLAN;
+            }
+        };
+        MockSubscription otherSubscription = new MockSubscription() {
+            @Override
+            public List<SubscriptionEvent> getSubscriptionEvents() {
+                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
+                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
+                    @Override
+                    public SubscriptionEventType getSubscriptionEventType() {
+                        return SubscriptionEventType.CHANGE;
+                    }
+
+                    @Override
+                    public BillingPeriod getPrevBillingPeriod() {
+                        return BillingPeriod.MONTHLY;
+                    }
+
+                    @Override
+                    public BillingPeriod getNextBillingPeriod() {
+                        return BillingPeriod.ANNUAL;
+                    }
+
+                    @Override
+                    public Product getPrevProduct() {
+                        MockProduct product = new MockProduct();
+                        return product;
+                    }
+
+                    @Override
+                    public Product getNextProduct() {
+                        MockProduct product = new MockProduct();
+                        return product;
+                    }
+                };
+                result.add(subscriptionEvent);
+                return result;
             }
         };
 
-        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenThrow(SQLException.class);
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
+
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenThrow(SQLException.class);
 
         entitlementPluginApi.onSuccessCall(otherContext, properties);
     }

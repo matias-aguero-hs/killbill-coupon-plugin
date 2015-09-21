@@ -18,15 +18,13 @@
 package org.killbill.billing.plugin.coupon.listener;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.util.Calendar;
+import java.sql.SQLException;
 import java.util.UUID;
 
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 import org.killbill.billing.account.api.Account;
-import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
 import org.killbill.billing.catalog.api.Currency;
 import org.killbill.billing.invoice.api.Invoice;
@@ -43,7 +41,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedR
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.mock.MockAccount;
 import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
-import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
+import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.security.api.SecurityApi;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
@@ -55,14 +53,12 @@ import org.mockito.Mockito;
  */
 public class TestCouponListener extends Mockito {
 
-    public static final String COUPON_CODE = "test";
     private CouponPluginApi couponPluginApi;
     private OSGIKillbillAPI osgiKillbillAPI;
     private InvoiceUserApi invoiceUserApi;
     private AccountUserApi accountUserApi;
     private SecurityApi securityApi;
     private OSGIKillbillLogService logService;
-    private UUID tenantId;
     private CouponListener couponListener;
 
     private Invoice invoice;
@@ -79,7 +75,6 @@ public class TestCouponListener extends Mockito {
         accountUserApi = mock(AccountUserApi.class);
         invoiceUserApi = mock(InvoiceUserApi.class);
         securityApi = mock(SecurityApi.class);
-        tenantId = UUID.randomUUID();
         couponPluginApi = mock(CouponPluginApi.class);
         couponListener = new CouponListener(logService, osgiKillbillAPI, couponPluginApi);
 
@@ -253,6 +248,30 @@ public class TestCouponListener extends Mockito {
         when(invoiceUserApi.getInvoice(any(), any())).thenReturn(invoice);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(null);
         when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(null);
+
+        // test
+        couponListener.handleKillbillEvent(event);
+    }
+
+    @Test
+    public void testCancelSubscriptionEventHandler() throws SQLException {
+        event = new MockExtBusEvent(ExtBusEventType.SUBSCRIPTION_CANCEL, null, invoice.getId(),
+                                    account.getId(), UUID.randomUUID());
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
+
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
+
+        // test
+        couponListener.handleKillbillEvent(event);
+    }
+
+    @Test
+    public void testCancelSubscriptionEventHandlerWithSQLException() throws SQLException {
+        event = new MockExtBusEvent(ExtBusEventType.SUBSCRIPTION_CANCEL, null, invoice.getId(),
+                                    account.getId(), UUID.randomUUID());
+
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenThrow(SQLException.class);
 
         // test
         couponListener.handleKillbillEvent(event);
