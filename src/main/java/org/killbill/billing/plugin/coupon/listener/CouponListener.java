@@ -20,6 +20,8 @@ package org.killbill.billing.plugin.coupon.listener;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
@@ -120,6 +122,9 @@ public class CouponListener implements OSGIKillbillEventHandler {
         // login TODO figure out where credential are pick up from...
         osgiKillbillAPI.getSecurityApi().login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
 
+        Map<UUID, CouponsAppliedRecord> appliedCouponsToIncrease = new HashMap<UUID, CouponsAppliedRecord>();
+        Map<UUID, CouponsRecord> couponsToIncrease = new HashMap<UUID, CouponsRecord>();
+
         // get invoice
         Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponTenantContext(tenantId));
 
@@ -154,13 +159,10 @@ public class CouponListener implements OSGIKillbillEventHandler {
                     if (null != invoiceItemAdjustment) {
                         // add 1 to the number of Invoices affected
                         cApplied.setNumberOfInvoices(cApplied.getNumberOfInvoices() + 1);
-                        // check if now the duration is completed (after adding the last discount)
 
-                        couponPluginApi.increaseNumberOfInvoicesAndSetActiveStatus(
-                                cApplied.getCouponCode(),
-                                cApplied.getNumberOfInvoices(),
-                                CouponHelper.shouldDeactivateCouponApplied(cApplied, coupon),
-                                subscriptionId);
+                        // put coupon applied into map
+                        appliedCouponsToIncrease.put(subscriptionId, cApplied);
+                        couponsToIncrease.put(subscriptionId, coupon);
 
                         logService.log(LogService.LOG_INFO, "Invoice Item Adjustment added. ID: " + invoiceItemAdjustment.getId());
                     }
@@ -172,6 +174,22 @@ public class CouponListener implements OSGIKillbillEventHandler {
                 logService.log(LogService.LOG_INFO, "Skipping invoice item " + item.getId() + "/" + item.getInvoiceItemType());
             }
         }
+
+        // increase number of invoices created with discounts
+        for (UUID subsId : appliedCouponsToIncrease.keySet()) {
+
+            CouponsAppliedRecord cApplied = appliedCouponsToIncrease.get(subsId);
+            CouponsRecord coupon = couponsToIncrease.get(subsId);
+
+            couponPluginApi.increaseNumberOfInvoicesAndSetActiveStatus(
+                    cApplied.getCouponCode(),
+                    cApplied.getNumberOfInvoices(),
+                    CouponHelper.shouldDeactivateCouponApplied(cApplied, coupon),
+                    subsId);
+            logService.log(LogService.LOG_INFO, "Applied Coupon increased. Coupon: " + cApplied.getCouponCode()
+                          + ", Subscription: " + cApplied.getKbSubscriptionId());
+        }
+
     }
 
     private boolean validateCouponApplication(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
