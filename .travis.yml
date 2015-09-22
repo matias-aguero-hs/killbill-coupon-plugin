@@ -7,5 +7,11 @@ install: mvn install
 jdk:
   - oraclejdk8
 
+# whitelist
+branches:
+  only:
+    - master
+    - stable
+
 after_success:
   - mvn clean cobertura:cobertura coveralls:report
