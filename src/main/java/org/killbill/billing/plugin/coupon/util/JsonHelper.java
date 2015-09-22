@@ -1,3 +1,20 @@
+/*
+ * Copyright 2014-2015 Groupon, Inc
+ * Copyright 2014-2015 The Billing Project, LLC
+ *
+ * The Billing Project licenses this file to you under the Apache License, version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.killbill.billing.plugin.coupon.util;
 
 import java.io.BufferedReader;
@@ -74,6 +91,7 @@ public class JsonHelper {
         jsonResponse.put(Constants.IS_ACTIVE, isActive.toString());
         jsonResponse.put(Constants.DURATION, coupon.getValue(COUPONS.DURATION));
         jsonResponse.put(Constants.NUMBER_OF_INVOICES, coupon.getValue(COUPONS.NUMBER_OF_INVOICES));
+        jsonResponse.put(Constants.MAX_REDEMPTIONS, coupon.getValue(COUPONS.MAX_REDEMPTIONS));
         jsonResponse.put(Constants.START_DATE, coupon.getValue(COUPONS.START_DATE));
         jsonResponse.put(Constants.EXPIRATION_DATE, coupon.getValue(COUPONS.EXPIRATION_DATE));
         jsonResponse.put(Constants.TENANT_ID, coupon.getValue(COUPONS.KB_TENANT_ID));

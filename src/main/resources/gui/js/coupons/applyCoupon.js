@@ -25,6 +25,7 @@ function initializeApplyCouponForm() {
     $("#applyCouponButton").show();
     $("#applyNewCouponButton").remove();
     $("#applyCouponContainer h4").remove();
+    $("#response").remove();
 };
 function applyCoupon() {
     var url = defaultUrl + "applycoupon/";

@@ -44,6 +44,7 @@ function getCouponByCouponCode() {
         var startDate =  document.getElementById("startDate");
         var expirationDate =  document.getElementById("expirationDate");
         var numberOfInvoices =  document.getElementById("numberOfInvoices");
+        var maxRedemptions =  document.getElementById("maxRedemptions");
         var products =  document.getElementById("products");
         if (xmlhttp.readyState == 4) {
             if ( xmlhttp.status == 200) {
@@ -64,6 +65,7 @@ function getCouponByCouponCode() {
                     duration.value = det.duration;
                     startDate.value = det.startDate;
                     expirationDate.value = det.expirationDate;
+                    maxRedemptions.value = det.maxRedemptions;
                     numberOfInvoices.value = det.numberOfInvoices;
                     products.value = det.products;
                 }

@@ -12,6 +12,7 @@ CREATE TABLE coupons (
   number_of_invoices int(3) DEFAULT 0,
   start_date DATE NOT NULL,
   expiration_date DATE,
+  max_redemptions int(10) DEFAULT 0,
   kb_tenant_id char(36) not null,
   PRIMARY KEY(record_id)
 ) /*! CHARACTER SET utf8 COLLATE utf8_bin */;

@@ -1,3 +1,20 @@
+/*
+ * Copyright 2014-2015 Groupon, Inc
+ * Copyright 2014-2015 The Billing Project, LLC
+ *
+ * The Billing Project licenses this file to you under the Apache License, version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at:
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.killbill.billing.plugin.coupon.model;
 
 import java.sql.Date;
@@ -20,6 +37,7 @@ public class Coupon {
     private boolean active;
     private DurationTypeEnum duration;
     private Integer numberOfInvoices;
+    private Integer maxRedemptions;
     private Date startDate;
     private Date expirationDate;
     private List<String> products;
@@ -113,6 +131,14 @@ public class Coupon {
         this.numberOfInvoices = numberOfInvoices;
     }
 
+    public Integer getMaxRedemptions() {
+        return maxRedemptions;
+    }
+
+    public void setMaxRedemptions(final Integer maxRedemptions) {
+        this.maxRedemptions = maxRedemptions;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -133,6 +159,7 @@ public class Coupon {
                 .append(this.active, rhs.active)
                 .append(this.duration, rhs.duration)
                 .append(this.numberOfInvoices, rhs.numberOfInvoices)
+                .append(this.maxRedemptions, rhs.maxRedemptions)
                 .append(this.startDate, rhs.startDate)
                 .append(this.expirationDate, rhs.expirationDate)
                 .append(this.products, rhs.products)
@@ -150,6 +177,7 @@ public class Coupon {
                 .append(active)
                 .append(duration)
                 .append(numberOfInvoices)
+                .append(maxRedemptions)
                 .append(startDate)
                 .append(expirationDate)
                 .append(products)
@@ -167,6 +195,7 @@ public class Coupon {
                 .append("active", active)
                 .append("duration", duration)
                 .append("numberOfInvoices", numberOfInvoices)
+                .append("maxRedemptions", maxRedemptions)
                 .append("startDate", startDate)
                 .append("expirationDate", expirationDate)
                 .append("products", products)

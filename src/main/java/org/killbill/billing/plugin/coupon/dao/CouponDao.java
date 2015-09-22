@@ -97,6 +97,7 @@ public class CouponDao extends PluginDao {
                                        COUPONS.PERCENTAGE_DISCOUNT,
                                        COUPONS.DURATION,
                                        COUPONS.NUMBER_OF_INVOICES,
+                                       COUPONS.MAX_REDEMPTIONS,
                                        COUPONS.START_DATE,
                                        COUPONS.EXPIRATION_DATE,
                                        COUPONS.KB_TENANT_ID)
@@ -106,6 +107,7 @@ public class CouponDao extends PluginDao {
                                    coupon.getPercentageDiscount(),
                                    coupon.getDuration().toString(),
                                    (coupon.getDuration().toString().equals(DurationTypeEnum.multiple.toString())) ? coupon.getNumberOfInvoices() : 0,
+                                   coupon.getMaxRedemptions(),
                                    coupon.getStartDate(),
                                    coupon.getExpirationDate(),
                                    context.getTenantId().toString())

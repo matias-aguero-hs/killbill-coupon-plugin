@@ -62,6 +62,15 @@ public class CouponHelper {
     }
 
     /**
+     * Check if the coupon still has redemptions to be applied.
+     * @param coupon
+     * @return
+     */
+    public static boolean hasRedemptions(CouponsRecord coupon, Integer numberOfApplications) {
+        return (coupon.getMaxRedemptions().equals(0) || coupon.getMaxRedemptions() > numberOfApplications);
+    }
+
+    /**
      * Check if the coupon has expired.
      * @param coupon
      * @return

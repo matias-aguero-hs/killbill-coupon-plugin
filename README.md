@@ -1,1 +1,2 @@
 # hootsuite-coupon-plugin
+[![Coverage Status](https://coveralls.io/repos/vp-maguero/hootsuite-coupon-plugin/badge.svg?branch=master&service=github)](https://coveralls.io/github/vp-maguero/hootsuite-coupon-plugin?branch=master)
