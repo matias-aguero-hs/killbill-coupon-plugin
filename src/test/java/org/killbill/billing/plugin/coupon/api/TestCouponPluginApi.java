@@ -703,6 +703,24 @@ public class TestCouponPluginApi extends Mockito {
 
     }
 
+    @Test(expected = CouponApiException.class)
+    public void testValidateCouponWithoutRedemptionsLeft() throws SQLException, AccountApiException, CouponApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        coupon.setMaxRedemptions(1);
+        List<CouponsAppliedRecord> couponsApplied = new ArrayList<CouponsAppliedRecord>();
+        couponsApplied.add(new CouponsAppliedRecord());
+
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(dao.getCouponsAppliedByCouponCode(any())).thenReturn(couponsApplied);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), "Standard", null);
+    }
+
     @Test
     public void testValidateCouponWithInvalidProducts() throws SQLException, AccountApiException {
 

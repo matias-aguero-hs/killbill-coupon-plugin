@@ -324,6 +324,20 @@ public class CouponPluginApi {
             logService.log(LogService.LOG_ERROR,error);
             throw new CouponApiException(new Throwable(error), 0, error);
         }
+        // validate max number of redemptions
+        Integer numberOfApplications = null;
+        try {
+            numberOfApplications = getCouponsAppliedByCouponCode(coupon.getCouponCode()).size();
+            if (!CouponHelper.hasRedemptions(coupon, numberOfApplications)) {
+                error = "Coupon " + coupon.getCouponCode() + " has reached its maximum number of redemptions.";
+                logService.log(LogService.LOG_ERROR,error);
+                throw new CouponApiException(new Throwable(error), 0, error);
+            }
+        } catch (SQLException e) {
+            error = "SQL Exception when trying to get a list of Coupons Applied by Coupon code: " + coupon.getCouponCode();
+            logService.log(LogService.LOG_ERROR, error);
+            throw new CouponApiException(new Throwable(error), 0, error);
+        }
 
         try {
             // check products

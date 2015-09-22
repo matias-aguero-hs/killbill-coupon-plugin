@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord> {
 
-	private static final long serialVersionUID = 1399803532;
+	private static final long serialVersionUID = -711985966;
 
 	/**
 	 * The reference instance of <code>killbill.coupons</code>
@@ -80,6 +80,11 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	 * The column <code>killbill.coupons.expiration_date</code>.
 	 */
 	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.sql.Date> EXPIRATION_DATE = createField("expiration_date", org.jooq.impl.SQLDataType.DATE, this, "");
+
+	/**
+	 * The column <code>killbill.coupons.max_redemptions</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Integer> MAX_REDEMPTIONS = createField("max_redemptions", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "");
 
 	/**
 	 * The column <code>killbill.coupons.kb_tenant_id</code>.

@@ -74,6 +74,7 @@ public class JsonHelper {
         jsonResponse.put(Constants.IS_ACTIVE, isActive.toString());
         jsonResponse.put(Constants.DURATION, coupon.getValue(COUPONS.DURATION));
         jsonResponse.put(Constants.NUMBER_OF_INVOICES, coupon.getValue(COUPONS.NUMBER_OF_INVOICES));
+        jsonResponse.put(Constants.MAX_REDEMPTIONS, coupon.getValue(COUPONS.MAX_REDEMPTIONS));
         jsonResponse.put(Constants.START_DATE, coupon.getValue(COUPONS.START_DATE));
         jsonResponse.put(Constants.EXPIRATION_DATE, coupon.getValue(COUPONS.EXPIRATION_DATE));
         jsonResponse.put(Constants.TENANT_ID, coupon.getValue(COUPONS.KB_TENANT_ID));

@@ -22,9 +22,9 @@ function initializeCreateSubscriptionForm() {
     $("#accountIdCreate").val("");
     $("#externalKeyCreate").val("");
     $("#productNameCreate").val("");
-    $("#productCategoryCreate").val("");
+    $("#productCategoryCreate").val("BASE");
     $("#billingPeriodCreate").val("MONTHLY");
-    $("#priceListCreate").val("");
+    $("#priceListCreate").val("DEFAULT");
     $("#createSubscriptionButton").show();
     $("#createNewSubscriptionButton").remove();
     $("#createSubscriptionContainer h4").remove();

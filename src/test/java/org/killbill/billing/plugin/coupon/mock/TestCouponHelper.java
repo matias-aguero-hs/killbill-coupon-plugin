@@ -43,6 +43,7 @@ public class TestCouponHelper {
         coupon.setDuration(DurationTypeEnum.forever.toString());
         coupon.setIsActive(Byte.valueOf("1"));
         coupon.setNumberOfInvoices(0);
+        coupon.setMaxRedemptions(0);
 
         return coupon;
     }

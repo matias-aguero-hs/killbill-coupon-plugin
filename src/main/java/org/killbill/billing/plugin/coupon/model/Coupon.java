@@ -20,6 +20,7 @@ public class Coupon {
     private boolean active;
     private DurationTypeEnum duration;
     private Integer numberOfInvoices;
+    private Integer maxRedemptions;
     private Date startDate;
     private Date expirationDate;
     private List<String> products;
@@ -113,6 +114,14 @@ public class Coupon {
         this.numberOfInvoices = numberOfInvoices;
     }
 
+    public Integer getMaxRedemptions() {
+        return maxRedemptions;
+    }
+
+    public void setMaxRedemptions(final Integer maxRedemptions) {
+        this.maxRedemptions = maxRedemptions;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -133,6 +142,7 @@ public class Coupon {
                 .append(this.active, rhs.active)
                 .append(this.duration, rhs.duration)
                 .append(this.numberOfInvoices, rhs.numberOfInvoices)
+                .append(this.maxRedemptions, rhs.maxRedemptions)
                 .append(this.startDate, rhs.startDate)
                 .append(this.expirationDate, rhs.expirationDate)
                 .append(this.products, rhs.products)
@@ -150,6 +160,7 @@ public class Coupon {
                 .append(active)
                 .append(duration)
                 .append(numberOfInvoices)
+                .append(maxRedemptions)
                 .append(startDate)
                 .append(expirationDate)
                 .append(products)
@@ -167,6 +178,7 @@ public class Coupon {
                 .append("active", active)
                 .append("duration", duration)
                 .append("numberOfInvoices", numberOfInvoices)
+                .append("maxRedemptions", maxRedemptions)
                 .append("startDate", startDate)
                 .append("expirationDate", expirationDate)
                 .append("products", products)

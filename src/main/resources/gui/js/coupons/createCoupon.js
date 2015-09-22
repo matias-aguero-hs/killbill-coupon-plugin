@@ -25,6 +25,7 @@ function initializeCreateCouponForm() {
     $("#percentageDiscountCreate").val("");
     $("#durationCreate").val("");
     $("#numberOfInvoicesCreate").val("");
+    $("#maxRedemptionsCreate").val("");
     $("#startDateCreate").val("");
     $("#expirationDateCreate").val("");
     $("#productCreate").val("");
@@ -41,6 +42,7 @@ function createCoupon() {
     var percentageDiscount = $("#percentageDiscountCreate").val();
     var duration = $("#durationCreate").val();
     var numberOfInvoices = $("#numberOfInvoicesCreate").val();
+    var maxRedemptions = $("#maxRedemptionsCreate").val();
     var startDate = $("#startDateCreate").val();
     var expirationDate = $("#expirationDateCreate").val();
     var product = $("#productCreate").val();
@@ -53,6 +55,7 @@ function createCoupon() {
             '", "percentageDiscount": "' + percentageDiscount +
             '", "duration": "' + duration +
             '", "numberOfInvoices": "' + numberOfInvoices +
+            '", "maxRedemptions": "' + maxRedemptions +
             '", "startDate": "' + startDate +
             '", "expirationDate": "' + expirationDate +
             '", "products": ["' + product + '"]' +
@@ -66,6 +69,7 @@ function createCoupon() {
             '", "percentageDiscount": "' + percentageDiscount +
             '", "duration": "' + duration +
             '", "numberOfInvoices": "' + numberOfInvoices +
+            '", "maxRedemptions": "' + maxRedemptions +
             '", "startDate": "' + startDate +
             '", "expirationDate": "' + expirationDate +
             '"}';
