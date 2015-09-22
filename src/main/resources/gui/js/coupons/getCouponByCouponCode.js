@@ -59,15 +59,27 @@ function getCouponByCouponCode() {
                 }
                 else {
                     couponName.value = det.couponName;
-                    isActive.value = det.isActive;
-                    discountType.value = det.discountType;
-                    percentageDiscount.value = det.percentageDiscount;
-                    duration.value = det.duration;
+                    if (isActive) {
+                        isActive.value = det.isActive;
+                    }
+                    if (discountType) {
+                        discountType.value = det.discountType;
+                    }
+                    if (percentageDiscount) {
+                        percentageDiscount.value = det.percentageDiscount;
+                    }
+                    if (duration) {
+                        duration.value = det.duration;
+                    }
                     startDate.value = det.startDate;
                     expirationDate.value = det.expirationDate;
                     maxRedemptions.value = det.maxRedemptions;
-                    numberOfInvoices.value = det.numberOfInvoices;
-                    products.value = det.products;
+                    if (numberOfInvoices) {
+                        numberOfInvoices.value = det.numberOfInvoices;
+                    }
+                    if (products) {
+                        products.value = det.products;
+                    }
                 }
             }
             else

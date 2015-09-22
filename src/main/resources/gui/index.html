@@ -31,7 +31,8 @@
         <script src="js/coupons/deactivateCouponByCouponCode.js"></script>
         <script src="js/coupons/deleteCouponByCouponCode.js"></script>
         <script src="js/coupons/createCoupon.js"></script>
-        <script src="js/coupons/applyCoupon.js"></script>
+        <script src="js/coupons/changeCoupon.js"></script>
+        <script src="js/couponsApplied/applyCoupon.js"></script>
         <script src="js/couponsApplied/getAllCouponsApplied.js"></script>
         <script src="js/couponsApplied/getCouponAppliedByCouponCodeAndSubscriptionId.js"></script>
         <script src="js/invoices/getInvoices.js"></script>
@@ -59,6 +60,7 @@
                             <li><a id="createCoupon" href="#">Create Coupon</a></li>
                             <li><a id="getCoupon" href="#">Get Coupon by Coupon Code</a></li>
                             <li><a id="getAllCoupons" href="#">Get All Coupons</a></li>
+                            <li><a id="changeCoupon" href="#">Change Coupon</a></li>
                             <li><a id="deactivateCoupon" href="#">Deactivate Coupon</a></li>
                             <li><a id="deleteCoupon" href="#">Delete Coupon</a></li>
                         </ul>
@@ -137,7 +139,8 @@
                     success: function(data)
                     {
                         $("#getCouponByCouponCodeContainer").remove();
-                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#overlay-inAbox .wrapper").append(data);
+                        $(".container").hide().fadeIn();
                         $("#couponCode").val(couponCode);
                         getCouponByCouponCode();
 
@@ -164,7 +167,8 @@
                     success: function(data)
                     {
                         $("#getCouponAppliedByCouponCodeAndSubscriptionIdContainer").remove();
-                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#overlay-inAbox .wrapper").append(data);
+                        $(".container").hide().fadeIn();
                         $("#couponCode").val(couponCode);
                         $("#subscriptionId").val(subscriptionId);
                         getCouponAppliedByCouponCodeAndSubscriptionId();
@@ -193,7 +197,8 @@
                     success: function(data)
                     {
                         $("#getAccountByIdContainer").remove();
-                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+                        $("#overlay-inAbox .wrapper").append(data);
+                        $(".container").hide().fadeIn();
                         $("#accountId").val(accountId);
                         getAccountById();
                         $("#getAccountByIdContainer").children("h3").html("Account Details");
@@ -218,7 +223,9 @@
                     success: function(data)
                     {
                         $("#getInvoiceByIdContainer").remove();
-                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
+
+                        $("#overlay-inAbox .wrapper").append(data);
+                        $(".container").hide().fadeIn();
                         $("#invoiceId").val(invoiceId);
                         getInvoiceById();
                         $("#getInvoiceByIdContainer").children("h3").html("Invoice Details");
@@ -236,31 +243,6 @@
                 });
             }
 
-            function importHtmlWithSubscriptionId(url, subscriptionId) {
-                $.ajax({
-                    type: "GET",
-                    url: url,
-                    success: function(data)
-                    {
-                        $("#getSubscriptionByIdContainer").remove();
-                        $(data).appendTo("#overlay-inAbox .wrapper").hide().fadeIn();
-                        $("#subscriptionId").val(subscriptionId);
-                        getSubscriptionById();
-                        $("#getSubscriptionByIdContainer").children("h3").html("Subscription Details");
-                        $("#getSubscriptionByIdContainer").children("h3").attr("style", "text-align:center;");
-                        $("#getSubscriptionByIdContainer").attr("style", "width:100%");
-                        $("#subscriptionIdLabel").html("Subscription Id:");
-                        $("#subscriptionId").attr("readonly", true);
-                        $("#getSubscriptionInfoButton").remove();
-                        openOverlay('#overlay-inAbox');
-                    },
-                    error: function() {
-                        alert("Error");
-                    },
-                    dataType: "html"
-                });
-            }
-
             function importHtml(url) {
                 $.ajax({
                     type: "GET",
@@ -268,7 +250,10 @@
                     success: function(data)
                     {
                         $(".container").remove();
-                        $(data).appendTo("body").hide().fadeIn();
+
+                        $("body").append(data);
+                        $(".container").hide().fadeIn();
+
                         $(".dateField").datepicker({ dateFormat: 'yy-mm-dd' });
                     },
                     error: function() {
@@ -312,6 +297,12 @@
                     $(".container").hide();
                     initializeCreateCouponForm();
                     importHtml("views/coupons/createCoupon.html");
+                });
+                $("#changeCoupon").click(function()
+                {
+                    $(".container").hide();
+                    initializeChangeCouponForm();
+                    importHtml("views/coupons/changeCoupon.html");
                 });
 
                 // Coupons Applied operations
