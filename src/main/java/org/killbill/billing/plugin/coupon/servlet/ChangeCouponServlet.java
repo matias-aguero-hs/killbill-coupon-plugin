@@ -18,9 +18,7 @@
 package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -36,8 +34,6 @@ import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
-import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
-import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
@@ -126,7 +122,7 @@ public class ChangeCouponServlet extends PluginServlet {
                 }
             }
         } catch (CouponApiException e) {
-            logService.log(LogService.LOG_ERROR, "Exception during generation of the Object from JSON. Cause: " + e.getMessage());
+            logService.log(LogService.LOG_ERROR, "CouponApiException. Cause: " + e.getMessage());
             e.printStackTrace();
             JSONObject errorMessage = new JSONObject();
             errorMessage.put("Error", "CouponApiException. Cause: " + e.getMessage());

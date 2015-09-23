@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
+import org.killbill.billing.catalog.api.Product;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
@@ -102,29 +103,35 @@ public class CouponPluginApi {
         dao.increaseNumberOfInvoicesAffected(couponCode, numberOfInvoices, deactivation, subscriptionId);
     }
 
-    public void createCoupon(final Coupon coupon, TenantContext context) throws SQLException {
+    public void createCoupon(final Coupon coupon, final TenantContext context) throws SQLException {
         logService.log(LogService.LOG_INFO, "Accessing the DAO to create a Coupon");
         dao.createCoupon(coupon, context);
     }
 
-    public void updateCoupon(final List<CouponsProductsRecord> oldCouponProducts, final Coupon coupon, final TenantContext context) throws SQLException {
-        logService.log(LogService.LOG_INFO, "Accessing the DAO to update a Coupon");
-        dao.updateCoupon(coupon);
+    public void updateCoupon(final List<CouponsProductsRecord> oldCouponProducts, final Coupon coupon,
+                             final TenantContext context) throws SQLException, CouponApiException {
+        // check if any of the products is applied to any subscription, in that case it must not be removed
+        logService.log(LogService.LOG_INFO, "Getting all the Active Applications of Coupon " + coupon.getCouponCode());
+        List<CouponsAppliedRecord> couponsApplied = getActiveCouponsAppliedByCouponCode(coupon.getCouponCode());
 
         // check if there are new products to add to the DB
+        logService.log(LogService.LOG_INFO, "Checking if there are Products that must be added to the DB");
         List<String> productsToAdd =
                 buildListOfProductsToAdd(oldCouponProducts, coupon.getProducts());
-        logService.log(LogService.LOG_INFO, "Accessing the DAO to add new Products to a Coupon");
-        dao.insertProductsToCoupon(coupon.getCouponCode(), productsToAdd, context.getTenantId().toString());
 
-        // check if there are products that must be removed from the DB
+        // check if there are products that must and can be removed from the DB
+        logService.log(LogService.LOG_INFO, "Checking if any of the Products has an Application and cannot be removed");
         List<String> productsToRemove =
-                buildListOfProductsToRemove(oldCouponProducts, coupon.getProducts());
-        logService.log(LogService.LOG_INFO, "Accessing the DAO to remove Products of a Coupon");
-        dao.removeProductsToCoupon(coupon.getCouponCode(), productsToRemove);
+                buildListOfProductsToRemove(oldCouponProducts, coupon.getProducts(), couponsApplied, context);
+
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to update a Coupon");
+        dao.updateCoupon(coupon, productsToAdd, productsToRemove, context.getTenantId().toString());
     }
 
-    private List<String> buildListOfProductsToRemove(final List<CouponsProductsRecord> oldCouponProducts, final List<String> products) {
+    private List<String> buildListOfProductsToRemove(final List<CouponsProductsRecord> oldCouponProducts,
+                                                     final List<String> products,
+                                                     final List<CouponsAppliedRecord> couponsApplied,
+                                                     final TenantContext context) throws CouponApiException {
         List<String> result = new ArrayList<String>();
 
         for (CouponsProductsRecord couponsProductsRecord : oldCouponProducts) {
@@ -132,7 +139,52 @@ public class CouponPluginApi {
                 result.add(couponsProductsRecord.getProductName());
             }
         }
-        return result;
+        return buildListOfProductsAllowedToBeRemoved(couponsApplied, result, context);
+    }
+
+    private List<String> buildListOfProductsAllowedToBeRemoved(final List<CouponsAppliedRecord> couponsApplied,
+                                                               final List<String> productsToRemove,
+                                                               final TenantContext context) throws CouponApiException {
+        List<String> result = new ArrayList<String>();
+
+        if (null != couponsApplied && !couponsApplied.isEmpty()) {
+            for (String productToRemove : productsToRemove) {
+                if (!hasApplications(productToRemove, couponsApplied, context)) {
+                    result.add(productToRemove);
+                }
+                else {
+                    throw new CouponApiException(
+                            new Throwable(
+                                    "Product " + productToRemove + " has applications and could not be removed"), 0,
+                            "Product " + productToRemove + " has applications and could not be removed");
+                }
+            }
+            return result;
+        }
+        else {
+            return productsToRemove;
+        }
+    }
+
+    private boolean hasApplications(final String productToRemove, final List<CouponsAppliedRecord> couponsApplied,
+                                   final TenantContext context) throws CouponApiException {
+        for (CouponsAppliedRecord couponApplied : couponsApplied) {
+            UUID subscriptionId = UUID.fromString(couponApplied.getKbSubscriptionId());
+            Subscription subscription = null;
+            try {
+                subscription = osgiKillbillAPI.getSubscriptionApi().getSubscriptionForEntitlementId(subscriptionId, context);
+                Product product = subscription.getLastActiveProduct();
+                if (null != product && !product.getName().isEmpty() && product.getName().equals(productToRemove)) {
+                    return true;
+                }
+            } catch (SubscriptionApiException e) {
+                e.printStackTrace();
+                throw new CouponApiException(
+                        new Throwable("Error getting the Subscription from the API"), 0,
+                        "Error getting the Subscription from the API");
+            }
+        }
+        return false;
     }
 
     private List<String> buildListOfProductsToAdd(List<CouponsProductsRecord> oldProducts, List<String> newProducts) {

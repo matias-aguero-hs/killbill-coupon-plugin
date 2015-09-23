@@ -30,6 +30,7 @@ function initializeChangeCouponForm() {
     $("#changeCouponContainer h4").remove();
     $("#response").remove();
 };
+
 function changeCoupon() {
     var couponCode = $("#couponCode").val();
     var url = defaultUrl + "changecoupon/";
@@ -79,10 +80,13 @@ function changeCoupon() {
             success: function(det) {
                 $("#response").remove();
                 if (det.Error) {
+                    $("#changeCouponButton").hide();
                     $("#changeCouponContainer").append(
                         "<textarea readonly='true' id='response' style='width:500px; height:50px;'>"
                         + det.Error
                         + "</textarea>"
+                        + "<br/>"
+                        + "<input type='button' id='changeAnotherCouponButton' value='Change another Coupon' onclick='initializeChangeCouponForm()'/>"
                     );
                 }
                 else {

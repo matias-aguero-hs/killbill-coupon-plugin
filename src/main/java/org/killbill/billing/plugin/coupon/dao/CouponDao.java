@@ -185,7 +185,8 @@ public class CouponDao extends PluginDao {
      * Method to update a Coupon object in the DB
 
      */
-    public void updateCoupon(final Coupon coupon) throws SQLException {
+    public void updateCoupon(final Coupon coupon, final List<String> productsToAdd,
+                             final List<String> productsToRemove, final String tenantId) throws SQLException {
         logService.log(LogService.LOG_INFO, "Executing query to Update a Coupon in the DB");
         execute(dataSource.getConnection(),
                 new WithConnectionCallback<Void>() {
@@ -202,6 +203,13 @@ public class CouponDao extends PluginDao {
                         return null;
                     }
                 });
+
+        if (!productsToAdd.isEmpty()) {
+            insertProductsToCoupon(coupon.getCouponCode(), productsToAdd, tenantId);
+        }
+        if (!productsToRemove.isEmpty()) {
+            removeProductsToCoupon(coupon.getCouponCode(), productsToRemove);
+        }
     }
 
     /**

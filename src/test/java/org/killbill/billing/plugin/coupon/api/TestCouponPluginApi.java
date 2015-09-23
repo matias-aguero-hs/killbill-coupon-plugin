@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
+import org.killbill.billing.catalog.api.Product;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
 import org.killbill.billing.entitlement.api.SubscriptionApiException;
@@ -38,6 +39,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProducts
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.mock.MockAccount;
+import org.killbill.billing.plugin.coupon.mock.MockProduct;
 import org.killbill.billing.plugin.coupon.mock.MockSubscription;
 import org.killbill.billing.plugin.coupon.mock.MockTenant;
 import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
@@ -749,7 +751,7 @@ public class TestCouponPluginApi extends Mockito {
     }
 
     @Test
-    public void testUpdateCouponWithOldAndNewProducts() throws SQLException, TenantApiException, CouponApiException {
+    public void testUpdateCouponWithProducts() throws SQLException, TenantApiException, CouponApiException, SubscriptionApiException {
         List<CouponsProductsRecord> oldProducts = new ArrayList<CouponsProductsRecord>();
         CouponsProductsRecord oldProduct = new CouponsProductsRecord();
         oldProduct.setCouponCode(Constants.COUPON_TEST_CODE);
@@ -762,17 +764,38 @@ public class TestCouponPluginApi extends Mockito {
         coupon.setProducts(newProducts);
         coupon.setCouponCode(Constants.COUPON_TEST_CODE);
 
+        List<CouponsAppliedRecord> activeCouponApplications = new ArrayList<CouponsAppliedRecord>();
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_TEST_CODE);
+        couponsAppliedRecord.setKbSubscriptionId(UUID.randomUUID().toString());
+        activeCouponApplications.add(couponsAppliedRecord);
+
+        MockSubscription subscription = new MockSubscription() {
+            @Override
+            public Product getLastActiveProduct() {
+                Product product = new MockProduct() {
+                    @Override
+                    public String getName() {
+                        return "newProduct";
+                    }
+                };
+                return product;
+            }
+        };
+
         Tenant tenant = new MockTenant();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
-
+        when(dao.getActiveCouponsAppliedByCouponCode(anyString())).thenReturn(activeCouponApplications);
+        when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(subscription);
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
 
         couponPluginApi.updateCoupon(oldProducts, coupon, tenantContext);
     }
 
-    @Test
-    public void testUpdateCouponWithSameProducts() throws SQLException, TenantApiException, CouponApiException {
+    @Test(expected = CouponApiException.class)
+    public void testUpdateCouponWithCouponApiException() throws SQLException, TenantApiException, CouponApiException, SubscriptionApiException {
         List<CouponsProductsRecord> oldProducts = new ArrayList<CouponsProductsRecord>();
         CouponsProductsRecord oldProduct = new CouponsProductsRecord();
         oldProduct.setCouponCode(Constants.COUPON_TEST_CODE);
@@ -781,14 +804,66 @@ public class TestCouponPluginApi extends Mockito {
 
         Coupon coupon = new Coupon();
         List<String> newProducts = new ArrayList<String>();
-        newProducts.add("oldProduct");
+        newProducts.add("newProduct");
         coupon.setProducts(newProducts);
         coupon.setCouponCode(Constants.COUPON_TEST_CODE);
+
+        List<CouponsAppliedRecord> activeCouponApplications = new ArrayList<CouponsAppliedRecord>();
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_TEST_CODE);
+        couponsAppliedRecord.setKbSubscriptionId(UUID.randomUUID().toString());
+        activeCouponApplications.add(couponsAppliedRecord);
+
+        MockSubscription subscription = new MockSubscription() {
+            @Override
+            public Product getLastActiveProduct() {
+                Product product = new MockProduct() {
+                    @Override
+                    public String getName() {
+                        return "oldProduct";
+                    }
+                };
+                return product;
+            }
+        };
 
         Tenant tenant = new MockTenant();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
         when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
+        when(dao.getActiveCouponsAppliedByCouponCode(anyString())).thenReturn(activeCouponApplications);
+        when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(subscription);
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
 
+        couponPluginApi.updateCoupon(oldProducts, coupon, tenantContext);
+    }
+
+    @Test(expected = CouponApiException.class)
+    public void testUpdateCouponWithSubscriptionApiException() throws SQLException, TenantApiException, CouponApiException, SubscriptionApiException {
+        List<CouponsProductsRecord> oldProducts = new ArrayList<CouponsProductsRecord>();
+        CouponsProductsRecord oldProduct = new CouponsProductsRecord();
+        oldProduct.setCouponCode(Constants.COUPON_TEST_CODE);
+        oldProduct.setProductName("oldProduct");
+        oldProducts.add(oldProduct);
+
+        Coupon coupon = new Coupon();
+        List<String> newProducts = new ArrayList<String>();
+        newProducts.add("newProduct");
+        coupon.setProducts(newProducts);
+        coupon.setCouponCode(Constants.COUPON_TEST_CODE);
+
+        List<CouponsAppliedRecord> activeCouponApplications = new ArrayList<CouponsAppliedRecord>();
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_TEST_CODE);
+        couponsAppliedRecord.setKbSubscriptionId(UUID.randomUUID().toString());
+        activeCouponApplications.add(couponsAppliedRecord);
+
+        Tenant tenant = new MockTenant();
+        when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
+        when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
+        when(dao.getActiveCouponsAppliedByCouponCode(anyString())).thenReturn(activeCouponApplications);
+        when(osgiKillbillAPI.getSubscriptionApi()).thenReturn(subscriptionApi);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenThrow(SubscriptionApiException.class);
         TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
 
         couponPluginApi.updateCoupon(oldProducts, coupon, tenantContext);
