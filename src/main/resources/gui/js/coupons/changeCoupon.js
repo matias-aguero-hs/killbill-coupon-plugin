@@ -24,7 +24,7 @@ function initializeChangeCouponForm() {
     $("#maxRedemptions").val("");
     $("#startDate").val("");
     $("#expirationDate").val("");
-    $("#product").val("");
+    $("#products").val("");
     $("#changeCouponButton").show();
     $("#changeAnotherCouponButton").remove();
     $("#changeCouponContainer h4").remove();
@@ -38,16 +38,28 @@ function changeCoupon() {
     var maxRedemptions = $("#maxRedemptions").val();
     var startDate = $("#startDate").val();
     var expirationDate = $("#expirationDate").val();
-    var product = $("#product").val();
+    var product = $("#products").val();
 
     if (product && product !== '') {
+        // split products
+        var products = product.split(",");
+        var jsonProducts = '"';
+        for (i = 0; i < products.length; i++) {
+            if (products.length-1 === (i)) {
+                jsonProducts+= products[i].trim() + '"';
+            }
+            else {
+                jsonProducts+= products[i].trim() + '", "';
+            }
+        }
+
         var body = '{' +
             '"couponCode": "' + couponCode +
             '", "couponName": "' + couponName +
             '", "maxRedemptions": "' + maxRedemptions +
             '", "startDate": "' + startDate +
             '", "expirationDate": "' + expirationDate +
-            '", "products": ["' + product + '"]' +
+            '", "products": [' + jsonProducts + ']' +
             '}';
     }
     else {

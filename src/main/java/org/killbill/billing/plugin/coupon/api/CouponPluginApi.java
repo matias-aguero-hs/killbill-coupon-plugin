@@ -107,6 +107,63 @@ public class CouponPluginApi {
         dao.createCoupon(coupon, context);
     }
 
+    public void updateCoupon(final List<CouponsProductsRecord> oldCouponProducts, final Coupon coupon, final TenantContext context) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to update a Coupon");
+        dao.updateCoupon(coupon);
+
+        // check if there are new products to add to the DB
+        List<String> productsToAdd =
+                buildListOfProductsToAdd(oldCouponProducts, coupon.getProducts());
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to add new Products to a Coupon");
+        dao.insertProductsToCoupon(coupon.getCouponCode(), productsToAdd, context.getTenantId().toString());
+
+        // check if there are products that must be removed from the DB
+        List<String> productsToRemove =
+                buildListOfProductsToRemove(oldCouponProducts, coupon.getProducts());
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to remove Products of a Coupon");
+        dao.removeProductsToCoupon(coupon.getCouponCode(), productsToRemove);
+    }
+
+    private List<String> buildListOfProductsToRemove(final List<CouponsProductsRecord> oldCouponProducts, final List<String> products) {
+        List<String> result = new ArrayList<String>();
+
+        for (CouponsProductsRecord couponsProductsRecord : oldCouponProducts) {
+            if (!hasOldProduct(products, couponsProductsRecord)) {
+                result.add(couponsProductsRecord.getProductName());
+            }
+        }
+        return result;
+    }
+
+    private List<String> buildListOfProductsToAdd(List<CouponsProductsRecord> oldProducts, List<String> newProducts) {
+        List<String> result = new ArrayList<String>();
+
+        for (String product : newProducts) {
+            if (!hasProduct(oldProducts, product)) {
+                result.add(product);
+            }
+        }
+        return result;
+    }
+
+    private boolean hasProduct(List<CouponsProductsRecord> listOfCouponsProducts, String product) {
+        for (CouponsProductsRecord couponsProduct : listOfCouponsProducts) {
+            if(couponsProduct.getProductName().equalsIgnoreCase(product)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasOldProduct(final List<String> products, final CouponsProductsRecord couponsProductsRecord) {
+        for (String product : products) {
+            if(product.equalsIgnoreCase(couponsProductsRecord.getProductName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public UUID getTenantId(String apiKey) throws CouponApiException {
         logService.log(LogService.LOG_INFO, "Accesing osgiKillbillAPI to get the TenantUserApi");
         TenantUserApi tenantUserApi = osgiKillbillAPI.getTenantUserApi();

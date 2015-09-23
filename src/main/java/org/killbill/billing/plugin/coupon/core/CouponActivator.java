@@ -31,6 +31,7 @@ import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.listener.CouponListener;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.servlet.ApplyCouponServlet;
+import org.killbill.billing.plugin.coupon.servlet.ChangeCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.CreateCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.DeactivateCouponServlet;
 import org.killbill.billing.plugin.coupon.servlet.DeleteCouponServlet;
@@ -102,6 +103,10 @@ public class CouponActivator extends KillbillActivatorBase {
         // Register Delete Coupon Servlet
         final DeleteCouponServlet deleteCouponServlet = new DeleteCouponServlet(logService, couponPluginApi);
         registerServlet(context, deleteCouponServlet, Constants.DELETE_COUPON_PATH);
+
+        // Register Change Coupon Servlet
+        final ChangeCouponServlet changeCouponServlet = new ChangeCouponServlet(logService, couponPluginApi);
+        registerServlet(context, changeCouponServlet, Constants.CHANGE_COUPON_PATH);
     }
 
     private void registerCouponPluginApi(final BundleContext context, final CouponPluginApi couponPluginApi) {

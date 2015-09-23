@@ -48,6 +48,18 @@ function createCoupon() {
     var product = $("#productCreate").val();
 
     if (product && product !== '') {
+        // split products
+        var products = product.split(",");
+        var jsonProducts = '"';
+        for (i = 0; i < products.length; i++) {
+            if (products.length-1 === (i)) {
+                jsonProducts+= products[i].trim() + '"';
+            }
+            else {
+                jsonProducts+= products[i].trim() + '", "';
+            }
+        }
+
         var body = '{' +
             '"couponCode": "' + couponCode +
             '", "couponName": "' + couponName +
@@ -58,7 +70,7 @@ function createCoupon() {
             '", "maxRedemptions": "' + maxRedemptions +
             '", "startDate": "' + startDate +
             '", "expirationDate": "' + expirationDate +
-            '", "products": ["' + product + '"]' +
+            '", "products": [' + jsonProducts + ']' +
             '}';
     }
     else {

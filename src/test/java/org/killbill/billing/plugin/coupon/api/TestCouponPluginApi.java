@@ -748,4 +748,49 @@ public class TestCouponPluginApi extends Mockito {
 
     }
 
+    @Test
+    public void testUpdateCouponWithOldAndNewProducts() throws SQLException, TenantApiException, CouponApiException {
+        List<CouponsProductsRecord> oldProducts = new ArrayList<CouponsProductsRecord>();
+        CouponsProductsRecord oldProduct = new CouponsProductsRecord();
+        oldProduct.setCouponCode(Constants.COUPON_TEST_CODE);
+        oldProduct.setProductName("oldProduct");
+        oldProducts.add(oldProduct);
+
+        Coupon coupon = new Coupon();
+        List<String> newProducts = new ArrayList<String>();
+        newProducts.add("newProduct");
+        coupon.setProducts(newProducts);
+        coupon.setCouponCode(Constants.COUPON_TEST_CODE);
+
+        Tenant tenant = new MockTenant();
+        when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
+        when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
+
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
+
+        couponPluginApi.updateCoupon(oldProducts, coupon, tenantContext);
+    }
+
+    @Test
+    public void testUpdateCouponWithSameProducts() throws SQLException, TenantApiException, CouponApiException {
+        List<CouponsProductsRecord> oldProducts = new ArrayList<CouponsProductsRecord>();
+        CouponsProductsRecord oldProduct = new CouponsProductsRecord();
+        oldProduct.setCouponCode(Constants.COUPON_TEST_CODE);
+        oldProduct.setProductName("oldProduct");
+        oldProducts.add(oldProduct);
+
+        Coupon coupon = new Coupon();
+        List<String> newProducts = new ArrayList<String>();
+        newProducts.add("oldProduct");
+        coupon.setProducts(newProducts);
+        coupon.setCouponCode(Constants.COUPON_TEST_CODE);
+
+        Tenant tenant = new MockTenant();
+        when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
+        when(tenantUserApi.getTenantByApiKey(anyString())).thenReturn(tenant);
+
+        TenantContext tenantContext = new CouponTenantContext(couponPluginApi.getTenantId("apiKey"));
+
+        couponPluginApi.updateCoupon(oldProducts, coupon, tenantContext);
+    }
 }

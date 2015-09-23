@@ -116,8 +116,22 @@ public class CouponDao extends PluginDao {
                     }
                 });
 
-        // Add List of Products and Coupon associated to the table
         List<String> products = coupon.getProducts();
+        if (null != products) {
+            // Add List of Products and Coupon associated to the table
+            insertProductsToCoupon(coupon.getCouponCode(), products, context.getTenantId().toString());
+        }
+    }
+
+    /**
+     * Method to insert Products to a Coupon
+     * @param couponCode
+     * @param products
+     * @param tenantId
+     * @throws SQLException
+     */
+    public void insertProductsToCoupon(final String couponCode, final List<String> products, final String tenantId) throws SQLException {
+        // Add List of Products and Coupon associated to the table
         if (null != products) {
             logService.log(LogService.LOG_INFO, "Executing query to Add associated Products of a Coupon in the DB");
             for (final String product : products) {
@@ -130,15 +144,64 @@ public class CouponDao extends PluginDao {
                                                COUPONS_PRODUCTS.COUPON_CODE,
                                                COUPONS_PRODUCTS.PRODUCT_NAME,
                                                COUPONS.KB_TENANT_ID)
-                                   .values(coupon.getCouponCode(),
+                                   .values(couponCode,
                                            product,
-                                           context.getTenantId().toString())
+                                           tenantId)
                                    .execute();
                                 return null;
                             }
                         });
             }
         }
+    }
+
+    /**
+     * Method to remove Products to a Coupon
+     * @param couponCode
+     * @param products
+     * @throws SQLException
+     */
+    public void removeProductsToCoupon(final String couponCode, final List<String> products) throws SQLException {
+        if (null != products) {
+            logService.log(LogService.LOG_INFO, "Executing query to Remove associated Products of a Coupon in the DB");
+            for (final String product : products) {
+                execute(dataSource.getConnection(),
+                        new WithConnectionCallback<Void>() {
+                            @Override
+                            public Void withConnection(final Connection conn) throws SQLException {
+                                DSL.using(conn, dialect, settings)
+                                   .delete(COUPONS_PRODUCTS)
+                                   .where(COUPONS_PRODUCTS.COUPON_CODE.equal(couponCode))
+                                   .and(COUPONS_PRODUCTS.PRODUCT_NAME.equal(product))
+                                   .execute();
+                                return null;
+                            }
+                        });
+            }
+        }
+    }
+
+    /**
+     * Method to update a Coupon object in the DB
+
+     */
+    public void updateCoupon(final Coupon coupon) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to Update a Coupon in the DB");
+        execute(dataSource.getConnection(),
+                new WithConnectionCallback<Void>() {
+                    @Override
+                    public Void withConnection(final Connection conn) throws SQLException {
+                        DSL.using(conn, dialect, settings)
+                           .update(COUPONS)
+                           .set(COUPONS.COUPON_NAME, coupon.getCouponName())
+                           .set(COUPONS.MAX_REDEMPTIONS, coupon.getMaxRedemptions())
+                           .set(COUPONS.START_DATE, coupon.getStartDate())
+                           .set(COUPONS.EXPIRATION_DATE, coupon.getExpirationDate())
+                           .where(COUPONS.COUPON_CODE.equal(coupon.getCouponCode()))
+                           .execute();
+                        return null;
+                    }
+                });
     }
 
     /**
