@@ -97,8 +97,8 @@ public class TestCouponListener extends Mockito {
         InvoiceItem invoiceItem = new MockRecurringInvoiceItem(invoice.getId(), account.getId(),
                                                                subscriptionId,
                                                                UUID.randomUUID(),
-                                                               "test plan",
-                                                               "test phase", null,
+                                                               "standard-monthly",
+                                                               "standard-monthly-evergreen", null,
                                                                now,
                                                                now.plusMonths(1),
                                                                requestedAmount,
@@ -228,8 +228,8 @@ public class TestCouponListener extends Mockito {
         InvoiceItem invoiceItem = new MockRecurringInvoiceItem(invoice.getId(), account.getId(),
                                                                subscriptionId,
                                                                UUID.randomUUID(),
-                                                               "test plan",
-                                                               "test phase", null,
+                                                               "standard-monthly",
+                                                               "standard-monthly-evergreen", null,
                                                                null,
                                                                null,
                                                                null,
@@ -241,6 +241,31 @@ public class TestCouponListener extends Mockito {
             }
         };
 
+        invoice.getInvoiceItems().clear();
+        invoice.addInvoiceItem(invoiceItem);
+
+        // mocks
+        when(invoiceUserApi.getInvoice(any(), any())).thenReturn(invoice);
+        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(null);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(null);
+
+        // test
+        couponListener.handleKillbillEvent(event);
+    }
+
+    @Test
+    public void testRecurringInvoiceItemNonEvergreen() throws Exception {
+
+        InvoiceItem invoiceItem = new MockRecurringInvoiceItem(invoice.getId(), account.getId(),
+                                                               subscriptionId,
+                                                               UUID.randomUUID(),
+                                                               "standard-monthly",
+                                                               "standard-monthly-discount", null,
+                                                               null,
+                                                               null,
+                                                               null,
+                                                               new BigDecimal("1.0"),
+                                                               Currency.USD);
         invoice.getInvoiceItems().clear();
         invoice.addInvoiceItem(invoiceItem);
 

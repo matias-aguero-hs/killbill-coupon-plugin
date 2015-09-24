@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.killbill.billing.catalog.api.PhaseType;
 import org.killbill.billing.entitlement.plugin.api.EntitlementPluginApiException;
 import org.killbill.billing.invoice.api.Invoice;
 import org.killbill.billing.invoice.api.InvoiceApiException;
@@ -129,10 +130,9 @@ public class CouponListener implements OSGIKillbillEventHandler {
         Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponTenantContext(tenantId));
 
         for (InvoiceItem item : invoice.getInvoiceItems()) {
-            if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())) {
-
-                // TODO validate phase plan (EVERGREEN) ?
-                // item.getPhaseName().contains("evergreen");
+            if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())
+                    && (item.getPhaseName() != null)
+                    && item.getPhaseName().endsWith(PhaseType.EVERGREEN.toString().toLowerCase())) {
 
                 logService.log(LogService.LOG_INFO, "RECURRING item " + item.getId() + " found for invoice " + invoice.getId());
 
