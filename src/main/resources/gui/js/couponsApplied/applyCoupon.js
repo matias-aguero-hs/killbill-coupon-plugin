@@ -28,7 +28,7 @@ function initializeApplyCouponForm() {
     $("#response").remove();
 };
 function applyCoupon() {
-    var url = defaultUrl + "applycoupon/";
+    var url = defaultUrl + "applyCoupon";
     var couponCode = $("#couponCodeApply").val();
     var accountId = $("#accountIdApply").val();
     var subscriptionId = $("#subscriptionIdApply").val();

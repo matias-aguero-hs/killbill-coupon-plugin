@@ -26,7 +26,7 @@ function initializeDeactivateCouponByCouponCodeForm() {
 function deactivateCouponByCouponCode() {
     var couponCode = document.getElementById("deactivateCouponCode");
     var stopHonouring = document.getElementById("stopHonouring");
-    var url = defaultUrl + "deactivatecoupon?couponCode=" + couponCode.value + "&stopHonouring=" + stopHonouring.value;
+    var url = defaultUrl + "deactivateCoupon?couponCode=" + couponCode.value + "&stopHonouring=" + stopHonouring.value;
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);
     xmlhttp.onreadystatechange = function() {

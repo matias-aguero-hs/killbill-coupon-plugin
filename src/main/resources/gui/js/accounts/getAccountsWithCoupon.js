@@ -26,7 +26,7 @@ function initializeGetAccountsWithCouponForm() {
 };
 function getAccountsByCouponCode() {
     var couponCode = $("#couponCode");
-    var url = defaultUrl + "getallaccountswithcoupon?couponCode=" + couponCode.val();
+    var url = defaultUrl + "getAllAccountsWithCoupon?couponCode=" + couponCode.val();
 
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);

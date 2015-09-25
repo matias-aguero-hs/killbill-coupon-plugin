@@ -24,7 +24,7 @@ function initializeDeleteCouponByCouponCodeForm() {
 };
 function deleteCouponByCouponCode() {
     var couponCode = document.getElementById("deleteCouponCode");
-    var url = defaultUrl + "deletecoupon?couponCode=" + couponCode.value;
+    var url = defaultUrl + "deleteCoupon?couponCode=" + couponCode.value;
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);
     xmlhttp.onreadystatechange = function() {

@@ -33,7 +33,7 @@ function getCouponAppliedByCouponCodeAndSubscriptionId() {
     var couponCode = $("#couponCode").val();
     var subscriptionId = $("#subscriptionId").val();
 
-    var url = defaultUrl + "getcouponapplied?couponCode=" + couponCode + "&subscriptionId=" + subscriptionId;
+    var url = defaultUrl + "getCouponApplied?couponCode=" + couponCode + "&subscriptionId=" + subscriptionId;
 
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);

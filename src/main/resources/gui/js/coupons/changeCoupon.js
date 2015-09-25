@@ -33,7 +33,7 @@ function initializeChangeCouponForm() {
 
 function changeCoupon() {
     var couponCode = $("#couponCode").val();
-    var url = defaultUrl + "changecoupon/";
+    var url = defaultUrl + "changeCoupon";
 
     var couponName = $("#couponName").val();
     var maxRedemptions = $("#maxRedemptions").val();
@@ -105,6 +105,9 @@ function changeCoupon() {
             dataType: "json",
             contentType: "application/json",
             headers: {
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "POST",
+                "Content-Type" : "application/json",
                 "X-Killbill-ApiKey" : "hootsuite"
             }
         });

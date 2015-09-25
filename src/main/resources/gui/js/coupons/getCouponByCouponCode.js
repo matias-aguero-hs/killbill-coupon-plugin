@@ -32,7 +32,7 @@ function initializeGetCouponByCouponCodeForm() {
 };
 function getCouponByCouponCode() {
     var couponCode = document.getElementById("couponCode");
-    var url = defaultUrl + "getcoupon?couponCode=" + couponCode.value;
+    var url = defaultUrl + "getCoupon?couponCode=" + couponCode.value;
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);
     xmlhttp.onreadystatechange = function() {

@@ -22,7 +22,7 @@ function initializeGetAllCouponsAppliedForm() {
     $('#allCouponsAppliedTable').html('');
 };
 function getAllCouponsApplied() {
-    var url = defaultUrl + "getallcouponsapplied/";
+    var url = defaultUrl + "getAllCouponsApplied";
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);
     xmlhttp.onreadystatechange = function() {

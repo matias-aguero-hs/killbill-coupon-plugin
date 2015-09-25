@@ -17,6 +17,8 @@
 
 package org.killbill.billing.plugin.coupon.model;
 
+import java.util.regex.Pattern;
+
 /**
  * Created by jgomez on 02/09/15.
  */
@@ -41,16 +43,18 @@ public class Constants {
     public static final String SUBSCRIPTION_ID = "subscriptionId";
     public static final String X_KILLBILL_API_KEY = "X-Killbill-ApiKey";
     public static final String PLUGIN_NAME = "coupon";
-    public static final String GET_COUPON_PATH = "-getcoupon";
-    public static final String GET_COUPON_APPLIED_PATH = "-getcouponapplied";
-    public static final String CREATE_COUPON_PATH = "-createcoupon";
-    public static final String APPLY_COUPON_PATH = "-applycoupon";
-    public static final String GET_ALL_COUPON_PATH = "-getallcoupons";
-    public static final String GET_ALL_COUPONS_APPLIED_PATH = "-getallcouponsapplied";
-    public static final String GET_ALL_ACCOUNTS_WITH_COUPON_PATH = "-getallaccountswithcoupon";
-    public static final String DEACTIVATE_COUPON_PATH = "-deactivatecoupon";
-    public static final String DELETE_COUPON_PATH = "-deletecoupon";
-    public static final String CHANGE_COUPON_PATH = "-changecoupon";
+
+    public static final Pattern GET_COUPON_PATH = Pattern.compile("/" + "getCoupon");
+    public static final Pattern GET_COUPON_APPLIED_PATH = Pattern.compile("/" + "getCouponApplied");
+    public static final Pattern CREATE_COUPON_PATH = Pattern.compile("/" + "createCoupon");
+    public static final Pattern APPLY_COUPON_PATH = Pattern.compile("/" + "applyCoupon");
+    public static final Pattern GET_ALL_COUPON_PATH = Pattern.compile("/" + "getAllCoupons");
+    public static final Pattern GET_ALL_COUPONS_APPLIED_PATH = Pattern.compile("/" + "getAllCouponsApplied");
+    public static final Pattern GET_ALL_ACCOUNTS_WITH_COUPON_PATH = Pattern.compile("/" + "getAllAccountsWithCoupon");
+    public static final Pattern DEACTIVATE_COUPON_PATH = Pattern.compile("/" + "deactivateCoupon");
+    public static final Pattern DELETE_COUPON_PATH = Pattern.compile("/" + "deleteCoupon");
+    public static final Pattern CHANGE_COUPON_PATH = Pattern.compile("/" + "changeCoupon");
+
     public static final String ADMIN_USER = "admin";
     public static final String ADMIN_PASSWORD = "password";
     public static final String PRODUCTS = "products";
