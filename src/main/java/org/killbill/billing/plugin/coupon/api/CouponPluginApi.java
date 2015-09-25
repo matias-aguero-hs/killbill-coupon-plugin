@@ -190,9 +190,11 @@ public class CouponPluginApi {
     private List<String> buildListOfProductsToAdd(List<CouponsProductsRecord> oldProducts, List<String> newProducts) {
         List<String> result = new ArrayList<String>();
 
-        for (String product : newProducts) {
-            if (!hasProduct(oldProducts, product)) {
-                result.add(product);
+        if (null != newProducts) {
+            for (String product : newProducts) {
+                if (!hasProduct(oldProducts, product)) {
+                    result.add(product);
+                }
             }
         }
         return result;
