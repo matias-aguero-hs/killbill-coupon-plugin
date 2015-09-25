@@ -427,12 +427,6 @@ public class CouponPluginApi {
             logService.log(LogService.LOG_ERROR,error);
             throw new CouponApiException(new Throwable(error), 0, error);
         }
-        // validate start date
-        if (!CouponHelper.isStarted(coupon)) {
-            error = "Coupon " + coupon.getCouponCode() + " has a Start Date on " + coupon.getStartDate().toString();
-            logService.log(LogService.LOG_ERROR,error);
-            throw new CouponApiException(new Throwable(error), 0, error);
-        }
         // validate max number of redemptions
         Integer numberOfApplications = null;
         try {

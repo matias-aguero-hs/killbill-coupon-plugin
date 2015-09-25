@@ -20,6 +20,7 @@ package org.killbill.billing.plugin.coupon.util;
 import java.util.Date;
 import java.util.Calendar;
 
+import org.joda.time.LocalDate;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
@@ -40,7 +41,7 @@ public class CouponHelper {
      * @return
      */
     public static boolean isApplicable(CouponsRecord coupon) {
-        return isActive(coupon) && isStarted(coupon) && !hasExpired(coupon);
+        return isActive(coupon) && !hasExpired(coupon);
     }
 
     /**
@@ -57,8 +58,8 @@ public class CouponHelper {
      * @param coupon
      * @return
      */
-    public static boolean isStarted(CouponsRecord coupon) {
-        return !getZeroTimeDate(coupon.getStartDate()).after(getZeroTimeDate(new Date()));
+    public static boolean isStarted(CouponsRecord coupon, LocalDate currentDate) {
+        return !getZeroTimeDate(coupon.getStartDate()).after(getZeroTimeDate(currentDate.toDate()));
     }
 
     /**
