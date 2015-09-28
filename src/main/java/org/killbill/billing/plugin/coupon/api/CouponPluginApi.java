@@ -190,9 +190,11 @@ public class CouponPluginApi {
     private List<String> buildListOfProductsToAdd(List<CouponsProductsRecord> oldProducts, List<String> newProducts) {
         List<String> result = new ArrayList<String>();
 
-        for (String product : newProducts) {
-            if (!hasProduct(oldProducts, product)) {
-                result.add(product);
+        if (null != newProducts) {
+            for (String product : newProducts) {
+                if (!hasProduct(oldProducts, product)) {
+                    result.add(product);
+                }
             }
         }
         return result;
@@ -424,12 +426,6 @@ public class CouponPluginApi {
         // validate expiration date
         if (CouponHelper.hasExpired(coupon)) {
             error = "Coupon " + coupon.getCouponCode() + " has expired.";
-            logService.log(LogService.LOG_ERROR,error);
-            throw new CouponApiException(new Throwable(error), 0, error);
-        }
-        // validate start date
-        if (!CouponHelper.isStarted(coupon)) {
-            error = "Coupon " + coupon.getCouponCode() + " has a Start Date on " + coupon.getStartDate().toString();
             logService.log(LogService.LOG_ERROR,error);
             throw new CouponApiException(new Throwable(error), 0, error);
         }

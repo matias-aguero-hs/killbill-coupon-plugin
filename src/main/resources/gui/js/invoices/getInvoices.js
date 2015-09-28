@@ -48,6 +48,7 @@ function buildTable(data) {
     r[++j] ='<td style="border:2px outset; text-align:center;"><h5>Invoice Number</h5></td>';
     r[++j] ='<td style="border:2px outset; text-align:center;"><h5>Invoice Date</h5></td>';
     r[++j] ='<td style="border:2px outset; text-align:center;"><h5>Invoice Id</h5></td>';
+    r[++j] ='<td style="border:2px outset; text-align:center;"><h5>Account Id</h5></td>';
     r[++j] ='<td style="border:2px outset; text-align:center;"><h5>Details</h5></td></tr>';
     for (var key=0, size=data.length; key<size; key++){
         r[++j] ='<tr><td style="border:2px outset; text-align:center;"><h5>#'+ [key+1] + '</h5></td>';
@@ -59,6 +60,9 @@ function buildTable(data) {
         r[++j] = '</td>';
         r[++j] ='<td style="border:2px outset; text-align:center;" id="invoiceId' + [key] + '">';
         r[++j] = data[key].invoiceId;
+        r[++j] = '</td>';
+        r[++j] ='<td style="border:2px outset; text-align:center;" id="accountId' + [key] + '">';
+        r[++j] = data[key].accountId;
         r[++j] = '</td>';
         r[++j] ='<td style="border:2px outset; text-align:center;"><input type="button" onclick="openInvoiceDetailsOverlay(this);" id="getInfo' + [key] + '" value="Get Details"/></td></tr>';
     }

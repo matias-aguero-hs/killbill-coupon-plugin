@@ -20,6 +20,7 @@
  */
 function initializeChangeCouponForm() {
     $("#couponCode").val("");
+    $("#couponCode").prop("readonly", false);
     $("#couponName").val("");
     $("#maxRedemptions").val("");
     $("#startDate").val("");
@@ -30,6 +31,11 @@ function initializeChangeCouponForm() {
     $("#changeCouponContainer h4").remove();
     $("#response").remove();
 };
+
+function lockCouponCodeFieldAndGetCouponByCouponCode() {
+    $("#couponCode").prop("readonly", true);
+    getCouponByCouponCode();
+}
 
 function changeCoupon() {
     var couponCode = $("#couponCode").val();

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.killbill.billing.catalog.api.PhaseType;
 import org.killbill.billing.entitlement.plugin.api.EntitlementPluginApiException;
 import org.killbill.billing.invoice.api.Invoice;
@@ -149,7 +150,7 @@ public class CouponListener implements OSGIKillbillEventHandler {
                 CouponsRecord coupon = couponPluginApi.getCouponByCode(cApplied.getCouponCode());
 
                 // check if Coupon's application is still valid
-                if (validateCouponApplication(cApplied, coupon)) {
+                if (validateCouponApplication(cApplied, coupon, invoice.getInvoiceDate())) {
                     BigDecimal discountAmount = calculateDiscountAmount(item, cApplied);
 
                     PluginCallContext context = new PluginCallContext(Constants.PLUGIN_NAME, DateTime.now(), tenantId);
@@ -192,16 +193,17 @@ public class CouponListener implements OSGIKillbillEventHandler {
 
     }
 
-    private boolean validateCouponApplication(final CouponsAppliedRecord cApplied, final CouponsRecord coupon) {
+    private boolean validateCouponApplication(final CouponsAppliedRecord cApplied, final CouponsRecord coupon,
+                                              final LocalDate currentDate) {
         if (CouponHelper.isCouponAppliedActive(cApplied)) {
             // now check if it has not completed its duration yet
-            if (CouponHelper.canCouponCanBeAppliedByDuration(cApplied, coupon)) {
-                // coupon has not completed its duration and could be applied
+            if (CouponHelper.canCouponCanBeAppliedByDuration(cApplied, coupon) && CouponHelper.isStarted(coupon, currentDate)) {
+                // coupon has not completed its duration and has passed its Start Date. It could be applied
                 return true;
             }
             else {
                 // coupon has completed its duration cannot be applied
-                logService.log(LogService.LOG_ERROR, "Error: Coupon Application has completed its duration and the discount cannot be applied again.");
+                logService.log(LogService.LOG_ERROR, "Error: Coupon Application has completed its duration or its Start Date is in the future. The discount cannot be applied again.");
             }
         }
         else {
