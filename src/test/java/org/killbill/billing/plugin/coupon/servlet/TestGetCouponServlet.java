@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestGetCouponServlet extends Mockito {
 
-    private GetCouponServlet getCouponServlet;
+    private ServletRouter servletRouter;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private LogService logService;
@@ -55,7 +55,7 @@ public class TestGetCouponServlet extends Mockito {
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         couponPluginApi = mock(CouponPluginApi.class);
-        getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
+        servletRouter = new ServletRouter(couponPluginApi, logService);
     }
 
     @Test
@@ -68,8 +68,10 @@ public class TestGetCouponServlet extends Mockito {
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(couponRecord);
         when(couponPluginApi.getProductsOfCoupon(anyString())).thenReturn(new ArrayList());
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
@@ -83,8 +85,10 @@ public class TestGetCouponServlet extends Mockito {
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(null);
         when(couponPluginApi.getProductsOfCoupon(anyString())).thenReturn(new ArrayList());
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("Coupon not found in the DB"));
     }
@@ -97,8 +101,10 @@ public class TestGetCouponServlet extends Mockito {
         when(response.getWriter()).thenReturn(writer);
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponByCode(anyString())).thenThrow(SQLException.class);
+        when(request.getPathInfo()).thenReturn(Constants.GET_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("SQL Exception"));
     }
@@ -110,8 +116,10 @@ public class TestGetCouponServlet extends Mockito {
 
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn("");
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("Coupon code is empty or not valid"));
     }

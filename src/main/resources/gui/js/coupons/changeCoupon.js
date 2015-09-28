@@ -105,10 +105,7 @@ function changeCoupon() {
             dataType: "json",
             contentType: "application/json",
             headers: {
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "POST",
-                "Content-Type" : "application/json",
-                "X-Killbill-ApiKey" : "hootsuite"
+                "X-Killbill-ApiKey": "hootsuite"
             }
         });
 

@@ -35,7 +35,7 @@ function initializeCreateCouponForm() {
     $("#response").remove();
 };
 function createCoupon() {
-    var url = defaultUrl + "ceateCoupon";
+    var url = defaultUrl + "createCoupon";
     var couponCode = $("#couponCodeCreate").val();
     var couponName = $("#couponNameCreate").val();
     var discountType = $("#discountTypeCreate").val();

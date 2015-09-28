@@ -44,7 +44,7 @@ public class TestApplyCouponServlet extends Mockito {
 
     public static final String COUPON_TEST_CODE = "couponTestCode";
     public static final String TEST_API_KEY = "hootsuite";
-    private ApplyCouponServlet applyCouponServlet;
+    private ServletRouter servletRouter;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private LogService logService;
@@ -56,7 +56,7 @@ public class TestApplyCouponServlet extends Mockito {
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         couponPluginApi = mock(CouponPluginApi.class);
-        applyCouponServlet = new ApplyCouponServlet(logService, couponPluginApi);
+        servletRouter = new ServletRouter(couponPluginApi, logService);
     }
 
     @Test
@@ -72,8 +72,10 @@ public class TestApplyCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(applyCouponRequest);
         when(couponPluginApi.getCouponApplied(anyString(), any(UUID.class), any(UUID.class))).thenReturn(couponAppliedRecord);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        applyCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains(COUPON_TEST_CODE));
     }
@@ -88,8 +90,12 @@ public class TestApplyCouponServlet extends Mockito {
         when(couponPluginApi.getTenantId(anyString())).thenReturn(randomTenantId);
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(null);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        applyCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("CouponApiException"));
     }
@@ -106,8 +112,10 @@ public class TestApplyCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(applyCouponRequest);
         when(couponPluginApi.getCouponApplied(anyString(), any(UUID.class), any(UUID.class))).thenThrow(SQLException.class);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        applyCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("SQLException"));
     }
@@ -124,8 +132,10 @@ public class TestApplyCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(applyCouponRequest);
         when(couponPluginApi.getCouponApplied(anyString(), any(UUID.class), any(UUID.class))).thenThrow(CouponApiException.class);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        applyCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("Coupon cannot be applied"));
     }
@@ -142,10 +152,32 @@ public class TestApplyCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(applyCouponRequest);
         when(couponPluginApi.getCouponApplied(anyString(), any(UUID.class), any(UUID.class))).thenThrow(Exception.class);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        applyCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("API Exception"));
+    }
+
+    @Test
+    public void testApplyCouponServletWithNullCouponApplied() throws Exception {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+        UUID randomTenantId = UUID.randomUUID();
+        ApplyCouponRequest applyCouponRequest = buildSuccessfulApplyCouponRequest(randomTenantId);
+
+        when(request.getHeader(Constants.X_KILLBILL_API_KEY)).thenReturn(TEST_API_KEY);
+        when(couponPluginApi.getTenantId(anyString())).thenReturn(randomTenantId);
+        when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(applyCouponRequest);
+        when(couponPluginApi.getCouponApplied(anyString(), any(UUID.class), any(UUID.class))).thenReturn(null);
+        when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.APPLY_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
+
+        servletRouter.doPost(request, response);
+
+        assertTrue(stringWriter.toString().contains("Coupon Applied not found in the DB"));
     }
 
     private ApplyCouponRequest buildSuccessfulApplyCouponRequest(UUID randomTenantId) {

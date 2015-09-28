@@ -98,36 +98,27 @@ public class ApplyCouponServlet extends PluginServlet {
         }
 
         try {
-            if (null != applyCouponRequest) {
-                logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to Apply a Coupon");
-                couponPluginApi.applyCoupon(applyCouponRequest.getCouponCode(), null, applyCouponRequest.getSubscriptionId(), applyCouponRequest.getAccountId(), context);
+            logService.log(LogService.LOG_INFO, "Calling CouponPluginAPI to Apply a Coupon");
+            couponPluginApi.applyCoupon(applyCouponRequest.getCouponCode(), null, applyCouponRequest.getSubscriptionId(), applyCouponRequest.getAccountId(), context);
 
-                logService.log(LogService.LOG_INFO, "Getting recently created Coupon Applied using couponCode: "
-                                                    + applyCouponRequest.getCouponCode()
-                                                    + " and accountId: " + applyCouponRequest.getAccountId());
-                CouponsAppliedRecord couponApplied =
-                        couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getSubscriptionId(), applyCouponRequest.getAccountId());
+            logService.log(LogService.LOG_INFO, "Getting recently created Coupon Applied using couponCode: "
+                                                + applyCouponRequest.getCouponCode()
+                                                + " and accountId: " + applyCouponRequest.getAccountId());
+            CouponsAppliedRecord couponApplied =
+                    couponPluginApi.getCouponApplied(applyCouponRequest.getCouponCode(), applyCouponRequest.getSubscriptionId(), applyCouponRequest.getAccountId());
 
-                if (null != couponApplied) {
-                    // add Coupon to JSON response
-                    logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon Applied created");
-                    JSONObject jsonResponse = JsonHelper.buildCouponAppliedJsonResponse(couponApplied);
-                    logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
-                    ServletHelper.writeResponseToJson(response, jsonResponse.toString());
-                    buildResponse(response);
-                }
-                else {
-                    logService.log(LogService.LOG_ERROR, "Error. Coupon Applied not found in the DB");
-                    JSONObject errorMessage = new JSONObject();
-                    errorMessage.put("Error", "Coupon Applied not found in the DB");
-                    ServletHelper.writeResponseToJson(response, errorMessage.toString());
-                    buildResponse(response);
-                }
+            if (null != couponApplied) {
+                // add Coupon to JSON response
+                logService.log(LogService.LOG_INFO, "Calling JsonHelper to build JSON Response using the Coupon Applied created");
+                JSONObject jsonResponse = JsonHelper.buildCouponAppliedJsonResponse(couponApplied);
+                logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
+                ServletHelper.writeResponseToJson(response, jsonResponse.toString());
+                buildResponse(response);
             }
             else {
-                logService.log(LogService.LOG_ERROR, "Apply Coupon Request object is null");
+                logService.log(LogService.LOG_ERROR, "Error. Coupon Applied not found in the DB");
                 JSONObject errorMessage = new JSONObject();
-                errorMessage.put("Error", "Apply Coupon Request object is null");
+                errorMessage.put("Error", "Coupon Applied not found in the DB");
                 ServletHelper.writeResponseToJson(response, errorMessage.toString());
                 buildResponse(response);
             }

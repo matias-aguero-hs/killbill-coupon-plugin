@@ -19,9 +19,9 @@ package org.killbill.billing.plugin.coupon.servlet;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -29,7 +29,7 @@ import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.osgi.service.log.LogService;
 
-public class ServletRouter extends BaseServlet {
+public class ServletRouter extends HttpServlet {
 
     private GetCouponServlet getCouponServlet;
     private ApplyCouponServlet applyCouponServlet;
@@ -42,9 +42,7 @@ public class ServletRouter extends BaseServlet {
     private GetAllCouponsAppliedServlet getAllCouponsAppliedServlet;
     private GetCouponAppliedServlet getCouponAppliedServlet;
 
-
     public ServletRouter(final CouponPluginApi couponPluginApi, final LogService logService) {
-        super(couponPluginApi, logService);
         getCouponServlet = new GetCouponServlet(logService, couponPluginApi);
         applyCouponServlet = new ApplyCouponServlet(logService, couponPluginApi);
         changeCouponServlet = new ChangeCouponServlet(logService, couponPluginApi);
@@ -59,36 +57,29 @@ public class ServletRouter extends BaseServlet {
 
     @Override
     protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        setCrossSiteScriptingHeaders(resp);
         forward(req, resp);
     }
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        setCrossSiteScriptingHeaders(resp);
         forward(req, resp);
     }
 
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        setCrossSiteScriptingHeaders(resp);
         forward(req, resp);
     }
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        setCrossSiteScriptingHeaders(resp);
         forward(req, resp);
     }
 
     @Override
     protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        setCrossSiteScriptingHeaders(resp);
         forward(req, resp);
     }
 
-    // Lame - we should rather use the built-in forward mechanism but I'm not sure how to create
-    // the dispatchers without a web.xml: getServletContext().getNamedDispatcher("...").forward(req, resp);
     private void forward(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, ServletException {
         final String pathInfo = req.getPathInfo();
         Matcher matcher;
@@ -158,5 +149,4 @@ public class ServletRouter extends BaseServlet {
 
         resp.sendError(404, "Resource " + pathInfo + " not found");
     }
-
 }

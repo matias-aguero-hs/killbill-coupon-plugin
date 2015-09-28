@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestGetAllAccountsWithCouponServlet extends Mockito {
 
-    private GetAllAccountsWithCouponServlet getAllAccountsWithCouponServlet;
+    private ServletRouter servletRouter;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private LogService logService;
@@ -54,7 +54,7 @@ public class TestGetAllAccountsWithCouponServlet extends Mockito {
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         couponPluginApi = mock(CouponPluginApi.class);
-        getAllAccountsWithCouponServlet = new GetAllAccountsWithCouponServlet(logService, couponPluginApi);
+        servletRouter = new ServletRouter(couponPluginApi, logService);
     }
 
     @Test
@@ -66,8 +66,10 @@ public class TestGetAllAccountsWithCouponServlet extends Mockito {
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponsAppliedByCouponCode(anyString())).thenReturn(listOfCouponsApplied);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_ALL_ACCOUNTS_WITH_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getAllAccountsWithCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
@@ -80,8 +82,10 @@ public class TestGetAllAccountsWithCouponServlet extends Mockito {
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponsAppliedByCouponCode(anyString())).thenReturn(new ArrayList());
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_ALL_ACCOUNTS_WITH_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getAllAccountsWithCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("There are no Coupons Applied with the specified Coupon code"));
     }
@@ -94,8 +98,10 @@ public class TestGetAllAccountsWithCouponServlet extends Mockito {
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponsAppliedByCouponCode(anyString())).thenReturn(null);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_ALL_ACCOUNTS_WITH_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getAllAccountsWithCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("Can't get List of Coupons Applied from the DB. Response: null object"));
     }
@@ -107,8 +113,10 @@ public class TestGetAllAccountsWithCouponServlet extends Mockito {
 
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(null);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_ALL_ACCOUNTS_WITH_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getAllAccountsWithCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("Coupon code is empty or not valid"));
     }
@@ -121,8 +129,10 @@ public class TestGetAllAccountsWithCouponServlet extends Mockito {
         when(request.getParameter(Constants.COUPON_CODE)).thenReturn(Constants.COUPON_TEST_CODE);
         when(couponPluginApi.getCouponsAppliedByCouponCode(anyString())).thenThrow(SQLException.class);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.GET_ALL_ACCOUNTS_WITH_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("GET");
 
-        getAllAccountsWithCouponServlet.doGet(request, response);
+        servletRouter.doGet(request, response);
 
         assertTrue(stringWriter.toString().contains("SQL Exception"));
     }

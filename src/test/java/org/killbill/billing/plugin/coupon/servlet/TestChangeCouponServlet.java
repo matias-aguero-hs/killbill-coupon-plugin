@@ -47,7 +47,7 @@ import static org.junit.Assert.assertTrue;
 public class TestChangeCouponServlet extends Mockito {
 
     public static final String TEST_API_KEY = "hootsuite";
-    private ChangeCouponServlet changeCouponServlet;
+    private ServletRouter servletRouter;
     private HttpServletRequest request;
     private HttpServletResponse response;
     private LogService logService;
@@ -59,7 +59,7 @@ public class TestChangeCouponServlet extends Mockito {
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         couponPluginApi = mock(CouponPluginApi.class);
-        changeCouponServlet = new ChangeCouponServlet(logService, couponPluginApi);
+        servletRouter = new ServletRouter(couponPluginApi, logService);
     }
 
     @Test
@@ -75,8 +75,10 @@ public class TestChangeCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(coupon);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(couponRecord);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.CHANGE_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        changeCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains(Constants.COUPON_TEST_CODE));
     }
@@ -91,8 +93,10 @@ public class TestChangeCouponServlet extends Mockito {
         when(couponPluginApi.getTenantId(anyString())).thenReturn(randomTenantId);
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(null);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.CHANGE_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        changeCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("CouponApiException"));
     }
@@ -109,8 +113,10 @@ public class TestChangeCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(coupon);
         when(couponPluginApi.getCouponByCode(anyString())).thenReturn(null);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.CHANGE_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        changeCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("Coupon not found in the DB"));
     }
@@ -127,8 +133,10 @@ public class TestChangeCouponServlet extends Mockito {
         when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(coupon);
         when(couponPluginApi.getCouponByCode(anyString())).thenThrow(SQLException.class);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.CHANGE_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        changeCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("SQLException"));
     }
@@ -141,8 +149,10 @@ public class TestChangeCouponServlet extends Mockito {
         when(request.getHeader(Constants.X_KILLBILL_API_KEY)).thenReturn(TEST_API_KEY);
         when(couponPluginApi.getTenantId(anyString())).thenThrow(CouponApiException.class);
         when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.CHANGE_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
 
-        changeCouponServlet.doPost(request, response);
+        servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("CouponApiException"));
     }
