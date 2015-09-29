@@ -41,6 +41,7 @@ public class Coupon {
     private Date startDate;
     private Date expirationDate;
     private List<String> products;
+    private List<String> planPhases;
     private UUID tenantId;
 
     public String getCouponCode() {
@@ -90,6 +91,10 @@ public class Coupon {
     public void setProducts(final List<String> products) {
         this.products = products;
     }
+
+    public List<String> getPlanPhases() { return planPhases; }
+
+    public void setPlanPhases(final List<String> planPhases) { this.planPhases = planPhases;}
 
     public boolean isActive() {
         return active;
@@ -163,6 +168,7 @@ public class Coupon {
                 .append(this.startDate, rhs.startDate)
                 .append(this.expirationDate, rhs.expirationDate)
                 .append(this.products, rhs.products)
+                .append(this.planPhases, rhs.planPhases)
                 .append(this.tenantId, rhs.tenantId)
                 .isEquals();
     }
@@ -181,6 +187,7 @@ public class Coupon {
                 .append(startDate)
                 .append(expirationDate)
                 .append(products)
+                .append(planPhases)
                 .append(tenantId)
                 .toHashCode();
     }
@@ -199,6 +206,7 @@ public class Coupon {
                 .append("startDate", startDate)
                 .append("expirationDate", expirationDate)
                 .append("products", products)
+                .append("planPhases", planPhases)
                 .append("tenantId", tenantId)
                 .toString();
     }

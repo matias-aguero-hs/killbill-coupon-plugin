@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
@@ -41,6 +42,7 @@ import org.osgi.service.log.LogService;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
 import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS;
+import static org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsPlans.COUPONS_PLANS;
 
 public class CouponDao extends PluginDao {
 
@@ -121,6 +123,12 @@ public class CouponDao extends PluginDao {
             // Add List of Products and Coupon associated to the table
             insertProductsToCoupon(coupon.getCouponCode(), products, context.getTenantId().toString());
         }
+
+        List<String> planPhases = coupon.getPlanPhases();
+        if (null != planPhases) {
+            // Add List of Plan Phases and Coupon associated to the table
+            insertPlanPhasesToCoupon(coupon.getCouponCode(), planPhases, context.getTenantId().toString());
+        }
     }
 
     /**
@@ -146,6 +154,38 @@ public class CouponDao extends PluginDao {
                                                COUPONS.KB_TENANT_ID)
                                    .values(couponCode,
                                            product,
+                                           tenantId)
+                                   .execute();
+                                return null;
+                            }
+                        });
+            }
+        }
+    }
+
+    /**
+     * Method to insert Plan Phases to a Coupon
+     * @param couponCode
+     * @param planPhases
+     * @param tenantId
+     * @throws SQLException
+     */
+    public void insertPlanPhasesToCoupon(final String couponCode, final List<String> planPhases, final String tenantId) throws SQLException {
+        // Add List of Products and Coupon associated to the table
+        if (null != planPhases) {
+            logService.log(LogService.LOG_INFO, "Executing query to Add associated Products of a Coupon in the DB");
+            for (final String plan : planPhases) {
+                execute(dataSource.getConnection(),
+                        new WithConnectionCallback<Void>() {
+                            @Override
+                            public Void withConnection(final Connection conn) throws SQLException {
+                                DSL.using(conn, dialect, settings)
+                                   .insertInto(COUPONS_PLANS,
+                                               COUPONS_PLANS.COUPON_CODE,
+                                               COUPONS_PLANS.PLAN_PHASE,
+                                               COUPONS.KB_TENANT_ID)
+                                   .values(couponCode,
+                                           plan,
                                            tenantId)
                                    .execute();
                                 return null;
@@ -227,6 +267,26 @@ public class CouponDao extends PluginDao {
                                return DSL.using(conn, dialect, settings)
                                          .selectFrom(COUPONS_PRODUCTS)
                                          .where(COUPONS_PRODUCTS.COUPON_CODE.equal(couponCode))
+                                         .fetch();
+                           }
+                       });
+    }
+
+    /**
+     * Method to get a list of Plan Phases associated with a Coupon from the DB
+     * @param couponCode
+     * @return
+     * @throws SQLException
+     */
+    public List<CouponsPlansRecord> getPlanPhasesOfCoupon(final String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Executing query to get a List of Products associated with a Coupon from the DB");
+        return execute(dataSource.getConnection(),
+                       new WithConnectionCallback<Result<CouponsPlansRecord>>() {
+                           @Override
+                           public Result<CouponsPlansRecord> withConnection(final Connection conn) throws SQLException {
+                               return DSL.using(conn, dialect, settings)
+                                         .selectFrom(COUPONS_PLANS)
+                                         .where(COUPONS_PLANS.COUPON_CODE.equal(couponCode))
                                          .fetch();
                            }
                        });

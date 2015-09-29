@@ -58,6 +58,7 @@ public class Constants {
     public static final String ADMIN_USER = "admin";
     public static final String ADMIN_PASSWORD = "password";
     public static final String PRODUCTS = "products";
+    public static final String PLAN_PHASES = "planPhases";
     public static final String COUPON_LIST = "coupons";
     public static final String COUPONS_APPLIED_LIST = "couponsApplied";
     public static final String INFO = "Info";

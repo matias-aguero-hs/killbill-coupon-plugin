@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONObject;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
@@ -124,9 +125,13 @@ public class JsonHelper {
         return jsonResponse;
     }
 
-    public static JSONObject buildProductsAssociatedToCoupon(JSONObject json, List<CouponsProductsRecord> products) {
+    public static JSONObject buildProductsAndPlansAssociatedToCoupon(JSONObject json,
+                                                                     List<CouponsProductsRecord> products,
+                                                                     List<CouponsPlansRecord> plans) {
         List<String> productsAsString = buildProductList(products);
         json.put(Constants.PRODUCTS, productsAsString);
+        List<String> plansAsString = buildPlanPhasesList(plans);
+        json.put(Constants.PLAN_PHASES, plansAsString);
         return json;
     }
 
@@ -149,5 +154,14 @@ public class JsonHelper {
             productsAsString.add(productAsString);
         }
         return productsAsString;
+    }
+
+    private static List<String> buildPlanPhasesList(final List<CouponsPlansRecord> plans) {
+        List<String> plansAsString = new ArrayList<String>();
+        for (CouponsPlansRecord plan : plans) {
+            String planAsString = plan.getPlanPhase();
+            plansAsString.add(planAsString);
+        }
+        return plansAsString;
     }
 }

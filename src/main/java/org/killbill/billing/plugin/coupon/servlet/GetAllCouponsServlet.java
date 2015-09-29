@@ -30,9 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
-import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.plugin.coupon.util.ServletHelper;
 import org.osgi.service.log.LogService;
@@ -71,8 +71,10 @@ public class GetAllCouponsServlet extends PluginServlet {
 
                     logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
                     List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
+                    logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
+                    List<CouponsPlansRecord> plans = couponPluginApi.getPlanPhasesOfCoupon(coupon.getCouponCode());
                     logService.log(LogService.LOG_INFO, "Calling JsonHelper to add the list of Products associated with the Coupon to the JSON Response");
-                    JsonHelper.buildProductsAssociatedToCoupon(jsonCoupon, products);
+                    JsonHelper.buildProductsAndPlansAssociatedToCoupon(jsonCoupon, products, plans);
                     jsonCoupons.add(jsonCoupon);
                 }
 

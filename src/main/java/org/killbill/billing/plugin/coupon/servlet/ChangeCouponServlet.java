@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.killbill.billing.plugin.core.PluginServlet;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
@@ -105,9 +106,12 @@ public class ChangeCouponServlet extends PluginServlet {
                     logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
                     List<CouponsProductsRecord> products = couponPluginApi.getProductsOfCoupon(coupon.getCouponCode());
 
+                    logService.log(LogService.LOG_INFO, "Calling the CouponPluginAPI to get the list of Products associated with the Coupon");
+                    List<CouponsPlansRecord> plans = couponPluginApi.getPlanPhasesOfCoupon(coupon.getCouponCode());
+
                     // add Products to JSON response
                     logService.log(LogService.LOG_INFO, "Calling JsonHelper to add the list of Products associated with the Coupon to the JSON Response");
-                    jsonResponse = JsonHelper.buildProductsAssociatedToCoupon(jsonResponse, products);
+                    jsonResponse = JsonHelper.buildProductsAndPlansAssociatedToCoupon(jsonResponse, products, plans);
 
                     logService.log(LogService.LOG_INFO, "Writing JSON Response and returning OK");
                     ServletHelper.writeResponseToJson(response, jsonResponse.toString());

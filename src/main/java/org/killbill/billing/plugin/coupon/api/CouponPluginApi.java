@@ -32,6 +32,7 @@ import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
@@ -546,9 +547,22 @@ public class CouponPluginApi {
             return dao.getProductsOfCoupon(couponCode);
         } catch (SQLException e) {
             logService.log(LogService.LOG_ERROR, "Error getting list of Products associated with a Coupon with code: " + couponCode + ". Cause: " + e.getMessage());
-            e.printStackTrace();
-            // TODO check this block
         }
         return new ArrayList<CouponsProductsRecord>();
+    }
+
+    /**
+     * Get Plan Phases associated to a Coupon
+     * @param couponCode
+     * @return
+     */
+    public List<CouponsPlansRecord> getPlanPhasesOfCoupon(String couponCode) throws SQLException {
+        logService.log(LogService.LOG_INFO, "Accessing the DAO to get a list of Plan Phases associated with a Coupon with code: " + couponCode);
+        try {
+            return dao.getPlanPhasesOfCoupon(couponCode);
+        } catch (SQLException e) {
+            logService.log(LogService.LOG_ERROR, "Error getting list of Plan Phases associated with a Coupon with code: " + couponCode + ". Cause: " + e.getMessage());
+        }
+        return new ArrayList<CouponsPlansRecord>();
     }
 }

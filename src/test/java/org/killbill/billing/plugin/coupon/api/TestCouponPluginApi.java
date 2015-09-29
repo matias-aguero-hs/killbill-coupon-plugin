@@ -29,12 +29,14 @@ import org.junit.Test;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
+import org.killbill.billing.catalog.api.PhaseType;
 import org.killbill.billing.catalog.api.Product;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
 import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.plugin.coupon.dao.CouponDao;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
@@ -317,6 +319,17 @@ public class TestCouponPluginApi extends Mockito {
     }
 
     @Test
+    public void testGetPlansOfCouponOK() throws Exception {
+        List<CouponsPlansRecord> couponsPlansRecordList = buildListOfCouponPlans();
+
+        when(dao.getPlanPhasesOfCoupon(anyString())).thenReturn(couponsPlansRecordList);
+
+        List<CouponsPlansRecord> result = couponPluginApi.getPlanPhasesOfCoupon(Constants.COUPON_CODE);
+
+        assertEquals(result.get(0).getCouponCode(), couponsPlansRecordList.get(0).getCouponCode());
+    }
+
+    @Test
     public void testCreateCouponOK() throws Exception {
         Tenant tenant = new MockTenant();
         when(osgiKillbillAPI.getTenantUserApi()).thenReturn(tenantUserApi);
@@ -473,6 +486,15 @@ public class TestCouponPluginApi extends Mockito {
         assertEquals(result, new ArrayList<CouponsProductsRecord>());
     }
 
+    @Test
+    public void testGetPlansOfCouponSQLException() throws Exception {
+        when(dao.getPlanPhasesOfCoupon(anyString())).thenThrow(SQLException.class);
+
+        List<CouponsPlansRecord> result = couponPluginApi.getPlanPhasesOfCoupon(Constants.COUPON_CODE);
+
+        assertEquals(result, new ArrayList<CouponsPlansRecord>());
+    }
+
     @Test(expected = CouponApiException.class)
     public void testApplyCouponWithCouponApiExceptionAfterValidation() throws Exception {
         Tenant tenant = new MockTenant();
@@ -538,6 +560,15 @@ public class TestCouponPluginApi extends Mockito {
         CouponsProductsRecord couponsProductsRecord = new CouponsProductsRecord();
         couponsProductsRecord.setCouponCode(Constants.COUPON_CODE);
         result.add(couponsProductsRecord);
+        return result;
+    }
+
+    private List<CouponsPlansRecord> buildListOfCouponPlans() {
+        List<CouponsPlansRecord> result = new ArrayList<>();
+        CouponsPlansRecord couponsPlanRecord = new CouponsPlansRecord();
+        couponsPlanRecord.setCouponCode(Constants.COUPON_CODE);
+        couponsPlanRecord.setPlanPhase(PhaseType.EVERGREEN.toString());
+        result.add(couponsPlanRecord);
         return result;
     }
 
