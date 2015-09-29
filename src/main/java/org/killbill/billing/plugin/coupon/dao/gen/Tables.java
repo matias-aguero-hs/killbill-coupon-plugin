@@ -27,6 +27,11 @@ public class Tables {
 	public static final org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied COUPONS_APPLIED = org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED;
 
 	/**
+	 * The table killbill.coupons_plans
+	 */
+	public static final org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsPlans COUPONS_PLANS = org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsPlans.COUPONS_PLANS;
+
+	/**
 	 * The table killbill.coupons_products
 	 */
 	public static final org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts COUPONS_PRODUCTS = org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS;

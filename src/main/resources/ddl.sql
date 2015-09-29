@@ -47,3 +47,13 @@ CREATE TABLE coupons_products (
   PRIMARY KEY(record_id)
 ) /*! CHARACTER SET utf8 COLLATE utf8_bin */;
 CREATE INDEX coupons_products_code ON coupons_products(coupon_code);
+
+DROP TABLE IF EXISTS coupons_plans;
+CREATE TABLE coupons_plans (
+  record_id int(11) unsigned not null auto_increment,
+  coupon_code varchar(36) NOT NULL,
+  plan_phase varchar(80) NOT NULL,
+  kb_tenant_id char(36) NOT NULL,
+  PRIMARY KEY(record_id)
+) /*! CHARACTER SET utf8 COLLATE utf8_bin */;
+CREATE INDEX coupons_plans_code ON coupons_plans(coupon_code);

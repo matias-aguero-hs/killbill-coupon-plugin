@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Killbill extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -2090098461;
+	private static final long serialVersionUID = 921054189;
 
 	/**
 	 * The reference instance of <code>killbill</code>
@@ -41,6 +41,7 @@ public class Killbill extends org.jooq.impl.SchemaImpl {
 		return java.util.Arrays.<org.jooq.Table<?>>asList(
 			org.killbill.billing.plugin.coupon.dao.gen.tables.Coupons.COUPONS,
 			org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsApplied.COUPONS_APPLIED,
+			org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsPlans.COUPONS_PLANS,
 			org.killbill.billing.plugin.coupon.dao.gen.tables.CouponsProducts.COUPONS_PRODUCTS);
 	}
 }
