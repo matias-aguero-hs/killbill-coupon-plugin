@@ -25,6 +25,7 @@ function initializeCreateSubscriptionForm() {
     $("#productCategoryCreate").val("BASE");
     $("#billingPeriodCreate").val("MONTHLY");
     $("#priceListCreate").val("DEFAULT");
+    $("#coupon").val("");
     $("#createSubscriptionButton").show();
     $("#createNewSubscriptionButton").remove();
     $("#createSubscriptionContainer h4").remove();
@@ -32,6 +33,11 @@ function initializeCreateSubscriptionForm() {
 };
 function createSubscription() {
     var url = "http://127.0.0.1:8080/1.0/kb/subscriptions";
+
+    var coupon = $("#coupon").val();
+    if ((coupon != null) && (coupon.trim().length > 0)) {
+        url += "?pluginProperty=coupon:coupon%3D" + coupon;
+    }
 
     var accountId = $("#accountIdCreate").val();
     var externalKey = $("#externalKeyCreate").val();

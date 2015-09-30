@@ -19,6 +19,8 @@ package org.killbill.billing.plugin.coupon.listener;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.joda.time.LocalDate;
@@ -27,6 +29,7 @@ import org.junit.Test;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountUserApi;
 import org.killbill.billing.catalog.api.Currency;
+import org.killbill.billing.catalog.api.PhaseType;
 import org.killbill.billing.invoice.api.Invoice;
 import org.killbill.billing.invoice.api.InvoiceItem;
 import org.killbill.billing.invoice.api.InvoiceItemType;
@@ -38,6 +41,7 @@ import org.killbill.billing.payment.MockInvoice;
 import org.killbill.billing.payment.MockRecurringInvoiceItem;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.mock.MockAccount;
 import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
@@ -115,6 +119,12 @@ public class TestCouponListener extends Mockito {
 
         event = new MockExtBusEvent(ExtBusEventType.INVOICE_CREATION, null, invoice.getId(),
                             account.getId(), UUID.randomUUID());
+
+        CouponsPlansRecord plan = new CouponsPlansRecord();
+        plan.setPlanPhase(PhaseType.EVERGREEN.toString());
+        List<CouponsPlansRecord> plans = new ArrayList<CouponsPlansRecord>();
+        plans.add(plan);
+        when(couponPluginApi.getPlanPhasesOfCoupon(any())).thenReturn(plans);
 
     }
 
@@ -303,10 +313,13 @@ public class TestCouponListener extends Mockito {
         invoice.getInvoiceItems().clear();
         invoice.addInvoiceItem(invoiceItem);
 
+        CouponsAppliedRecord couponApplied = TestCouponHelper.createBaseCouponApplied(subscriptionId, accountId);
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+
         // mocks
         when(invoiceUserApi.getInvoice(any(), any())).thenReturn(invoice);
-        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(null);
-        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(null);
+        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(coupon);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
 
         // test
         couponListener.handleKillbillEvent(event);
@@ -331,6 +344,21 @@ public class TestCouponListener extends Mockito {
                                     account.getId(), UUID.randomUUID());
 
         when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenThrow(SQLException.class);
+
+        // test
+        couponListener.handleKillbillEvent(event);
+    }
+
+    @Test
+    public void testInvoiceItemCreationCouponWithoutPlans() throws Exception {
+
+        CouponsAppliedRecord couponApplied = TestCouponHelper.createBaseCouponApplied(subscriptionId, accountId);
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+
+        // mocks
+        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(coupon);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
+        when(couponPluginApi.getPlanPhasesOfCoupon(any())).thenReturn(null);
 
         // test
         couponListener.handleKillbillEvent(event);

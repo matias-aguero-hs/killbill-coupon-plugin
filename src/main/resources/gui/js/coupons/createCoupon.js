@@ -37,7 +37,7 @@ function initializeCreateCouponForm() {
     $("#startDateCreate").val("");
     $("#expirationDateCreate").val("");
     $("#productCreate").val("");
-    $("#planCreate").val("");
+    $("#planCreate").val("evergreen");
     $("#createCouponButton").show();
     $("#createNewCouponButton").remove();
     $("#createCouponContainer h4").remove();

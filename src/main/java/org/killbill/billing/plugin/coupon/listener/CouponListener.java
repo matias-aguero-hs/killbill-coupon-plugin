@@ -21,8 +21,11 @@ package org.killbill.billing.plugin.coupon.listener;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -37,6 +40,8 @@ import org.killbill.billing.notification.plugin.api.ExtBusEventType;
 import org.killbill.billing.plugin.api.PluginCallContext;
 import org.killbill.billing.plugin.coupon.api.CouponPluginApi;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsPlansRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
@@ -46,6 +51,9 @@ import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIKillbillEventHandler;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 import org.osgi.service.log.LogService;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 public class CouponListener implements OSGIKillbillEventHandler {
 
@@ -130,10 +138,8 @@ public class CouponListener implements OSGIKillbillEventHandler {
         // get invoice
         Invoice invoice = osgiKillbillAPI.getInvoiceUserApi().getInvoice(invoiceId, new CouponTenantContext(tenantId));
 
-        for (InvoiceItem item : invoice.getInvoiceItems()) {
-            if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())
-                    && (item.getPhaseName() != null)
-                    && item.getPhaseName().endsWith(PhaseType.EVERGREEN.toString().toLowerCase())) {
+        for (InvoiceItem item : invoice.getInvoiceItems())
+            if (InvoiceItemType.RECURRING.equals(item.getInvoiceItemType())) {
 
                 logService.log(LogService.LOG_INFO, "RECURRING item " + item.getId() + " found for invoice " + invoice.getId());
 
@@ -144,6 +150,21 @@ public class CouponListener implements OSGIKillbillEventHandler {
                 if (cApplied == null) {
                     logService.log(LogService.LOG_INFO, "Subscription " + subscriptionId + " does not have active coupon applied.");
                     continue;
+                }
+
+                List<CouponsPlansRecord> planPhasesOfCoupon = couponPluginApi.getPlanPhasesOfCoupon(cApplied.getCouponCode());
+                if ((planPhasesOfCoupon != null) && !planPhasesOfCoupon.isEmpty() && (item.getPhaseName() != null)) {
+                    // validate plans
+                    CouponsPlansRecord planFound = Iterables.tryFind(planPhasesOfCoupon, new Predicate<CouponsPlansRecord>() {
+                        @Override
+                        public boolean apply(@Nullable CouponsPlansRecord plan) {
+                            return item.getPhaseName().toLowerCase().endsWith(plan.getPlanPhase().toLowerCase());
+                        }
+                    }).orNull();
+                    if (planFound == null) {
+                        logService.log(LogService.LOG_INFO, "The plan " + item.getPhaseName() + " does not match for Invoice Item " + item.getId());
+                        continue;
+                    }
                 }
 
                 // get coupon info from DB
@@ -166,15 +187,13 @@ public class CouponListener implements OSGIKillbillEventHandler {
                         couponsToIncrease.put(subscriptionId, coupon);
 
                         logService.log(LogService.LOG_INFO, "Invoice Item Adjustment added. ID: " + invoiceItemAdjustment.getId());
-                    }
-                    else {
+                    } else {
                         logService.log(LogService.LOG_ERROR, "Error: Invoice Item Adjustment not added.");
                     }
                 }
             } else {
                 logService.log(LogService.LOG_INFO, "Skipping invoice item " + item.getId() + "/" + item.getInvoiceItemType());
             }
-        }
 
         // increase number of invoices created with discounts
         for (UUID subsId : appliedCouponsToIncrease.keySet()) {

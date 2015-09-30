@@ -77,7 +77,15 @@
         </tr>
         <tr>
             <td>Plan Phases: </td>
-            <td><input type="text" id="planCreate" size="100"/> </td>
+            <td>
+                <select id="planCreate">
+                    <option value="trial">TRIAL</option>
+                    <option value="discount">DISCOUNT</option>
+                    <option value="fixedterm">FIXEDTERM</option>
+                    <option selected value="evergreen">EVERGREEN</option>
+                    <option value="">ALL</option>
+                </select>
+            </td>
         </tr>
     </table>
     <input type="button" id="createCouponButton" value="Create Coupon" onclick="createCoupon()"/>
