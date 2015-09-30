@@ -28,19 +28,27 @@
         <tr>
             <td>Discount Type: </td>
             <td>
-                <select id="discountTypeCreate">
+                <select id="discountTypeCreate" onchange="changeDiscountType();">
                     <option value="percentage">Percentage</option>
                     <option value="amount">Amount</option>
                 </select>
             </td>
         </tr>
         <tr>
-            <td>Percentage Discount: </td>
+            <td id="percentageDiscountLabel">Percentage Discount: </td>
             <td><input type="text" id="percentageDiscountCreate" size="3"/></td>
         </tr>
         <tr>
+            <td id="amountDiscountLabel" style="display:none;">Amount Discount: </td>
+            <td><input type="text" id="amountDiscountCreate" size="3" style="display:none;"/></td>
+        </tr>
+        <tr>
+            <td id="amountCurrencyLabel" style="display:none;">Amount Currency: </td>
+            <td><input type="text" id="amountCurrencyCreate" size="3" style="display:none;"/></td>
+        </tr>
+        <tr>
             <td>Duration: </td>
-            <td><select id="durationCreate">
+            <td><select id="durationCreate" onchange="changeDurationType();">
                     <option value="once">Once</option>
                     <option value="multiple">Multiple</option>
                 <option value="forever">Forever</option>
@@ -48,8 +56,8 @@
             </td>
         </tr>
         <tr>
-            <td>Number of Invoices: </td>
-            <td><input type="text" id="numberOfInvoicesCreate" size="2"/> </td>
+            <td id="numberOfInvoicesLabel" style="display:none;">Number of Invoices: </td>
+            <td><input type="text" id="numberOfInvoicesCreate" style="display:none;"/> </td>
         </tr>
         <tr>
             <td>Max Number of Redemptions: </td>

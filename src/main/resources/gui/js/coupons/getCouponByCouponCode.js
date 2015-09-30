@@ -23,6 +23,14 @@ function initializeGetCouponByCouponCodeForm() {
     $("#couponName").val("");
     $("#discountType").val("percentage");
     $("#percentageDiscount").val("");
+    $("#percentageDiscount").show();
+    $("#percentageDiscountLabel").show();
+    $("#amountDiscount").val("");
+    $("#amountCurrency").val("");
+    $("#amountDiscount").hide();
+    $("#amountCurrency").hide();
+    $("#amountDiscountLabel").hide();
+    $("#amountCurrencyLabel").hide();
     $("#isActive").val("");
     $("#duration").val("");
     $("#numberOfInvoices").val("");
@@ -30,6 +38,28 @@ function initializeGetCouponByCouponCodeForm() {
     $("#expirationDate").val("");
     $("#products").val("");
 };
+
+function changeDiscount(e) {
+    if (e === "percentage") {
+        // show percentage discount amount field
+        $("#percentageDiscount").show();
+        $("#percentageDiscountLabel").show();
+        $("#amountDiscount").hide();
+        $("#amountDiscountLabel").hide();
+        $("#amountCurrency").hide();
+        $("#amountCurrencyLabel").hide();
+    }
+    else {
+        // show discount amount field
+        $("#amountDiscount").show();
+        $("#amountDiscountLabel").show();
+        $("#amountCurrency").show();
+        $("#amountCurrencyLabel").show();
+        $("#percentageDiscount").hide();
+        $("#percentageDiscountLabel").hide();
+    }
+}
+
 function getCouponByCouponCode() {
     var couponCode = document.getElementById("couponCode");
     var url = defaultUrl + "getCoupon?couponCode=" + couponCode.value;
@@ -40,6 +70,8 @@ function getCouponByCouponCode() {
         var isActive =  document.getElementById("isActive");
         var discountType =  document.getElementById("discountType");
         var percentageDiscount =  document.getElementById("percentageDiscount");
+        var amountDiscount =  document.getElementById("amountDiscount");
+        var amountCurrency =  document.getElementById("amountCurrency");
         var duration =  document.getElementById("duration");
         var startDate =  document.getElementById("startDate");
         var expirationDate =  document.getElementById("expirationDate");
@@ -64,9 +96,16 @@ function getCouponByCouponCode() {
                     }
                     if (discountType) {
                         discountType.value = det.discountType;
+                        changeDiscount(det.discountType);
                     }
                     if (percentageDiscount) {
                         percentageDiscount.value = det.percentageDiscount;
+                    }
+                    if (amountDiscount) {
+                        amountDiscount.value = det.amountDiscount;
+                    }
+                    if (amountCurrency) {
+                        amountCurrency.value = det.amountCurrency;
                     }
                     if (duration) {
                         duration.value = det.duration;
