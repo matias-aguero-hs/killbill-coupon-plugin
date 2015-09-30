@@ -16,7 +16,7 @@ package org.killbill.billing.plugin.coupon.dao.gen.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord> {
 
-	private static final long serialVersionUID = -711985966;
+	private static final long serialVersionUID = -2146926277;
 
 	/**
 	 * The reference instance of <code>killbill.coupons</code>
@@ -54,7 +54,17 @@ public class Coupons extends org.jooq.impl.TableImpl<org.killbill.billing.plugin
 	/**
 	 * The column <code>killbill.coupons.percentage_discount</code>.
 	 */
-	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Double> PERCENTAGE_DISCOUNT = createField("percentage_discount", org.jooq.impl.SQLDataType.FLOAT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Double> PERCENTAGE_DISCOUNT = createField("percentage_discount", org.jooq.impl.SQLDataType.FLOAT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>killbill.coupons.amount_discount</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.Double> AMOUNT_DISCOUNT = createField("amount_discount", org.jooq.impl.SQLDataType.FLOAT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>killbill.coupons.amount_currency</code>.
+	 */
+	public final org.jooq.TableField<org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord, java.lang.String> AMOUNT_CURRENCY = createField("amount_currency", org.jooq.impl.SQLDataType.VARCHAR.length(3), this, "");
 
 	/**
 	 * The column <code>killbill.coupons.is_active</code>.

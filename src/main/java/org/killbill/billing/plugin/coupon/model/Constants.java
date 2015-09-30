@@ -28,6 +28,8 @@ public class Constants {
     public static final String COUPON_NAME = "couponName";
     public static final String DISCOUNT_TYPE = "discountType";
     public static final String PERCENTAGE_DISCOUNT = "percentageDiscount";
+    public static final String AMOUNT_DISCOUNT = "amountDiscount";
+    public static final String AMOUNT_CURRENCY = "amountCurrency";
     public static final String IS_ACTIVE = "isActive";
     public static final String DURATION = "duration";
     public static final String NUMBER_OF_INVOICES = "numberOfInvoices";

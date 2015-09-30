@@ -224,19 +224,28 @@ public class CouponListener implements OSGIKillbillEventHandler {
             throws SQLException {
 
         CouponsRecord coupon = couponPluginApi.getCouponByCode(cApplied.getCouponCode());
-
-        if ((coupon != null) && (coupon.getDiscountType() != null)
-            && (coupon.getDiscountType().equals(DiscountTypeEnum.percentage.toString()))) {
-            BigDecimal discountAmount = (item.getAmount()
-                                   .multiply(BigDecimal.valueOf(coupon.getPercentageDiscount()))
-                                   .divide(BigDecimal.valueOf(100)));
-            logService.log(LogService.LOG_INFO, "Discount calculated: " + discountAmount);
-            return discountAmount;
-        } // TODO complete when implement DiscountTypeEnum.amount
-
+        if ((coupon != null) && (coupon.getDiscountType() != null)) {
+            BigDecimal discountAmount;
+            if (coupon.getDiscountType().equals(DiscountTypeEnum.percentage.toString())) {
+                discountAmount = (item.getAmount()
+                                                 .multiply(BigDecimal.valueOf(coupon.getPercentageDiscount()))
+                                                 .divide(BigDecimal.valueOf(100)));
+                logService.log(LogService.LOG_INFO, "Discount calculated: " + discountAmount);
+                return discountAmount;
+            }
+            else if (coupon.getDiscountType().equals(DiscountTypeEnum.amount.toString())) {
+                if (BigDecimal.valueOf(coupon.getAmountDiscount()).compareTo(item.getAmount()) == 1) {
+                    discountAmount = item.getAmount();
+                }
+                else {
+                    discountAmount = BigDecimal.valueOf(coupon.getAmountDiscount());
+                }
+                logService.log(LogService.LOG_INFO, "Discount: " + discountAmount);
+                return discountAmount;
+            }
+        }
         logService.log(LogService.LOG_WARNING, "No discount type was found for coupon " + cApplied.getCouponCode());
         return BigDecimal.ZERO;
     }
-
 }
 

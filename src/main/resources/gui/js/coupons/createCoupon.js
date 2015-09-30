@@ -23,6 +23,14 @@ function initializeCreateCouponForm() {
     $("#couponNameCreate").val("");
     $("#discountTypeCreate").val("percentage");
     $("#percentageDiscountCreate").val("");
+    $("#percentageDiscountCreate").show();
+    $("#percentageDiscountLabel").show();
+    $("#amountDiscountCreate").val("");
+    $("#amountCurrencyCreate").val("");
+    $("#amountDiscountCreate").hide();
+    $("#amountCurrencyCreate").hide();
+    $("#amountDiscountLabel").hide();
+    $("#amountCurrencyLabel").hide();
     $("#durationCreate").val("");
     $("#numberOfInvoicesCreate").val("");
     $("#maxRedemptionsCreate").val("");
@@ -34,12 +42,47 @@ function initializeCreateCouponForm() {
     $("#createCouponContainer h4").remove();
     $("#response").remove();
 };
+
+function changeDiscountType() {
+    if ($("#discountTypeCreate").val() === "percentage") {
+        // show percentage discount amount field
+        $("#percentageDiscountCreate").show();
+        $("#percentageDiscountLabel").show();
+        $("#amountDiscountCreate").hide();
+        $("#amountDiscountLabel").hide();
+        $("#amountCurrencyCreate").hide();
+        $("#amountCurrencyLabel").hide();
+    }
+    else {
+        // show discount amount field
+        $("#amountDiscountCreate").show();
+        $("#amountDiscountLabel").show();
+        $("#amountCurrencyCreate").show();
+        $("#amountCurrencyLabel").show();
+        $("#percentageDiscountCreate").hide();
+        $("#percentageDiscountLabel").hide();
+    }
+}
+
+function changeDurationType() {
+    if ($("#durationCreate").val() === "multiple") {
+        $("#numberOfInvoicesCreate").show();
+        $("#numberOfInvoicesLabel").show();
+    }
+    else {
+        $("#numberOfInvoicesCreate").hide();
+        $("#numberOfInvoicesLabel").hide();
+    }
+}
+
 function createCoupon() {
     var url = defaultUrl + "createCoupon";
     var couponCode = $("#couponCodeCreate").val();
     var couponName = $("#couponNameCreate").val();
     var discountType = $("#discountTypeCreate").val();
     var percentageDiscount = $("#percentageDiscountCreate").val();
+    var amountDiscount = $("#amountDiscountCreate").val();
+    var amountCurrency = $("#amountCurrencyCreate").val();
     var duration = $("#durationCreate").val();
     var numberOfInvoices = $("#numberOfInvoicesCreate").val();
     var maxRedemptions = $("#maxRedemptionsCreate").val();
@@ -65,6 +108,8 @@ function createCoupon() {
             '", "couponName": "' + couponName +
             '", "discountType": "' + discountType +
             '", "percentageDiscount": "' + percentageDiscount +
+            '", "amountDiscount": "' + amountDiscount +
+            '", "amountCurrency": "' + amountCurrency +
             '", "duration": "' + duration +
             '", "numberOfInvoices": "' + numberOfInvoices +
             '", "maxRedemptions": "' + maxRedemptions +
@@ -79,6 +124,8 @@ function createCoupon() {
             '", "couponName": "' + couponName +
             '", "discountType": "' + discountType +
             '", "percentageDiscount": "' + percentageDiscount +
+            '", "amountDiscount": "' + amountDiscount +
+            '", "amountCurrency": "' + amountCurrency +
             '", "duration": "' + duration +
             '", "numberOfInvoices": "' + numberOfInvoices +
             '", "maxRedemptions": "' + maxRedemptions +

@@ -87,6 +87,8 @@ public class JsonHelper {
         jsonResponse.put(Constants.COUPON_NAME, coupon.getValue(COUPONS.COUPON_NAME));
         jsonResponse.put(Constants.DISCOUNT_TYPE, coupon.getValue(COUPONS.DISCOUNT_TYPE));
         jsonResponse.put(Constants.PERCENTAGE_DISCOUNT, coupon.getValue(COUPONS.PERCENTAGE_DISCOUNT));
+        jsonResponse.put(Constants.AMOUNT_DISCOUNT, coupon.getValue(COUPONS.AMOUNT_DISCOUNT));
+        jsonResponse.put(Constants.AMOUNT_CURRENCY, coupon.getValue(COUPONS.AMOUNT_CURRENCY));
         Boolean isActive = coupon.getValue(COUPONS.IS_ACTIVE).equals(Byte.valueOf(Constants.BYTE_TRUE));
         jsonResponse.put(Constants.IS_ACTIVE, isActive.toString());
         jsonResponse.put(Constants.DURATION, coupon.getValue(COUPONS.DURATION));

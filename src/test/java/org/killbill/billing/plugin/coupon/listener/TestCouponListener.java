@@ -199,6 +199,40 @@ public class TestCouponListener extends Mockito {
     }
 
     @Test
+    public void testInvoiceItemCreationCouponAppliedWithAmountDiscount() throws Exception {
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        coupon.setDiscountType("amount");
+        coupon.setAmountDiscount(10d);
+        coupon.setAmountCurrency("USD");
+
+        CouponsAppliedRecord couponApplied = TestCouponHelper.createBaseCouponApplied(subscriptionId, accountId);
+
+        // mocks
+        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(coupon);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
+
+        // test
+        couponListener.handleKillbillEvent(event);
+    }
+
+    @Test
+    public void testInvoiceItemCreationCouponAppliedWithHighAmountDiscount() throws Exception {
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        coupon.setDiscountType("amount");
+        coupon.setAmountDiscount(20d);
+        coupon.setAmountCurrency("USD");
+
+        CouponsAppliedRecord couponApplied = TestCouponHelper.createBaseCouponApplied(subscriptionId, accountId);
+
+        // mocks
+        when(couponPluginApi.getCouponByCode(anyString())).thenReturn(coupon);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any(UUID.class))).thenReturn(couponApplied);
+
+        // test
+        couponListener.handleKillbillEvent(event);
+    }
+
+    @Test
     public void testInvoiceItemCreationWithoutCouponApplied() throws Exception {
 
         CouponsRecord coupon = TestCouponHelper.createBaseCoupon();

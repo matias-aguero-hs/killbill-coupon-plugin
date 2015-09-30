@@ -127,6 +127,7 @@ public class TestCreateCouponServlet extends Mockito {
         PrintWriter writer = new PrintWriter(stringWriter);
         UUID randomTenantId = UUID.randomUUID();
         Coupon coupon = buildSuccessfulCoupon(randomTenantId);
+        coupon.setStartDate(null);
 
         when(request.getHeader(Constants.X_KILLBILL_API_KEY)).thenReturn(TEST_API_KEY);
         when(couponPluginApi.getTenantId(anyString())).thenReturn(randomTenantId);
@@ -198,6 +199,32 @@ public class TestCreateCouponServlet extends Mockito {
         servletRouter.doPost(request, response);
 
         assertTrue(stringWriter.toString().contains("Must specify the number of Invoices"));
+    }
+
+    @Test
+    public void testCreateCouponServletWithNegativeAmountDiscount() throws Exception {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+        UUID randomTenantId = UUID.randomUUID();
+        Coupon coupon = buildSuccessfulCoupon(randomTenantId);
+        coupon.setDiscountType(DiscountTypeEnum.amount);
+        coupon.setAmountDiscount(-30d);
+        coupon.setAmountCurrency("USD");
+        CouponsRecord couponRecord = buildSuccessfulCouponRecord();
+        couponRecord.setDiscountType("amount");
+        couponRecord.setAmountDiscount(-30d);
+        couponRecord.setAmountCurrency("USD");
+
+        when(request.getHeader(Constants.X_KILLBILL_API_KEY)).thenReturn(TEST_API_KEY);
+        when(couponPluginApi.getTenantId(anyString())).thenReturn(randomTenantId);
+        when(couponPluginApi.getObjectFromJsonRequest(any(HttpServletRequest.class), any(LogService.class), any(Class.class))).thenReturn(coupon);
+        when(response.getWriter()).thenReturn(writer);
+        when(request.getPathInfo()).thenReturn(Constants.CREATE_COUPON_PATH.toString());
+        when(request.getMethod()).thenReturn("POST");
+
+        servletRouter.doPost(request, response);
+
+        assertTrue(stringWriter.toString().contains("Amount can't be a negative value"));
     }
 
     private Coupon buildSuccessfulCoupon(UUID randomTenantId) {

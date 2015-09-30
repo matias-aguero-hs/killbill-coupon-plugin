@@ -34,6 +34,8 @@ public class Coupon {
     private String couponName;
     private DiscountTypeEnum discountType;
     private Double percentageDiscount;
+    private Double amountDiscount;
+    private String amountCurrency;
     private boolean active;
     private DurationTypeEnum duration;
     private Integer numberOfInvoices;
@@ -139,6 +141,22 @@ public class Coupon {
         this.maxRedemptions = maxRedemptions;
     }
 
+    public Double getAmountDiscount() {
+        return amountDiscount;
+    }
+
+    public void setAmountDiscount(final Double amountDiscount) {
+        this.amountDiscount = amountDiscount;
+    }
+
+    public String getAmountCurrency() {
+        return amountCurrency;
+    }
+
+    public void setAmountCurrency(final String amountCurrency) {
+        this.amountCurrency = amountCurrency;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -156,6 +174,8 @@ public class Coupon {
                 .append(this.couponName, rhs.couponName)
                 .append(this.discountType, rhs.discountType)
                 .append(this.percentageDiscount, rhs.percentageDiscount)
+                .append(this.amountDiscount, rhs.amountDiscount)
+                .append(this.amountCurrency, rhs.amountCurrency)
                 .append(this.active, rhs.active)
                 .append(this.duration, rhs.duration)
                 .append(this.numberOfInvoices, rhs.numberOfInvoices)
@@ -174,6 +194,8 @@ public class Coupon {
                 .append(couponName)
                 .append(discountType)
                 .append(percentageDiscount)
+                .append(amountDiscount)
+                .append(amountCurrency)
                 .append(active)
                 .append(duration)
                 .append(numberOfInvoices)
@@ -192,6 +214,8 @@ public class Coupon {
                 .append("couponName", couponName)
                 .append("discountType", discountType)
                 .append("percentageDiscount", percentageDiscount)
+                .append("amountDiscount", amountDiscount)
+                .append("amountCurrency", amountCurrency)
                 .append("active", active)
                 .append("duration", duration)
                 .append("numberOfInvoices", numberOfInvoices)

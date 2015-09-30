@@ -90,17 +90,25 @@ public class CreateCouponServlet extends PluginServlet {
             if (null == coupon || (null == coupon.getCouponCode() || coupon.getCouponCode().isEmpty())
                     || (null == coupon.getCouponName() || coupon.getCouponName().isEmpty())
                     || (null == coupon.getDiscountType())
-                    || (null == coupon.getPercentageDiscount())
+                    || (coupon.getDiscountType().equals(DiscountTypeEnum.percentage) && null == coupon.getPercentageDiscount())
+                    || (coupon.getDiscountType().equals(DiscountTypeEnum.amount) && (null == coupon.getAmountDiscount() || null == coupon.getAmountCurrency()))
                     || (null == coupon.getDuration())) {
                 throw new CouponApiException(new Throwable("Exception during generation of the Object from JSON. Missing or invalid required parameters."), 0, "Exception during generation of the Object from JSON. Missing or invalid required parameters.");
             }
             else {
                 if (coupon.getDiscountType().equals(DiscountTypeEnum.percentage)
                     && (coupon.getPercentageDiscount().doubleValue() <= 0 || coupon.getPercentageDiscount().doubleValue() > 100)) {
-                    // TODO include amount verification
                     logService.log(LogService.LOG_ERROR, "Error. Percentage must be between 0 and 100");
                     JSONObject errorMessage = new JSONObject();
                     errorMessage.put("Error", "Percentage must be between 0 and 100");
+                    ServletHelper.writeResponseToJson(response, errorMessage.toString());
+                    buildResponse(response);
+                }
+                else if (coupon.getDiscountType().equals(DiscountTypeEnum.amount)
+                        && coupon.getAmountDiscount() < 0) {
+                    logService.log(LogService.LOG_ERROR, "Error. Amount can't be a negative value");
+                    JSONObject errorMessage = new JSONObject();
+                    errorMessage.put("Error", "Amount can't be a negative value");
                     ServletHelper.writeResponseToJson(response, errorMessage.toString());
                     buildResponse(response);
                 }
