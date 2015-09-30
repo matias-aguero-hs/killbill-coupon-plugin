@@ -75,7 +75,7 @@ public class MockAccount implements Account {
 
     @Override
     public Currency getCurrency() {
-        return null;
+        return Currency.USD;
     }
 
     @Override
