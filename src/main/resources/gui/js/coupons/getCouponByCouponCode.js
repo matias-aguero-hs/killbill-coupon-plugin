@@ -37,6 +37,7 @@ function initializeGetCouponByCouponCodeForm() {
     $("#startDate").val("");
     $("#expirationDate").val("");
     $("#products").val("");
+    $("#plans").val("");
 };
 
 function changeDiscount(e) {
@@ -78,6 +79,8 @@ function getCouponByCouponCode() {
         var numberOfInvoices =  document.getElementById("numberOfInvoices");
         var maxRedemptions =  document.getElementById("maxRedemptions");
         var products =  document.getElementById("products");
+        var plans =  document.getElementById("plans");
+
         if (xmlhttp.readyState == 4) {
             if ( xmlhttp.status == 200) {
                 var det = eval( "(" +  xmlhttp.responseText + ")");
@@ -118,6 +121,9 @@ function getCouponByCouponCode() {
                     }
                     if (products) {
                         products.value = det.products;
+                    }
+                    if (plans) {
+                        plans.value = det.planPhases;
                     }
                 }
             }

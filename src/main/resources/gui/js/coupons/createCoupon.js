@@ -37,6 +37,7 @@ function initializeCreateCouponForm() {
     $("#startDateCreate").val("");
     $("#expirationDateCreate").val("");
     $("#productCreate").val("");
+    $("#planCreate").val("");
     $("#createCouponButton").show();
     $("#createNewCouponButton").remove();
     $("#createCouponContainer h4").remove();
@@ -89,6 +90,10 @@ function createCoupon() {
     var startDate = $("#startDateCreate").val();
     var expirationDate = $("#expirationDateCreate").val();
     var product = $("#productCreate").val();
+    var plan = $("#planCreate").val();
+
+    var lineProduct = "";
+    var linePlan = "";
 
     if (product && product !== '') {
         // split products
@@ -103,36 +108,41 @@ function createCoupon() {
             }
         }
 
-        var body = '{' +
-            '"couponCode": "' + couponCode +
-            '", "couponName": "' + couponName +
-            '", "discountType": "' + discountType +
-            '", "percentageDiscount": "' + percentageDiscount +
-            '", "amountDiscount": "' + amountDiscount +
-            '", "amountCurrency": "' + amountCurrency +
-            '", "duration": "' + duration +
-            '", "numberOfInvoices": "' + numberOfInvoices +
-            '", "maxRedemptions": "' + maxRedemptions +
-            '", "startDate": "' + startDate +
-            '", "expirationDate": "' + expirationDate +
-            '", "products": [' + jsonProducts + ']' +
-            '}';
+        lineProduct = ', "products": [' + jsonProducts + ']';
+
     }
-    else {
-        var body = '{' +
-            '"couponCode": "' + couponCode +
-            '", "couponName": "' + couponName +
-            '", "discountType": "' + discountType +
-            '", "percentageDiscount": "' + percentageDiscount +
-            '", "amountDiscount": "' + amountDiscount +
-            '", "amountCurrency": "' + amountCurrency +
-            '", "duration": "' + duration +
-            '", "numberOfInvoices": "' + numberOfInvoices +
-            '", "maxRedemptions": "' + maxRedemptions +
-            '", "startDate": "' + startDate +
-            '", "expirationDate": "' + expirationDate +
-            '"}';
+
+    if (plan && plan !== '') {
+        // split plans
+        var plans = plan.split(",");
+        var jsonPlans = '"';
+        for (i = 0; i < plans.length; i++) {
+            if (plans.length-1 === (i)) {
+                jsonPlans+= plans[i].trim() + '"';
+            }
+            else {
+                jsonPlans+= plans[i].trim() + '", "';
+            }
+        }
+
+        linePlan = ', "planPhases": [' + jsonPlans + ']';
+
     }
+
+    var body = '{' +
+        '"couponCode": "' + couponCode +
+        '", "couponName": "' + couponName +
+        '", "discountType": "' + discountType +
+        '", "percentageDiscount": "' + percentageDiscount +
+        '", "amountDiscount": "' + amountDiscount +
+        '", "amountCurrency": "' + amountCurrency +
+        '", "duration": "' + duration +
+        '", "numberOfInvoices": "' + numberOfInvoices +
+        '", "maxRedemptions": "' + maxRedemptions +
+        '", "startDate": "' + startDate +
+        '", "expirationDate": "' + expirationDate + '"' +
+        lineProduct + linePlan +
+        '}';
 
     $.ajax({
             type: "POST",
