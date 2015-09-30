@@ -38,6 +38,7 @@ import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
+import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.util.CouponHelper;
 import org.killbill.billing.plugin.coupon.util.JsonHelper;
 import org.killbill.billing.tenant.api.Tenant;
@@ -442,6 +443,15 @@ public class CouponPluginApi {
         } catch (SQLException e) {
             error = "SQL Exception when trying to get a list of Coupons Applied by Coupon code: " + coupon.getCouponCode();
             logService.log(LogService.LOG_ERROR, error);
+            throw new CouponApiException(new Throwable(error), 0, error);
+        }
+
+        String currencyAccount = account.getCurrency().toString();
+        if (coupon.getDiscountType().equalsIgnoreCase(DiscountTypeEnum.amount.toString())
+            && !CouponHelper.validateCurrencies(currencyAccount, coupon.getAmountCurrency())) {
+            error = "Coupon " + coupon.getCouponCode() + " has a different Currency ("
+                    + coupon.getAmountCurrency() + ") than the Account (" + currencyAccount + ")";
+            logService.log(LogService.LOG_ERROR,error);
             throw new CouponApiException(new Throwable(error), 0, error);
         }
 

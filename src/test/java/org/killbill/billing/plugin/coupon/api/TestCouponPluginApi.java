@@ -30,6 +30,7 @@ import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.account.api.AccountUserApi;
 import org.killbill.billing.catalog.api.PhaseType;
+import org.killbill.billing.catalog.api.Currency;
 import org.killbill.billing.catalog.api.Product;
 import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
@@ -48,6 +49,7 @@ import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.Coupon;
 import org.killbill.billing.plugin.coupon.model.CouponTenantContext;
+import org.killbill.billing.plugin.coupon.model.DiscountTypeEnum;
 import org.killbill.billing.plugin.coupon.util.CouponHelper;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.tenant.api.TenantApiException;
@@ -741,6 +743,27 @@ public class TestCouponPluginApi extends Mockito {
 
         CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
         coupon.setMaxRedemptions(1);
+        List<CouponsAppliedRecord> couponsApplied = new ArrayList<CouponsAppliedRecord>();
+        couponsApplied.add(new CouponsAppliedRecord());
+
+        Account account = new MockAccount(UUID.randomUUID(), "external");
+
+        when(dao.getCouponByCode(any())).thenReturn(coupon);
+        when(dao.getCouponsAppliedByCouponCode(any())).thenReturn(couponsApplied);
+        when(osgiKillbillAPI.getAccountUserApi()).thenReturn(accountUserApi);
+        when(accountUserApi.getAccountById(any(), any())).thenReturn(account);
+
+        couponPluginApi.validateCoupon(coupon.getCouponCode(), account.getId(), "Standard", null);
+    }
+
+    @Test(expected = CouponApiException.class)
+    public void testValidateCouponWithDifferentCurrencies() throws SQLException, AccountApiException, CouponApiException {
+
+        CouponsRecord coupon = TestCouponHelper.createBaseCoupon();
+        coupon.setAmountCurrency(Currency.EUR.toString());
+        coupon.setAmountDiscount(10d);
+        coupon.setDiscountType(DiscountTypeEnum.amount.toString());
+
         List<CouponsAppliedRecord> couponsApplied = new ArrayList<CouponsAppliedRecord>();
         couponsApplied.add(new CouponsAppliedRecord());
 

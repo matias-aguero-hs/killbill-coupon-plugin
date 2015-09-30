@@ -144,4 +144,13 @@ public class CouponHelper {
                    && cApplied.getMaxInvoices() <= cApplied.getNumberOfInvoices());
     }
 
+    /**
+     * Determine if both Currencies are equal and the Coupon can be applied
+     * @param couponCurrency
+     * @param accountCurrency
+     * @return
+     */
+    public static boolean validateCurrencies(final String couponCurrency, final String accountCurrency) {
+        return couponCurrency.equalsIgnoreCase(accountCurrency);
+    }
 }
