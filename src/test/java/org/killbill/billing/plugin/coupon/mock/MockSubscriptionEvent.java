@@ -80,7 +80,13 @@ public class MockSubscriptionEvent implements SubscriptionEvent {
 
     @Override
     public Product getPrevProduct() {
-        return null;
+        MockProduct product = new MockProduct() {
+            @Override
+            public String getName() {
+                return "Standard";
+            }
+        };
+        return product;
     }
 
     @Override
@@ -100,12 +106,18 @@ public class MockSubscriptionEvent implements SubscriptionEvent {
 
     @Override
     public BillingPeriod getPrevBillingPeriod() {
-        return null;
+        return BillingPeriod.MONTHLY;
     }
 
     @Override
     public Product getNextProduct() {
-        return null;
+        MockProduct product = new MockProduct() {
+            @Override
+            public String getName() {
+                return "Standard";
+            }
+        };
+        return product;
     }
 
     @Override
@@ -125,6 +137,6 @@ public class MockSubscriptionEvent implements SubscriptionEvent {
 
     @Override
     public BillingPeriod getNextBillingPeriod() {
-        return null;
+        return BillingPeriod.MONTHLY;
     }
 }

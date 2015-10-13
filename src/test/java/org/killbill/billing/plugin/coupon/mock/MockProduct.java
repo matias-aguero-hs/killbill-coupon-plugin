@@ -28,7 +28,7 @@ public class MockProduct implements Product {
 
     @Override
     public String getName() {
-        return null;
+        return "Standard";
     }
 
     @Override
