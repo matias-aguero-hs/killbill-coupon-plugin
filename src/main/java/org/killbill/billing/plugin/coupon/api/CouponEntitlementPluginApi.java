@@ -19,6 +19,7 @@ package org.killbill.billing.plugin.coupon.api;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -41,6 +42,7 @@ import org.killbill.billing.entitlement.plugin.api.OperationType;
 import org.killbill.billing.entitlement.plugin.api.PriorEntitlementResult;
 import org.killbill.billing.payment.api.PluginProperty;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.model.Constants;
@@ -53,6 +55,7 @@ import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 import org.osgi.service.log.LogService;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
@@ -113,7 +116,8 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
         return null;
     }
 
-    private boolean hasChangedBillingPeriodOrProduct(EntitlementContext entitlementContext) {
+    @VisibleForTesting
+    protected boolean hasChangedBillingPeriodOrProduct(EntitlementContext entitlementContext) {
         // check what kind of "change" was made to the plan, if it was billing period or type of product, deactivate the coupon applied!
         SubscriptionEvent lastChangeEvent = null;
         try {
@@ -128,19 +132,55 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
                             lastChangeEvent = subscriptionEvent;
                         }
                     }
-                    // billing period or product have changed, so deactivate the coupon applied
-                    return (null != lastChangeEvent
-                            && null != lastChangeEvent.getPrevBillingPeriod()
-                            && null != lastChangeEvent.getNextBillingPeriod()
-                            && null != lastChangeEvent.getPrevProduct()
-                            && null != lastChangeEvent.getNextProduct()
-                            && (!lastChangeEvent.getPrevBillingPeriod().equals(lastChangeEvent.getNextBillingPeriod())
-                            || !lastChangeEvent.getPrevProduct().equals(lastChangeEvent.getNextProduct())));
+
+                    if (null == lastChangeEvent
+                           || null == lastChangeEvent.getPrevBillingPeriod()
+                           || null == lastChangeEvent.getNextBillingPeriod()
+                           || null == lastChangeEvent.getPrevProduct()
+                           || null == lastChangeEvent.getNextProduct()) {
+                        return false;
+                    }
+
+                    // billing period has changed, so deactivate the coupon applied
+                    if (!lastChangeEvent.getPrevBillingPeriod().equals(lastChangeEvent.getNextBillingPeriod())) {
+                        return true;
+                    }
+
+                    boolean hasProductChange = !lastChangeEvent.getPrevProduct().equals(lastChangeEvent.getNextProduct());
+                    boolean isValidProduct = true;
+                    UUID subscriptionId = getEntitlementId(entitlementContext);
+                    // load coupon products
+                    CouponsAppliedRecord couponsAppliedRecord = couponPluginApi.getActiveCouponAppliedBySubscription(subscriptionId);
+
+                    if (hasProductChange && (couponsAppliedRecord != null)) {
+
+                        final List<CouponsProductsRecord> productsOfCoupon = couponPluginApi.getProductsOfCoupon(couponsAppliedRecord.getCouponCode());
+
+                        // check if coupon contains new product
+                        if ((null != productsOfCoupon) && !productsOfCoupon.isEmpty()) {
+                            final String newProduct = lastChangeEvent.getNextProduct().getName();
+                            final CouponsProductsRecord productFound =
+                                    Iterables.tryFind(productsOfCoupon, new Predicate<CouponsProductsRecord>() {
+                                         @Override
+                                         public boolean apply(@Nullable final CouponsProductsRecord product) {
+                                             return product.getProductName().equalsIgnoreCase(newProduct);
+                                         }
+                                     }
+                                    ).orNull();
+
+                            isValidProduct = null != productFound;
+                        }
+                    }
+
+                    // if product have changed and new product is not valid, so deactivate the coupon applied
+                    return !isValidProduct;
                 }
             }
         } catch (SubscriptionApiException e) {
             e.printStackTrace();
         } catch (EntitlementApiException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
@@ -170,9 +210,10 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
      * @param pluginProperties
      * @return
      */
-    private boolean applyCouponToNewSubscription(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties) throws EntitlementPluginApiException {
+    @VisibleForTesting
+    protected boolean applyCouponToNewSubscription(final EntitlementContext entitlementContext, final Iterable<PluginProperty> pluginProperties) throws EntitlementPluginApiException {
 
-        String couponCode = findCouponInRequest(pluginProperties);
+        final String couponCode = findCouponInRequest(pluginProperties);
         CouponsRecord requestCoupon = null;
         List<CouponsAppliedRecord> couponsApplied = new ArrayList<CouponsAppliedRecord>();
 
@@ -183,11 +224,11 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             }
 
             // get active coupons applied
-            String productName = entitlementContext.getPlanPhaseSpecifier().getProductName();
+            final String productName = entitlementContext.getPlanPhaseSpecifier().getProductName();
             couponsApplied = couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(entitlementContext.getAccountId(), productName);
 
             // compare discounts and get the coupon to apply
-            CouponsRecord couponToApply = findBestCouponToApply(requestCoupon, couponsApplied);
+            final CouponsRecord couponToApply = findBestCouponToApply(requestCoupon, couponsApplied);
 
             if (couponToApply == null) {
                 logService.log(LogService.LOG_INFO, "Nothing to apply.");
@@ -195,11 +236,11 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             }
 
             // if needed, calculate number of invoices
-            Integer maxInvoices = calculateMaxInvoicesToApply(couponToApply, couponsApplied);
+            final Integer maxInvoices = calculateMaxInvoicesToApply(couponToApply, couponsApplied);
 
             // apply coupon with higher discount
             logService.log(LogService.LOG_INFO, "Going to get subscription id from externalkey = " + entitlementContext.getExternalKey());
-            UUID entitlementId = getEntitlementId(entitlementContext);
+            final UUID entitlementId = getEntitlementId(entitlementContext);
             if (entitlementId == null) {
                 String error = "There are no Entitlements for externalKey = " + entitlementContext.getExternalKey();
                 logService.log(LogService.LOG_ERROR, error);
@@ -213,7 +254,7 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
         } catch (Exception e) {
             // TODO inform user that the coupon couldn't be applied
             // TODO this exception won't stop Subscription creation.
-            //            throw new EntitlementPluginApiException(e);
+            throw new EntitlementPluginApiException(e.getMessage(), e);
         }
         return true;
     }
@@ -225,13 +266,13 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
      * @param couponsApplied
      * @return
      */
-    private Integer calculateMaxInvoicesToApply(final CouponsRecord couponToApply, final List<CouponsAppliedRecord> couponsApplied) {
+    private Integer calculateMaxInvoicesToApply(final CouponsRecord couponToApply, final Collection<CouponsAppliedRecord> couponsApplied) {
 
         if (couponToApply.getDuration().equals(DurationTypeEnum.forever.toString())) {
             return 0;
         }
 
-        CouponsAppliedRecord appliedCoupon = Iterables.tryFind(couponsApplied, new Predicate<CouponsAppliedRecord>() {
+        final CouponsAppliedRecord appliedCoupon = Iterables.tryFind(couponsApplied, new Predicate<CouponsAppliedRecord>() {
             @Override
             public boolean apply(@Nullable CouponsAppliedRecord input) {
                 return input.getCouponCode().equals(couponToApply.getCouponCode());
@@ -249,7 +290,7 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
      * @param couponsApplied
      * @return
      */
-    private CouponsRecord findBestCouponToApply(final CouponsRecord requestCoupon, final List<CouponsAppliedRecord> couponsApplied) {
+    private CouponsRecord findBestCouponToApply(final CouponsRecord requestCoupon, final Collection<CouponsAppliedRecord> couponsApplied) {
 
         if ((requestCoupon == null) && ((couponsApplied == null) || couponsApplied.isEmpty())) {
             logService.log(LogService.LOG_INFO, "There are no coupons to apply automatically.");
@@ -263,15 +304,15 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             return requestCoupon;
         }
 
-        List<CouponsRecord> candidateCoupons = new ArrayList<CouponsRecord>();
+        final List<CouponsRecord> candidateCoupons = new ArrayList<CouponsRecord>();
 
         if ((couponsApplied != null) && !couponsApplied.isEmpty()) {
             logService.log(LogService.LOG_INFO,
                            "There are active apply coupons for this account.");
 
-            for (CouponsAppliedRecord couponApplied : couponsApplied) {
+            for (final CouponsAppliedRecord couponApplied : couponsApplied) {
                 try {
-                    CouponsRecord coupon = couponPluginApi.getCouponByCode(couponApplied.getCouponCode());
+                    final CouponsRecord coupon = couponPluginApi.getCouponByCode(couponApplied.getCouponCode());
                     if ((coupon == null) || !CouponHelper.isApplicable(coupon)) {
                         logService.log(LogService.LOG_INFO,
                                        "Coupon " + couponApplied.getCouponCode() + " + is not applicable.");
@@ -358,7 +399,7 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
             return null;
         }
 
-        PluginProperty coupon = Iterables.tryFind(pluginProperties, new Predicate<PluginProperty>() {
+        final PluginProperty coupon = Iterables.tryFind(pluginProperties, new Predicate<PluginProperty>() {
             @Override
             public boolean apply(@Nullable PluginProperty input) {
                 return input.getKey().equals(COUPON_PROPERTY);
@@ -367,4 +408,5 @@ public class CouponEntitlementPluginApi implements EntitlementPluginApi {
 
         return (coupon != null) ? (String) coupon.getValue() : null;
     }
+
 }

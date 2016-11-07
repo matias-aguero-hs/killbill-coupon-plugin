@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hamcrest.Matcher;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.catalog.api.BillingPeriod;
@@ -31,7 +31,6 @@ import org.killbill.billing.catalog.api.Product;
 import org.killbill.billing.entitlement.api.Entitlement;
 import org.killbill.billing.entitlement.api.EntitlementApi;
 import org.killbill.billing.entitlement.api.EntitlementApiException;
-import org.killbill.billing.entitlement.api.Subscription;
 import org.killbill.billing.entitlement.api.SubscriptionApi;
 import org.killbill.billing.entitlement.api.SubscriptionApiException;
 import org.killbill.billing.entitlement.api.SubscriptionEvent;
@@ -43,17 +42,15 @@ import org.killbill.billing.entitlement.plugin.api.OperationType;
 import org.killbill.billing.entitlement.plugin.api.PriorEntitlementResult;
 import org.killbill.billing.payment.api.PluginProperty;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsAppliedRecord;
+import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsProductsRecord;
 import org.killbill.billing.plugin.coupon.dao.gen.tables.records.CouponsRecord;
-import org.killbill.billing.plugin.coupon.exception.CouponApiException;
-import org.killbill.billing.plugin.coupon.mock.MockEntitlement;
-import org.killbill.billing.plugin.coupon.mock.MockEntitlementContext;
-import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
 import org.killbill.billing.plugin.coupon.exception.CouponApiException;
 import org.killbill.billing.plugin.coupon.mock.MockEntitlement;
 import org.killbill.billing.plugin.coupon.mock.MockEntitlementContext;
 import org.killbill.billing.plugin.coupon.mock.MockProduct;
 import org.killbill.billing.plugin.coupon.mock.MockSubscription;
 import org.killbill.billing.plugin.coupon.mock.MockSubscriptionEvent;
+import org.killbill.billing.plugin.coupon.mock.TestCouponHelper;
 import org.killbill.billing.plugin.coupon.model.Constants;
 import org.killbill.billing.plugin.coupon.model.DefaultPriorEntitlementResult;
 import org.killbill.billing.plugin.coupon.model.DurationTypeEnum;
@@ -62,6 +59,7 @@ import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.killbill.osgi.libs.killbill.OSGIKillbillLogService;
 import org.mockito.Mockito;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -179,8 +177,8 @@ public class TestCouponEntitlementPluginApi extends Mockito {
     @Test
     public void testOnSuccessCallNoCoupon() throws EntitlementPluginApiException {
 
-        OnSuccessEntitlementResult result = entitlementPluginApi.onSuccessCall(context, null);
-        assertTrue(result == null);
+        boolean result = entitlementPluginApi.applyCouponToNewSubscription(context, null);
+        assertTrue(result);
 
     }
 
@@ -192,19 +190,17 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
-        OnSuccessEntitlementResult result = null;
         try {
-            result = entitlementPluginApi.onSuccessCall(context, properties);
+            entitlementPluginApi.onSuccessCall(context, properties);
         } catch (EntitlementPluginApiException e) {
             assertTrue(e.getMessage().contains("There are no Entitlements"));
+            return;
         }
-        assertTrue(result == null);
-
+        fail();
     }
 
-    @Ignore
-    @Test
-    public void testOnSuccessCallInvalidCoupon() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    @Test(expected = EntitlementPluginApiException.class)
+    public void testOnSuccessCallInvalidCoupon() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
 
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
@@ -214,20 +210,12 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenThrow(CouponApiException.class);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(context, properties);
-        } catch (EntitlementPluginApiException e) {
-            assertTrue(result == null);
-            return;
-        }
-
+        entitlementPluginApi.onSuccessCall(context, properties);
         fail();
-
     }
 
     @Test
-    public void testOnSuccessCallValidCoupon() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    public void testOnSuccessCallValidCoupon() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
 
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
@@ -237,18 +225,13 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(context, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        boolean result = entitlementPluginApi.applyCouponToNewSubscription(context, properties);
+        assertTrue(result);
 
     }
 
     @Test
-    public void testOnSuccessCallNoCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    public void testOnSuccessCallNoCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
 
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
@@ -258,79 +241,12 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(null);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(context, null);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        boolean result = entitlementPluginApi.applyCouponToNewSubscription(context, null);
+        assertTrue(result);
     }
 
     @Test
-    public void testOnSuccessCallChangePlanComplete() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
-        MockEntitlementContext otherContext = new MockEntitlementContext() {
-            @Override
-            public OperationType getOperationType() {
-                return OperationType.CHANGE_PLAN;
-            }
-        };
-        MockSubscription otherSubscription = new MockSubscription() {
-            @Override
-            public List<SubscriptionEvent> getSubscriptionEvents() {
-                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
-                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
-                    @Override
-                    public SubscriptionEventType getSubscriptionEventType() {
-                        return SubscriptionEventType.CHANGE;
-                    }
-
-                    @Override
-                    public BillingPeriod getPrevBillingPeriod() {
-                        return BillingPeriod.MONTHLY;
-                    }
-
-                    @Override
-                    public BillingPeriod getNextBillingPeriod() {
-                        return BillingPeriod.ANNUAL;
-                    }
-
-                    @Override
-                    public Product getPrevProduct() {
-                        MockProduct product = new MockProduct();
-                        return product;
-                    }
-
-                    @Override
-                    public Product getNextProduct() {
-                        MockProduct product = new MockProduct();
-                        return product;
-                    }
-                };
-                result.add(subscriptionEvent);
-                return result;
-            }
-        };
-
-        List<Entitlement> entitlements = new ArrayList<Entitlement>();
-        entitlements.add(entitlement);
-        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
-        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
-
-        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
-        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
-        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(otherContext, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
-    }
-
-    @Test
-    public void testOnSuccessCallAppliedCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    public void testOnSuccessCallAppliedCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
 
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
@@ -366,18 +282,14 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(appliedCoupons);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(context, null);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        boolean result = entitlementPluginApi.applyCouponToNewSubscription(context, null);
+        assertTrue(result);
+        verify(couponPluginApi, times(1)).applyCoupon(matches("c2"), eq(2), any(), any(), any());
 
     }
 
     @Test
-    public void testOnSuccessCallAppliedCouponsSameDiscount() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    public void testOnSuccessCallAppliedCouponsSameDiscount() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
 
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
@@ -413,67 +325,13 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(appliedCoupons);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(context, null);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        boolean result = entitlementPluginApi.applyCouponToNewSubscription(context, null);
+        assertTrue(result);
+        verify(couponPluginApi, times(1)).applyCoupon(matches("c1"), eq(4), any(), any(), any());
     }
 
     @Test
-    public void testOnSuccessCallChangePlanCompleteWithoutDeactivation() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
-        MockEntitlementContext otherContext = new MockEntitlementContext() {
-            @Override
-            public OperationType getOperationType() {
-                return OperationType.CHANGE_PLAN;
-            }
-        };
-        MockSubscription otherSubscription = new MockSubscription() {
-            @Override
-            public List<SubscriptionEvent> getSubscriptionEvents() {
-                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
-                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
-                    @Override
-                    public SubscriptionEventType getSubscriptionEventType() {
-                        return SubscriptionEventType.CHANGE;
-                    }
-
-                    @Override
-                    public BillingPeriod getPrevBillingPeriod() {
-                        return BillingPeriod.MONTHLY;
-                    }
-
-                    @Override
-                    public BillingPeriod getNextBillingPeriod() {
-                        return BillingPeriod.ANNUAL;
-                    }
-                };
-                result.add(subscriptionEvent);
-                return result;
-            }
-        };
-
-        List<Entitlement> entitlements = new ArrayList<Entitlement>();
-        entitlements.add(entitlement);
-        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
-        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
-
-        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
-        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
-        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(otherContext, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
-    }
-
-    @Test
-    public void testOnSuccessCallWithCouponAndAppliedCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException {
+    public void testOnSuccessCallWithCouponAndAppliedCoupons() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
 
         List<Entitlement> entitlements = new ArrayList<Entitlement>();
         entitlements.add(entitlement);
@@ -502,14 +360,14 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponsAppliedByAccountIdAndProduct(any(), any())).thenReturn(appliedCoupons);
         when(couponPluginApi.applyCoupon(any(), any(), any(), any(), any())).thenReturn(true);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(context, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        boolean result = entitlementPluginApi.applyCouponToNewSubscription(context, properties);
+        assertTrue(result);
+        verify(couponPluginApi, times(1)).applyCoupon(matches(Constants.COUPON_CODE), eq(4), any(), any(), any());
     }
+
+    // ******************************************************************
+    //                      CHANGE PLAN
+    // ******************************************************************
 
     @Test
     public void testOnSuccessCallChangePlanEntitlementApiException() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
@@ -525,13 +383,8 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
 
         when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenThrow(EntitlementApiException.class);
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(otherContext, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, never()).deactivateApplicationOfCouponByCodeAndSubscription(any(), any());
     }
 
     @Test
@@ -544,13 +397,8 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         };
         when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenThrow(SubscriptionApiException.class);
 
-        OnSuccessEntitlementResult result = null;
-        try {
-            result = entitlementPluginApi.onSuccessCall(otherContext, properties);
-        } catch (EntitlementPluginApiException e) {
-            fail();
-        }
-        assertTrue(result == null);
+        entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, never()).deactivateApplicationOfCouponByCodeAndSubscription(any(), any());
     }
 
     @Test(expected = EntitlementPluginApiException.class)
@@ -581,17 +429,6 @@ public class TestCouponEntitlementPluginApi extends Mockito {
                         return BillingPeriod.ANNUAL;
                     }
 
-                    @Override
-                    public Product getPrevProduct() {
-                        MockProduct product = new MockProduct();
-                        return product;
-                    }
-
-                    @Override
-                    public Product getNextProduct() {
-                        MockProduct product = new MockProduct();
-                        return product;
-                    }
                 };
                 result.add(subscriptionEvent);
                 return result;
@@ -608,6 +445,7 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenThrow(EntitlementApiException.class);
 
         entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, never()).deactivateApplicationOfCouponByCodeAndSubscription(any(), any());
     }
 
     @Test(expected = EntitlementPluginApiException.class)
@@ -638,17 +476,6 @@ public class TestCouponEntitlementPluginApi extends Mockito {
                         return BillingPeriod.ANNUAL;
                     }
 
-                    @Override
-                    public Product getPrevProduct() {
-                        MockProduct product = new MockProduct();
-                        return product;
-                    }
-
-                    @Override
-                    public Product getNextProduct() {
-                        MockProduct product = new MockProduct();
-                        return product;
-                    }
                 };
                 result.add(subscriptionEvent);
                 return result;
@@ -665,5 +492,162 @@ public class TestCouponEntitlementPluginApi extends Mockito {
         when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenThrow(SQLException.class);
 
         entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, never()).deactivateApplicationOfCouponByCodeAndSubscription(any(), any());
     }
+
+    @Test
+    public void testOnSuccessCallChangePlanBillingPeriod() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
+        MockEntitlementContext otherContext = new MockEntitlementContext() {
+            @Override
+            public OperationType getOperationType() {
+                return OperationType.CHANGE_PLAN;
+            }
+        };
+        MockSubscription otherSubscription = new MockSubscription() {
+            @Override
+            public List<SubscriptionEvent> getSubscriptionEvents() {
+                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
+                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
+                    @Override
+                    public SubscriptionEventType getSubscriptionEventType() {
+                        return SubscriptionEventType.CHANGE;
+                    }
+
+                    @Override
+                    public BillingPeriod getPrevBillingPeriod() {
+                        return BillingPeriod.MONTHLY;
+                    }
+
+                    @Override
+                    public BillingPeriod getNextBillingPeriod() {
+                        return BillingPeriod.ANNUAL;
+                    }
+
+                };
+                result.add(subscriptionEvent);
+                return result;
+            }
+        };
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
+
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
+
+        entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, times(1)).deactivateApplicationOfCouponByCodeAndSubscription(matches(Constants.COUPON_CODE), any());
+    }
+
+    @Test
+    public void testOnSuccessCallChangePlanActiveCouponProduct() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
+        MockEntitlementContext otherContext = new MockEntitlementContext() {
+            @Override
+            public OperationType getOperationType() {
+                return OperationType.CHANGE_PLAN;
+            }
+        };
+        MockSubscription otherSubscription = new MockSubscription() {
+            @Override
+            public List<SubscriptionEvent> getSubscriptionEvents() {
+                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
+                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
+                    @Override
+                    public SubscriptionEventType getSubscriptionEventType() {
+                        return SubscriptionEventType.CHANGE;
+                    }
+
+                    @Override
+                    public Product getNextProduct() {
+                        MockProduct product = new MockProduct() {
+                            @Override
+                            public String getName() {
+                                return "Sports";
+                            }
+                        };
+                        return product;
+                    }
+                };
+                result.add(subscriptionEvent);
+                return result;
+            }
+        };
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
+        CouponsProductsRecord couponProduct = new CouponsProductsRecord();
+        couponProduct.setCouponCode(Constants.COUPON_CODE);
+        couponProduct.setProductName("Sports");
+        final List<CouponsProductsRecord> productsOfCoupon = new ArrayList<CouponsProductsRecord>();
+        productsOfCoupon.add(couponProduct);
+
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
+        when(couponPluginApi.getProductsOfCoupon(any())).thenReturn(productsOfCoupon);
+
+        boolean result = entitlementPluginApi.hasChangedBillingPeriodOrProduct(otherContext);
+        assertFalse(result);
+        entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, never()).deactivateApplicationOfCouponByCodeAndSubscription(any(), any());
+    }
+
+    @Test
+    public void testOnSuccessCallChangePlanNonCouponProduct() throws EntitlementApiException, SQLException, AccountApiException, CouponApiException, SubscriptionApiException, EntitlementPluginApiException {
+        MockEntitlementContext otherContext = new MockEntitlementContext() {
+            @Override
+            public OperationType getOperationType() {
+                return OperationType.CHANGE_PLAN;
+            }
+        };
+        MockSubscription otherSubscription = new MockSubscription() {
+            @Override
+            public List<SubscriptionEvent> getSubscriptionEvents() {
+                List<SubscriptionEvent> result = new ArrayList<SubscriptionEvent>();
+                MockSubscriptionEvent subscriptionEvent = new MockSubscriptionEvent() {
+                    @Override
+                    public SubscriptionEventType getSubscriptionEventType() {
+                        return SubscriptionEventType.CHANGE;
+                    }
+
+                    @Override
+                    public Product getNextProduct() {
+                        MockProduct product = new MockProduct() {
+                            @Override
+                            public String getName() {
+                                return "Sports";
+                            }
+                        };
+                        return product;
+                    }
+                };
+                result.add(subscriptionEvent);
+                return result;
+            }
+        };
+
+        List<Entitlement> entitlements = new ArrayList<Entitlement>();
+        entitlements.add(entitlement);
+        CouponsAppliedRecord couponsAppliedRecord = new CouponsAppliedRecord();
+        couponsAppliedRecord.setCouponCode(Constants.COUPON_CODE);
+        CouponsProductsRecord couponProduct = new CouponsProductsRecord();
+        couponProduct.setCouponCode(Constants.COUPON_CODE);
+        couponProduct.setProductName("Standard");
+        final List<CouponsProductsRecord> productsOfCoupon = new ArrayList<CouponsProductsRecord>();
+        productsOfCoupon.add(couponProduct);
+
+        when(entitlementApi.getAllEntitlementsForAccountIdAndExternalKey(any(), any(), any())).thenReturn(entitlements);
+        when(subscriptionApi.getSubscriptionForEntitlementId(any(), any())).thenReturn(otherSubscription);
+        when(couponPluginApi.getActiveCouponAppliedBySubscription(any())).thenReturn(couponsAppliedRecord);
+        when(couponPluginApi.getProductsOfCoupon(any())).thenReturn(productsOfCoupon);
+
+        entitlementPluginApi.onSuccessCall(otherContext, properties);
+        verify(couponPluginApi, times(1)).deactivateApplicationOfCouponByCodeAndSubscription(matches(Constants.COUPON_CODE), any());
+    }
+
 }
